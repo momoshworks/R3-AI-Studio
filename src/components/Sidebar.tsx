@@ -98,11 +98,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       }`}
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
     >
-      {/* Top Header: Hamburger Menu Button (The 3 stripes that collapse/open the sidebar) */}
+      {/* Top Header: Hamburger Menu Button & App Brand */}
       <div
         className={`h-14 flex items-center border-b transition-colors ${
           isDark ? 'border-gemini-border/60' : 'border-slate-200'
-        } ${isCollapsed ? 'px-2 justify-center' : 'px-3 justify-start'}`}
+        } ${isCollapsed ? 'px-2 justify-center' : 'px-3 justify-between'}`}
       >
         <button
           onClick={onToggleCollapse}
@@ -115,6 +115,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
         >
           <Menu className="w-5 h-5" />
         </button>
+
+        {!isCollapsed && (
+          <div className="flex items-center space-x-2 space-x-reverse pe-1 select-none">
+            <div className="flex items-baseline space-x-1.5 space-x-reverse">
+              <span className={`font-black text-lg tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                R3
+              </span>
+              <span className="font-semibold text-xs text-cyan-400">
+                AI Studio
+              </span>
+            </div>
+            <div className="w-7 h-7 rounded-lg overflow-hidden border border-purple-500/30 shadow-md shadow-purple-500/10 shrink-0">
+              <img src="/app-icon.png" alt="R3" className="w-full h-full object-cover" />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* "New Chat" Button */}

@@ -20,6 +20,7 @@ import {
 import { AttachedFile, ChatMessage } from '../types';
 import { exportTextOrHtmlToPDF, downloadPDFDirectly } from '../utils/pdfExport';
 import { Translations, Theme, Language } from '../utils/translations';
+import { MermaidChart } from './MermaidChart';
 
 interface ChatCanvasProps {
   messages: ChatMessage[];
@@ -453,7 +454,16 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             const codeId = `${msg.id}-${codeContent.slice(0, 15)}`;
 
                             if (!inline && match) {
-                              const codeLang = match[1];
+                              const codeLang = match[1].toLowerCase();
+                              if (codeLang === 'mermaid') {
+                                return (
+                                  <MermaidChart
+                                    chart={codeContent}
+                                    isDark={isDark}
+                                    lang={lang}
+                                  />
+                                );
+                              }
                               return (
                                 <div
                                   dir="ltr"
@@ -548,6 +558,22 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             <span>{t.copy}</span>
                           </>
                         )}
+                      </button>
+
+                      {/* Explain Like I'm 10 / بسّطهالي أكتر */}
+                      <button
+                        onClick={() => {
+                          onPromptSelect?.(
+                            lang === 'ar'
+                              ? 'أعد شرح الرد السابق بأسلوب مبسط جداً لشخص ليس لديه أي خلفية تقنية، واستخدم تشبيهاً من الحياة اليومية ومثالاً بسيطاً من سطرين فقط.'
+                              : 'Please re-explain the previous response in very simple terms for someone with no technical background, using a daily-life analogy and a minimal 2-line example.'
+                          );
+                        }}
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/25 transition-all text-[11px] font-medium shadow-sm hover:scale-[1.02] active:scale-95"
+                        title={lang === 'ar' ? 'شرح مبسط للأطفال والمبتدئين بمثال واقعي' : "Explain Like I'm 10"}
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                        <span>{lang === 'ar' ? '👶 بسّطهالي أكتر' : 'ELI5 (Simplify)'}</span>
                       </button>
 
                       {/* Text-to-Speech (TTS Read Aloud) */}

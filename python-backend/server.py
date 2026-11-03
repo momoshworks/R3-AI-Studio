@@ -188,19 +188,66 @@ async def get_uploaded_file(filename: str):
     mime_type, _ = mimetypes.guess_type(str(target))
     return FileResponse(str(target), media_type=mime_type or "application/octet-stream")
 
-# Direct Google Gemini API Chat Streaming
-GEMINI_SYSTEM_INSTRUCTION = """
-You are R3 AI (أنت R3 AI), an advanced, fast, and helpful AI assistant powered by Google Gemini API.
-Answer user inquiries accurately and professionally in their requested language (Arabic or English).
-Format answers using neat Markdown, clean code blocks with syntax highlighting, and well-structured text.
+# Master Genius Lecturer Teaching System Prompt & Dynamic CoT
+TEACHING_SYSTEM_PROMPT = """
+أنت معمار برمجيات ومحاضر تقني عبقري داخل منصة R3 AI Studio. مهمتك ليست فقط إعطاء إجابة أو كود، بل جعل المستخدم يفهم الفكرة بعمق وبساطة فائقة.
+
+قبل كتابة الشرح، فكّر أولاً في الترتيب الأسهل لفهم المبتدئ، ثم ابدأ في صياغة الإجابة خطوة بخطوة.
+
+عند شرح أي موضوع أو كود أو مشكلة برمجية أو مفهوم علمي، اتبع دائماً هذا التسلسل:
+1. الفكرة في جملة واحدة (The Core Idea): تعريف مباشر وبسيط جداً بدون تعقيد.
+2. تشبيه واقعي (Real-world Analogy): اربط المفهوم بحاجة من الحياة اليومية تثبت في الذهن فوراً.
+3. لماذا نستخدمه؟ (The Why): ما هي المشكلة الحقيقية التي يحلها هذا المفهوم لو لم يكن موجوداً؟
+4. مثال عملي مدعوم بالكود (Minimal Working Example): كود بسيط جداً وواضح ومُعلق عليه سطر بسطر.
+5. خطأ شائع يقع فيه الأغلبية (Common Pitfall): نصيحة عملية لتجنب الأخطاء عند التطبيق.
+
+قواعد الأسلوب والتنسيق البصري:
+- لا تسرد نصوصاً طويلة ومملة.
+- استخدم التنسيق البصري: نقاط بوليتس، جداول مقارنة، وتنسيق الأكواد بعناية فائقة.
+- كلما كان الشرح لمعمارية نظام، مسار بيانات (Data Flow)، خوارزمية، أو علاقات مركبة، قم بتوليد مخطط تدفقي عبر كود Mermaid داخل الرد بصيغة:
+```mermaid
+graph TD
+    ...
+```
+- تحدث بنبرة زميل خبير عملي، مبتعداً عن أسلوب الكتب النظرية الجامدة.
+- أجب بدقة واحترافية بنفس لغة المستخدم (العربية أو الإنجليزية).
 """
+
+def get_dynamic_generation_params(messages: list) -> dict:
+    """Dynamically set temperature and top-p:
+    - 0.45 for coding, mathematical, syntax, and debugging questions (precision & deterministic code).
+    - 0.7 for general concepts, explanations, design, analogies, and theory.
+    """
+    last_user_content = ""
+    for m in reversed(messages):
+        role = getattr(m, "role", "") if hasattr(m, "role") else (m.get("role", "") if isinstance(m, dict) else "")
+        if role == "user":
+            content = getattr(m, "content", "") if hasattr(m, "content") else (m.get("content", "") if isinstance(m, dict) else "")
+            last_user_content = (content or "").lower()
+            break
+            
+    code_indicators = [
+        "كود", "code", "برمج", "error", "خطأ", "bug", "debug", "python", "javascript",
+        "typescript", "react", "fastapi", "sql", "function", "class", "دالة", "algorithm",
+        "خوارزم", "معادلة", "math", "حساب", "api", "syntax", "fix", "حل المشكلة"
+    ]
+    
+    is_code_or_math = any(kw in last_user_content for kw in code_indicators)
+    
+    if is_code_or_math:
+        return {"temperature": 0.45, "top_p": 0.9}
+    else:
+        return {"temperature": 0.7, "top_p": 0.95}
+
+GEMINI_SYSTEM_INSTRUCTION = TEACHING_SYSTEM_PROMPT
+OPENAI_SYSTEM_INSTRUCTION = TEACHING_SYSTEM_PROMPT
 
 async def stream_gemini(chat_request: ChatRequest, queue: asyncio.Queue):
     resolved_api_key = get_gemini_api_key(chat_request.api_key)
     if not resolved_api_key:
         await queue.put({
             "type": "content_chunk",
-            "delta": "⚠️ **يرجى إدخال مفتاح Google Gemini API:**\n\nلم يتم العثور على مفتاح API محفوظ. يمكنك الحصول على مفتاح مجاني من [Google AI Studio](https://aistudio.google.com/app/apikey) وإدخاله في نافذة الإعدادات (أيقونة الترس) لبدء المحادثة فوراً."
+            "delta": "⚠️ **تنبيه مفتاح تشغيل Google Gemini API:**\n\nلم يتم العثور على مفتاح API نشط. يرجى الحصول على مفتاح مجاني من [Google AI Studio](https://aistudio.google.com/app/apikey) وتفعيله في نافذة الإعدادات (أيقونة الترس بالأسفل) لبدء الاستجابة فوراً."
         })
         await queue.put({"type": "done"})
         return
@@ -231,12 +278,20 @@ async def stream_gemini(chat_request: ChatRequest, queue: asyncio.Queue):
 
         contents.append(types.Content(role=role, parts=parts))
 
+    gen_params = get_dynamic_generation_params(chat_request.messages)
     config = types.GenerateContentConfig(
-        system_instruction=GEMINI_SYSTEM_INSTRUCTION,
-        temperature=0.7,
+        system_instruction=TEACHING_SYSTEM_PROMPT,
+        temperature=gen_params["temperature"],
+        top_p=gen_params["top_p"],
     )
 
-    candidate_models = ["gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.8-flash"]
+    candidate_models = [
+        "gemini-3.5-flash-lite",
+        "gemini-3.1-flash-lite",
+        "gemini-flash-lite-latest",
+        "gemini-3.5-flash",
+        "gemini-3.8-flash"
+    ]
     stream_success = False
 
     for model_name in candidate_models:
@@ -260,17 +315,12 @@ async def stream_gemini(chat_request: ChatRequest, queue: asyncio.Queue):
     if not stream_success:
         await queue.put({
             "type": "content_chunk",
-            "delta": "\n\n⚠️ عذراً، خوادم Google Gemini تواجه ضغطاً مؤقتاً حالياً. يرجى المحاولة بعد لحظات."
+            "delta": "\n\n⚠️ تم استنفاد حصة Google Gemini مؤقتاً لجميع النماذج المتاحة. يرجى المحاولة بعد قليل."
         })
 
-    await queue.put({"type": "done"})
+    await queue.put({"type": "done"}
 
-# Direct ChatGPT (OpenAI) API Chat Streaming
-OPENAI_SYSTEM_INSTRUCTION = """
-You are R3 AI (أنت R3 AI), an advanced, fast, and helpful AI assistant powered by OpenAI ChatGPT.
-Answer user inquiries accurately and professionally in their requested language (Arabic or English).
-Format answers using neat Markdown, clean code blocks with syntax highlighting, and well-structured text.
-"""
+)
 
 async def stream_openai(chat_request: ChatRequest, queue: asyncio.Queue):
     api_key = get_openai_api_key(chat_request.api_key)
@@ -293,7 +343,8 @@ async def stream_openai(chat_request: ChatRequest, queue: asyncio.Queue):
     elif "gpt-4" in raw_model:
         target_model = "gpt-4-turbo"
 
-    messages = [{"role": "system", "content": OPENAI_SYSTEM_INSTRUCTION}]
+    gen_params = get_dynamic_generation_params(chat_request.messages)
+    messages = [{"role": "system", "content": TEACHING_SYSTEM_PROMPT}]
 
     for msg in chat_request.messages:
         role = "user" if msg.role == "user" else "assistant"
@@ -338,7 +389,8 @@ async def stream_openai(chat_request: ChatRequest, queue: asyncio.Queue):
         "model": target_model,
         "messages": messages,
         "stream": True,
-        "temperature": 0.7,
+        "temperature": gen_params["temperature"],
+        "top_p": gen_params["top_p"],
     }
 
     try:

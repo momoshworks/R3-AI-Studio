@@ -22,6 +22,7 @@ import {
   HelpCircle,
   Brain,
   Zap,
+  Copy,
 } from 'lucide-react';
 import {
   Notebook,
@@ -674,6 +675,35 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                               </span>
                             </button>
                           ))}
+                        </div>
+                      )}
+
+                      {/* Quick pedagogical assistant actions */}
+                      {msg.role === 'assistant' && (
+                        <div className="mt-3 pt-2 border-t border-white/10 flex items-center gap-2">
+                          <button
+                            onClick={() =>
+                              handleSendChat(
+                                lang === 'ar'
+                                  ? 'أعد شرح الرد السابق بأسلوب مبسط جداً لشخص ليس لديه أي خلفية تقنية، واستخدم تشبيهاً من الحياة اليومية ومثالاً بسيطاً من سطرين فقط.'
+                                  : 'Please re-explain the previous response in very simple terms for someone with no technical background, using a daily-life analogy and a minimal 2-line example.',
+                                'explain'
+                              )
+                            }
+                            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/25 transition-all text-[10px] font-medium active:scale-95"
+                            title={lang === 'ar' ? 'تبسيط الشرح بأسلوب سلس وتشبيه واقعي' : "Explain Like I'm 10"}
+                          >
+                            <Sparkles className="w-3 h-3 text-amber-400" />
+                            <span>{lang === 'ar' ? '👶 بسّطهالي أكتر' : 'ELI5 (Simplify)'}</span>
+                          </button>
+                          <button
+                            onClick={() => navigator.clipboard.writeText(msg.text)}
+                            className="px-2 py-1 rounded-lg hover:bg-white/10 text-gray-400 hover:text-gray-200 transition-colors text-[10px] flex items-center gap-1"
+                            title={t.copy}
+                          >
+                            <Copy className="w-2.5 h-2.5" />
+                            <span>{t.copy}</span>
+                          </button>
                         </div>
                       )}
                     </div>
