@@ -1454,11 +1454,50 @@ async def notebook_study_tools_endpoint(notebook_id: str, payload: Dict[str, Any
 @app.get("/api/notebooks/{notebook_id}/files/{filename}")
 async def serve_notebook_file(notebook_id: str, filename: str):
     safe_name = Path(filename).name
-    target = notebook_engine._notebook_dir(notebook_id) / "files" / safe_name
+    files_dir = notebook_engine._notebook_dir(notebook_id) / "files"
+    target = files_dir / safe_name
     if not target.exists() or not target.is_file():
-        raise HTTPException(status_code=404, detail="الملف غير موجود")
+        candidates = list(files_dir.glob(f"*_{safe_name}")) or list(files_dir.glob(f"*{safe_name}"))
+        if candidates and candidates[0].is_file():
+            target = candidates[0]
+        else:
+            raise HTTPException(status_code=404, detail="الملف غير موجود")
     mime_type, _ = mimetypes.guess_type(str(target))
-    return FileResponse(str(target), media_type=mime_type or "application/octet-stream", filename=safe_name)
+    return FileResponse(
+        str(target),
+        media_type=mime_type or "application/octet-stream",
+        content_disposition_type="inline",
+        filename=safe_name
+    )
+
+@app.get("/api/notebooks/{notebook_id}/sources/{source_id}/file")
+async def serve_notebook_source_file(notebook_id: str, source_id: str):
+    nb = notebook_engine.get_notebook(notebook_id)
+    if not nb:
+        raise HTTPException(status_code=404, detail="الدفتر غير موجود")
+    source = next((s for s in nb.get("sources", []) if s["id"] == source_id), None)
+    if not source:
+        raise HTTPException(status_code=404, detail="المصدر غير موجود")
+
+    files_dir = notebook_engine._notebook_dir(notebook_id) / "files"
+    filename = source["name"]
+    target = files_dir / f"{source_id}_{filename}"
+    if not target.exists():
+        target = files_dir / filename
+    if not target.exists() or not target.is_file():
+        candidates = list(files_dir.glob(f"{source_id}_*")) or list(files_dir.glob(f"*{filename}*"))
+        if candidates and candidates[0].is_file():
+            target = candidates[0]
+        else:
+            raise HTTPException(status_code=404, detail="الملف غير موجود على القرص")
+
+    mime_type, _ = mimetypes.guess_type(str(target))
+    return FileResponse(
+        str(target),
+        media_type=mime_type or "application/octet-stream",
+        content_disposition_type="inline",
+        filename=filename
+    )
 
 # Serve Frontend Production Distribution (Single Process Desktop Mode)
 DIST_DIR = Path(__file__).resolve().parent.parent / "dist"

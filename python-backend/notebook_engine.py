@@ -178,7 +178,8 @@ class NotebookEngine:
             "content": content,
             "is_editable": is_editable,
             "size_human": source.get("size_human", "0 KB"),
-            "download_url": f"/api/notebooks/{notebook_id}/files/{filename}"
+            "download_url": f"/api/notebooks/{notebook_id}/sources/{source_id}/file",
+            "raw_file_url": f"/api/notebooks/{notebook_id}/sources/{source_id}/file"
         }
 
     def update_source_content(self, notebook_id: str, source_id: str, new_content: str) -> Dict[str, Any]:

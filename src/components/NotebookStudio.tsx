@@ -28,6 +28,9 @@ import {
   FolderOpen,
   Save,
   FileEdit,
+  ExternalLink,
+  Check,
+  Music,
 } from 'lucide-react';
 import {
   Notebook,
@@ -119,9 +122,12 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
     download_url?: string;
   } | null>(null);
   const [isLoadingSource, setIsLoadingSource] = useState(false);
+  const [pdfViewMode, setPdfViewMode] = useState<'native' | 'text'>('native');
+  const [copiedViewerText, setCopiedViewerText] = useState(false);
 
   const handleOpenSourceViewer = async (sourceId: string) => {
     if (!activeNotebook) return;
+    setPdfViewMode('native');
     setIsLoadingSource(true);
     try {
       const data = await api.getNotebookSourceContent(activeNotebook.id, sourceId);
@@ -400,21 +406,21 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
     >
       {/* Top Header Bar */}
       <div
-        className={`px-4 py-2.5 border-b flex items-center justify-between shrink-0 transition-colors ${
+        className={`px-4 py-2.5 border-b flex flex-wrap lg:flex-nowrap items-center justify-between gap-3 shrink-0 transition-colors ${
           isDark ? 'bg-gemini-sidebar/80 border-gemini-border' : 'bg-white border-slate-200'
         } backdrop-blur-md z-10`}
       >
-        <div className="flex items-center space-x-3 space-x-reverse min-w-0">
+        <div className="flex items-center space-x-3 space-x-reverse min-w-0 flex-1">
           <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-purple-600 flex items-center justify-center text-white shadow-md shadow-orange-500/20 shrink-0">
             <BookOpen className="w-5 h-5" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center space-x-2 space-x-reverse">
-              <h2 className="font-bold text-sm truncate">
+              <h2 className="font-bold text-sm truncate max-w-[180px] sm:max-w-xs md:max-w-md">
                 {activeNotebook?.title || t.notebookStudio}
               </h2>
               <span className="text-[10px] bg-amber-500/15 text-amber-400 font-mono px-2 py-0.5 rounded-full border border-amber-500/30 flex items-center gap-1 shrink-0">
-                <Brain className="w-2.5 h-2.5" />
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                 Gemini AI Connected
               </span>
             </div>
@@ -425,11 +431,11 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
         </div>
 
         {/* Action Controls & Navigation Tabs */}
-        <div className="flex items-center space-x-2.5 space-x-reverse">
+        <div className="flex items-center space-x-2 space-x-reverse flex-wrap shrink-0 gap-y-1">
           {/* Live Web Search Toggle Pill */}
           <button
             onClick={() => setEnableWebSearch(!enableWebSearch)}
-            className={`px-2.5 py-1 rounded-xl text-xs font-medium border flex items-center gap-1.5 transition-all ${
+            className={`px-2.5 py-1.5 rounded-xl text-xs font-medium border flex items-center gap-1.5 transition-all shrink-0 ${
               enableWebSearch
                 ? 'bg-blue-600/15 border-blue-500/40 text-blue-400 shadow-sm'
                 : isDark
@@ -449,7 +455,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
 
           {/* Mode Switcher Tabs */}
           <div
-            className={`p-1 rounded-xl border flex items-center space-x-1 space-x-reverse text-xs ${
+            className={`p-1 rounded-xl border flex items-center space-x-1 space-x-reverse text-xs shrink-0 ${
               isDark ? 'bg-[#1a1b1d] border-white/10' : 'bg-slate-100 border-slate-200'
             }`}
           >
@@ -501,7 +507,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
 
           <button
             onClick={() => setIsCreatingNotebook(true)}
-            className="p-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 transition-all"
+            className="p-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 transition-all shrink-0"
             title={t.newNotebook}
           >
             <Plus className="w-4 h-4" />
@@ -513,7 +519,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
       <div className="flex-1 flex overflow-hidden">
         {/* Left Column: Notebook Sources & Management Drawer (290px) */}
         <div
-          className={`w-72 border-e flex flex-col shrink-0 transition-colors ${
+          className={`w-80 border-e flex flex-col shrink-0 transition-colors ${
             isDark ? 'bg-gemini-sidebar/50 border-gemini-border' : 'bg-white border-slate-200'
           }`}
         >
@@ -596,75 +602,86 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
           )}
 
           {/* List of Source Cards */}
-          <div className="flex-1 overflow-y-auto p-2.5 space-y-2">
+          <div className="flex-1 overflow-y-auto p-2.5 space-y-2.5">
             {activeNotebook?.sources.map((source) => {
               const isSelected = selectedSourceIds.includes(source.id);
               return (
                 <div
                   key={source.id}
-                  className={`p-2.5 rounded-2xl border text-xs transition-all relative group ${
+                  className={`p-3 rounded-2xl border text-xs transition-all relative flex flex-col gap-2 ${
                     isSelected
                       ? isDark
-                        ? 'bg-blue-600/10 border-blue-500/40 text-blue-200'
-                        : 'bg-blue-50/80 border-blue-300 text-blue-900'
+                        ? 'bg-blue-600/10 border-blue-500/40 text-blue-200 shadow-sm'
+                        : 'bg-blue-50/80 border-blue-300 text-blue-900 shadow-sm'
                       : isDark
                       ? 'bg-[#1a1b1d] border-white/5 text-gray-300 hover:border-white/20'
                       : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
                   }`}
                 >
-                  <div className="flex items-start space-x-2.5 space-x-reverse min-w-0">
+                  {/* Row 1: Checkbox + Icon + File Name */}
+                  <div className="flex items-center space-x-2.5 space-x-reverse min-w-0">
                     <input
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => toggleSourceSelection(source.id)}
-                      className="mt-1 rounded cursor-pointer accent-blue-600 shrink-0"
+                      className="rounded accent-blue-600 shrink-0 cursor-pointer w-3.5 h-3.5"
                       title={lang === 'ar' ? 'تضمين في التحليل والبحث' : 'Include in analysis'}
                     />
-                    <div className="mt-0.5">{getSourceIcon(source.file_type)}</div>
-                    <div className="min-w-0 flex-1">
-                      <div className="font-semibold text-xs truncate" title={source.name}>
-                        {source.name}
-                      </div>
-                      <div className="flex items-center space-x-2 space-x-reverse text-[10px] opacity-65 mt-1 font-mono">
-                        <span>{source.page_count} {t.pages}</span>
-                        <span>•</span>
-                        <span>{source.chunk_count} {t.chunks}</span>
-                        <span>•</span>
-                        <span>{source.size_human}</span>
-                      </div>
+                    <div className="shrink-0">{getSourceIcon(source.file_type)}</div>
+                    <span
+                      className="font-semibold text-xs truncate flex-1 select-none"
+                      title={source.name}
+                    >
+                      {source.name}
+                    </span>
+                  </div>
+
+                  {/* Row 2: Metadata Pills & Action Buttons */}
+                  <div className="flex items-center justify-between gap-1 pt-1.5 border-t border-white/5 text-[10px] font-mono">
+                    <div className="flex items-center gap-1.5 opacity-70 truncate min-w-0">
+                      <span className="px-1.5 py-0.2 rounded bg-white/10 uppercase font-bold text-blue-400">
+                        {source.file_type}
+                      </span>
+                      <span>•</span>
+                      <span>{source.page_count} {t.pages}</span>
+                      <span>•</span>
+                      <span>{source.size_human}</span>
                     </div>
 
-                    <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                    <div className="flex items-center gap-1 shrink-0">
                       <button
-                        onClick={() => handleOpenSourceViewer(source.id)}
-                        className="p-1 text-blue-400 hover:bg-blue-500/20 rounded transition-colors"
+                        onClick={() => {
+                          setPdfViewMode('native');
+                          handleOpenSourceViewer(source.id);
+                        }}
+                        className="p-1 rounded-lg text-blue-400 hover:bg-blue-500/20 transition-colors"
                         title={lang === 'ar' ? 'معاينة وعرض المستند' : 'Preview Document'}
                       >
-                        <Eye className="w-3 h-3" />
+                        <Eye className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => handleOpenSourceEditor(source.id)}
-                        className="p-1 text-purple-400 hover:bg-purple-500/20 rounded transition-colors"
+                        className="p-1 rounded-lg text-purple-400 hover:bg-purple-500/20 transition-colors"
                         title={lang === 'ar' ? 'تعديل بسيط على المحتوى' : 'Quick Edit Content'}
                       >
-                        <Edit3 className="w-3 h-3" />
+                        <Edit3 className="w-3.5 h-3.5" />
                       </button>
                       <a
-                        href={`/api/notebooks/${activeNotebook?.id}/files/${source.name}`}
+                        href={`/api/notebooks/${activeNotebook?.id}/sources/${source.id}/file`}
                         download={source.name}
                         target="_blank"
                         rel="noreferrer"
-                        className="p-1 text-emerald-400 hover:bg-emerald-500/20 rounded transition-colors"
+                        className="p-1 rounded-lg text-emerald-400 hover:bg-emerald-500/20 transition-colors"
                         title={lang === 'ar' ? 'تحميل الملف الأصلي' : 'Download File'}
                       >
-                        <Download className="w-3 h-3" />
+                        <Download className="w-3.5 h-3.5" />
                       </a>
                       <button
                         onClick={() => handleDeleteSource(source.id)}
-                        className="p-1 text-rose-400 hover:bg-rose-500/20 rounded transition-colors"
+                        className="p-1 rounded-lg text-rose-400 hover:bg-rose-500/20 transition-colors"
                         title={lang === 'ar' ? 'حذف المصدر' : 'Delete Source'}
                       >
-                        <Trash2 className="w-3 h-3" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
@@ -1373,32 +1390,71 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
           </form>
         </div>
       )}
-      {/* 1. DOCUMENT VIEWER MODAL */}
+      {/* 1. UNIVERSAL NATURAL FILE VIEWER MODAL */}
       {viewingSource && (
         <div
-          className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150"
+          className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-3 md:p-6 animate-in fade-in duration-200"
           onClick={() => setViewingSource(null)}
         >
           <div
-            className={`w-full max-w-4xl max-h-[85vh] rounded-3xl border shadow-2xl flex flex-col overflow-hidden ${
-              isDark ? 'bg-[#18191a] border-gemini-border text-gray-100' : 'bg-white border-slate-200 text-slate-800'
+            className={`w-full max-w-6xl h-[90vh] rounded-3xl border shadow-2xl flex flex-col overflow-hidden ${
+              isDark ? 'bg-[#161719] border-gemini-border text-gray-100' : 'bg-white border-slate-200 text-slate-800'
             }`}
             onClick={(e) => e.stopPropagation()}
+            dir={lang === 'ar' ? 'rtl' : 'ltr'}
           >
             {/* Modal Header */}
-            <div className={`p-4 border-b flex items-center justify-between ${isDark ? 'border-gemini-border bg-[#202124]' : 'border-slate-200 bg-slate-50'}`}>
-              <div className="flex items-center space-x-3 space-x-reverse min-w-0">
-                <div className="p-2 rounded-xl bg-blue-500/15 text-blue-400">
-                  <FileText className="w-5 h-5" />
+            <div
+              className={`p-4 border-b flex flex-wrap items-center justify-between gap-3 shrink-0 ${
+                isDark ? 'border-gemini-border bg-[#1d1f23]' : 'border-slate-200 bg-slate-50'
+              }`}
+            >
+              <div className="flex items-center space-x-3 space-x-reverse min-w-0 flex-1">
+                <div className="p-2.5 rounded-2xl bg-blue-500/15 text-blue-400 shrink-0">
+                  {getSourceIcon(viewingSource.file_type)}
                 </div>
-                <div className="truncate">
-                  <div className="font-bold text-sm truncate">{viewingSource.name}</div>
-                  <div className="text-[11px] opacity-65 font-mono">
-                    {viewingSource.file_type.toUpperCase()} • {viewingSource.size_human}
+                <div className="truncate min-w-0">
+                  <div className="font-bold text-sm truncate flex items-center gap-2" title={viewingSource.name}>
+                    <span className="truncate">{viewingSource.name}</span>
+                    <span className="text-[10px] font-mono uppercase bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-md font-bold shrink-0">
+                      {viewingSource.file_type}
+                    </span>
+                  </div>
+                  <div className="text-[11px] opacity-65 font-mono mt-0.5">
+                    {viewingSource.size_human} • {lang === 'ar' ? 'عرض طبيعي للملف' : 'Native Format Viewer'}
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+
+              {/* Header Action Tools */}
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                {/* PDF Switcher: Native PDF vs Extracted Text */}
+                {viewingSource.file_type.toLowerCase() === 'pdf' && (
+                  <div className="flex items-center p-0.5 rounded-xl bg-black/20 border border-white/10 text-xs font-medium">
+                    <button
+                      onClick={() => setPdfViewMode('native')}
+                      className={`px-3 py-1 rounded-lg transition-all ${
+                        pdfViewMode === 'native'
+                          ? 'bg-blue-600 text-white shadow'
+                          : 'opacity-70 hover:opacity-100'
+                      }`}
+                    >
+                      {lang === 'ar' ? '📄 مستند PDF الأصلي' : 'Native PDF'}
+                    </button>
+                    <button
+                      onClick={() => setPdfViewMode('text')}
+                      className={`px-3 py-1 rounded-lg transition-all ${
+                        pdfViewMode === 'text'
+                          ? 'bg-purple-600 text-white shadow'
+                          : 'opacity-70 hover:opacity-100'
+                      }`}
+                    >
+                      {lang === 'ar' ? '📝 النص المستخرج' : 'Extracted Text'}
+                    </button>
+                  </div>
+                )}
+
+                {/* Edit Button if editable */}
                 {viewingSource.is_editable && (
                   <button
                     onClick={() => {
@@ -1412,22 +1468,52 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                         is_editable: true,
                       });
                     }}
-                    className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm"
+                    className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-medium flex items-center gap-1.5 shadow"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
                     <span>{lang === 'ar' ? 'تعديل المحتوى' : 'Edit Content'}</span>
                   </button>
                 )}
-                {viewingSource.download_url && (
-                  <a
-                    href={viewingSource.download_url}
-                    download={viewingSource.name}
-                    className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm"
+
+                {/* Copy Text Button */}
+                {viewingSource.content && (
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(viewingSource.content);
+                      setCopiedViewerText(true);
+                      setTimeout(() => setCopiedViewerText(false), 2000);
+                    }}
+                    className="px-3 py-1.5 rounded-xl border border-white/10 hover:bg-white/10 text-xs font-medium flex items-center gap-1.5"
+                    title={lang === 'ar' ? 'نسخ النص بالكامل' : 'Copy Text'}
                   >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>{lang === 'ar' ? 'تحميل' : 'Download'}</span>
-                  </a>
+                    {copiedViewerText ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedViewerText ? (lang === 'ar' ? 'تم النسخ!' : 'Copied!') : (lang === 'ar' ? 'نسخ' : 'Copy')}</span>
+                  </button>
                 )}
+
+                {/* Open in New Window */}
+                <a
+                  href={`/api/notebooks/${activeNotebook?.id}/sources/${viewingSource.source_id}/file`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-1.5 rounded-xl border border-white/10 hover:bg-white/10 text-xs font-medium flex items-center gap-1.5"
+                  title={lang === 'ar' ? 'فتح في علامة تبويب جديدة' : 'Open in new tab'}
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>{lang === 'ar' ? 'نافذة جديدة' : 'New Tab'}</span>
+                </a>
+
+                {/* Download Button */}
+                <a
+                  href={`/api/notebooks/${activeNotebook?.id}/sources/${viewingSource.source_id}/file`}
+                  download={viewingSource.name}
+                  className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium flex items-center gap-1.5 shadow"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>{lang === 'ar' ? 'تحميل' : 'Download'}</span>
+                </a>
+
+                {/* Close Button */}
                 <button
                   onClick={() => setViewingSource(null)}
                   className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
@@ -1437,11 +1523,127 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
               </div>
             </div>
 
-            {/* Modal Content Body */}
-            <div className="flex-1 overflow-y-auto p-5 text-xs font-mono leading-relaxed select-text whitespace-pre-wrap">
-              {viewingSource.content || (
-                <div className="text-center opacity-50 py-10">
-                  {lang === 'ar' ? 'لا يوجد محتوى نصي مستخرج لهذا الملف' : 'No text content available for this file'}
+            {/* Modal Body: Multi-Format Dynamic Viewer */}
+            <div className="flex-1 overflow-hidden relative bg-[#0d0e10]/40 flex flex-col">
+              {/* FORMAT 1: PDF Viewer */}
+              {viewingSource.file_type.toLowerCase() === 'pdf' ? (
+                pdfViewMode === 'native' ? (
+                  <div className="w-full h-full flex-1 bg-[#2a2a2e] relative">
+                    <iframe
+                      src={`/api/notebooks/${activeNotebook?.id}/sources/${viewingSource.source_id}/file#toolbar=1&navpanes=1`}
+                      className="w-full h-full border-0 bg-white"
+                      title={viewingSource.name}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex-1 overflow-y-auto p-6 font-sans text-xs md:text-sm leading-relaxed whitespace-pre-wrap select-text">
+                    {viewingSource.content || (lang === 'ar' ? 'لا يوجد نص مستخرج' : 'No extracted text')}
+                  </div>
+                )
+              ) : /* FORMAT 2: Images */
+              ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'].includes(viewingSource.file_type.toLowerCase()) ? (
+                <div className="flex-1 overflow-auto flex items-center justify-center p-6 bg-black/40">
+                  <img
+                    src={`/api/notebooks/${activeNotebook?.id}/sources/${viewingSource.source_id}/file`}
+                    alt={viewingSource.name}
+                    className="max-h-[75vh] max-w-full object-contain rounded-2xl shadow-2xl mx-auto"
+                  />
+                </div>
+              ) : /* FORMAT 3: Video */
+              ['mp4', 'webm', 'mov', 'mkv'].includes(viewingSource.file_type.toLowerCase()) ? (
+                <div className="flex-1 overflow-auto flex items-center justify-center p-6 bg-black/60">
+                  <video
+                    controls
+                    src={`/api/notebooks/${activeNotebook?.id}/sources/${viewingSource.source_id}/file`}
+                    className="max-h-[75vh] max-w-full rounded-2xl shadow-2xl mx-auto"
+                  />
+                </div>
+              ) : /* FORMAT 4: Audio */
+              ['mp3', 'wav', 'ogg', 'm4a'].includes(viewingSource.file_type.toLowerCase()) ? (
+                <div className="flex-1 flex flex-col items-center justify-center p-12 space-y-5">
+                  <div className="w-20 h-20 rounded-3xl bg-purple-500/20 text-purple-400 flex items-center justify-center shadow-2xl">
+                    <Music className="w-10 h-10 animate-bounce" />
+                  </div>
+                  <h4 className="font-bold text-sm">{viewingSource.name}</h4>
+                  <audio
+                    controls
+                    src={`/api/notebooks/${activeNotebook?.id}/sources/${viewingSource.source_id}/file`}
+                    className="w-full max-w-md shadow-lg"
+                  />
+                </div>
+              ) : /* FORMAT 5: Spreadsheets / CSV Tabular View */
+              viewingSource.file_type.toLowerCase() === 'csv' ? (
+                <div className="flex-1 flex flex-col overflow-hidden">
+                  <div className="p-3 border-b border-white/10 flex items-center justify-between text-xs bg-white/[0.02]">
+                    <span className="opacity-70 font-mono">
+                      {lang === 'ar' ? 'عرض بيانات الجدول (CSV Table)' : 'Tabular CSV View'}
+                    </span>
+                    <button
+                      onClick={() => {
+                        const src = viewingSource;
+                        setViewingSource(null);
+                        setEditingSource({
+                          id: src.source_id,
+                          name: src.name,
+                          file_type: src.file_type,
+                          content: src.content,
+                          is_editable: true,
+                        });
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium"
+                    >
+                      {lang === 'ar' ? '✏️ تعديل الجدول' : '✏️ Edit CSV'}
+                    </button>
+                  </div>
+                  <div className="flex-1 overflow-auto p-4">
+                    <table className="w-full text-xs font-mono border-collapse border border-white/10 text-start">
+                      <tbody>
+                        {viewingSource.content
+                          .trim()
+                          .split('\n')
+                          .slice(0, 150)
+                          .map((rowText, rIdx) => {
+                            const cols = rowText.split(',').map((c) => c.trim().replace(/^["']|["']$/g, ''));
+                            const isHeader = rIdx === 0;
+                            return (
+                              <tr
+                                key={rIdx}
+                                className={
+                                  isHeader
+                                    ? isDark
+                                      ? 'bg-blue-600/20 font-bold text-blue-300 border-b border-white/20'
+                                      : 'bg-blue-100 font-bold text-blue-900 border-b border-slate-300'
+                                    : rIdx % 2 === 0
+                                    ? isDark
+                                      ? 'bg-white/[0.02]'
+                                      : 'bg-slate-50'
+                                    : ''
+                                }
+                              >
+                                {cols.map((col, cIdx) => (
+                                  <td
+                                    key={cIdx}
+                                    className="p-2.5 border border-white/10 max-w-xs truncate select-text"
+                                    title={col}
+                                  >
+                                    {col}
+                                  </td>
+                                ))}
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
+                /* FORMAT 6: Code & Plain Text with syntax styling */
+                <div className="flex-1 overflow-y-auto p-5 text-xs font-mono leading-relaxed select-text whitespace-pre-wrap">
+                  {viewingSource.content || (
+                    <div className="text-center opacity-50 py-10">
+                      {lang === 'ar' ? 'لا يوجد محتوى نصي متاح لهذا الملف' : 'No text content available for this file'}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -1631,7 +1833,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                             <Edit3 className="w-4 h-4" />
                           </button>
                           <a
-                            href={`/api/notebooks/${activeNotebook.id}/files/${s.name}`}
+                            href={`/api/notebooks/${activeNotebook.id}/sources/${s.id}/file`}
                             download={s.name}
                             className="p-1.5 rounded-lg hover:bg-emerald-500/20 text-emerald-400 transition-colors"
                             title={lang === 'ar' ? 'تحميل' : 'Download'}

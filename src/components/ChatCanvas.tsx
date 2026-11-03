@@ -232,50 +232,26 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
       {/* Welcome Screen when Empty */}
       {messages.length === 0 && (
         <div className="min-h-[58vh] flex flex-col items-center justify-center text-center space-y-6 relative overflow-hidden select-none py-8">
-          {/* Faint Mystical Horror Skull Watermark in Background (مش واضحة وشبه شفافة) */}
+          {/* Claude AI Inspired Warm Refined Ambient Glow */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-0">
-            {/* Ambient Crimson Fog Aura */}
-            <div className="w-[420px] h-[420px] rounded-full bg-red-950/25 blur-3xl" />
-            <svg
-              className="w-80 h-80 text-red-900 animate-skull-pulse opacity-15"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              stroke="currentColor"
-              strokeWidth="0.5"
-            >
-              {/* Stylized Sinister Skull Path */}
-              <path d="M12 2C6.48 2 2 6.48 2 12c0 2.85 1.2 5.41 3.12 7.23.35.33.6.76.71 1.23l.42 1.8c.18.78.88 1.34 1.68 1.34h8.14c.8 0 1.5-.56 1.68-1.34l.42-1.8c.11-.47.36-.9.71-1.23C20.8 17.41 22 14.85 22 12c0-5.52-4.48-10-10-10zm-3.5 11c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.5 4c-.83 0-1.5-.67-1.5-1.5S11.17 14 12 14s1.5.67 1.5 1.5S12.83 17 12 17zm3.5-4c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" />
-              {/* Hollow Glowing Eye Sockets */}
-              <circle cx="8.5" cy="11" r="1.8" fill="#131314" stroke="#8b0000" strokeWidth="0.8" />
-              <circle cx="15.5" cy="11" r="1.8" fill="#131314" stroke="#8b0000" strokeWidth="0.8" />
-              {/* Nasal Cavity */}
-              <path d="M12 13.5l-.8 1.5h1.6z" fill="#8b0000" />
-              {/* Teeth Gaps */}
-              <path d="M8.5 20v2.5M10.5 20v2.5M12 20v2.5M13.5 20v2.5M15.5 20v2.5" stroke="#131314" strokeWidth="0.75" />
-            </svg>
+            <div className="w-[520px] h-[520px] rounded-full bg-gradient-to-tr from-amber-500/10 via-purple-500/10 to-blue-500/10 blur-3xl animate-claude-ambient" />
           </div>
 
-          {/* App Logo Badge with Dark Crimson Rim Glow */}
-          <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-2xl shadow-red-900/40 ring-2 ring-red-700/30 relative z-10 transition-transform hover:scale-105 duration-300">
+          {/* App Logo Badge with Refined Glow */}
+          <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-xl shadow-purple-900/20 ring-1 ring-white/20 relative z-10 transition-transform hover:scale-105 duration-300">
             <img src="/app-icon.png" alt="R3" className="w-full h-full object-cover" />
           </div>
 
-          {/* Horror Bloody Greeting Title */}
-          <div className="relative z-10 space-y-1.5">
+          {/* Claude AI Editorial Greeting Title */}
+          <div className="relative z-10 space-y-1">
             <h2 className="flex flex-col items-center justify-center">
               <span
-                className="text-xl md:text-2xl font-bold tracking-widest text-red-400 font-serif"
-                style={{
-                  textShadow: '0 0 12px rgba(220, 20, 60, 0.7), 0 2px 4px rgba(0, 0, 0, 0.9)'
-                }}
+                className="text-lg md:text-xl font-medium tracking-wide text-amber-200/90 font-serif"
               >
                 {lang === 'ar' ? 'مرحباً بك في' : 'Welcome to'}
               </span>
               <span
-                className="text-4xl md:text-6xl font-black font-horror text-bloody tracking-wider mt-1 select-none"
-                style={{
-                  fontFamily: "'Nosifer', 'Creepster', 'Cairo', cursive"
-                }}
+                className="text-4xl md:text-6xl font-semibold font-claude-serif text-claude-gradient tracking-tight mt-1 select-none"
               >
                 R3 AI Studio
               </span>
