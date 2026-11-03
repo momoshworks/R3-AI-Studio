@@ -52,6 +52,20 @@ const getTextFromChildren = (children: any): string => {
   return '';
 };
 
+
+const formatBytes = (bytes?: number): string => {
+  if (!bytes || bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+};
+
+const cleanFileName = (name: string): string => {
+  if (!name) return '';
+  return name.replace(/\.pdf\.pdf$/i, '.pdf').replace(/(\.\w{2,5})\1$/i, '$1');
+};
+
 export const ChatCanvas: React.FC<ChatCanvasProps> = ({
   messages,
   selectedModel = 'Google Gemini (gemini-3.5-flash)',
@@ -198,32 +212,28 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
     <div className="flex-1 overflow-y-auto px-4 md:px-12 py-6 space-y-8 max-w-4xl mx-auto w-full">
       {/* Top Action Bar when messages exist */}
       {messages.length > 0 && (
-        <div className="flex items-center justify-between pb-2 border-b border-gemini-border/40 select-none">
+        <div className="flex items-center justify-between pb-2 border-b border-white/10 select-none">
           <div className="text-xs text-gray-400 font-medium flex items-center gap-2">
             <span>{lang === 'ar' ? 'جلسة المحادثة الحالية' : 'Current Chat Session'}</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 font-mono">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 font-mono text-blue-400">
               {selectedModel}
             </span>
           </div>
-
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={downloadFullChatPDF}
-              disabled={downloadingPdfId === 'full-chat'}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600/15 hover:bg-blue-600/25 text-blue-400 border border-blue-500/30 text-xs font-medium transition-all shadow-sm active:scale-95 disabled:opacity-50"
-              title={t.downloadPdf}
+              title={lang === 'ar' ? 'تحميل سجل الجلسة بالكامل PDF' : 'Download full chat PDF'}
+              className="px-2.5 py-1 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors text-xs flex items-center gap-1.5 border border-white/10"
             >
-              <Download className="w-3.5 h-3.5" />
-              <span>{downloadingPdfId === 'full-chat' ? '...' : t.downloadPdf}</span>
+              <Download className="w-3.5 h-3.5 text-blue-400" />
+              <span className="text-[11px] font-medium">{lang === 'ar' ? 'تحميل الجلسة PDF' : 'Export PDF'}</span>
             </button>
-
             <button
               onClick={exportFullChatPDF}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 text-xs transition-colors"
-              title={t.printPdf}
+              title={lang === 'ar' ? 'طباعة / تصدير الجلسة' : 'Print / Export Session'}
+              className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors text-xs border border-white/10"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span>{t.printPdf}</span>
             </button>
           </div>
         </div>
@@ -369,18 +379,40 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                     dir={msgArabic ? 'rtl' : 'ltr'}
                     style={{ unicodeBidi: 'plaintext' }}
                   >
-                    {/* Render Attached Files if any */}
+                    {/* Render Attached Files with details and status */}
                     {msg.attachments && msg.attachments.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-2 pb-2 border-b border-white/20">
-                        {msg.attachments.map((att) => (
-                          <div
-                            key={att.id}
-                            className="flex items-center space-x-1.5 px-2 py-1 rounded bg-black/20 text-xs text-white/90"
-                          >
-                            {renderAttachmentIcon(att)}
-                            <span className="truncate max-w-[140px] font-mono text-[11px]">{att.name}</span>
-                          </div>
-                        ))}
+                      <div className="flex flex-wrap gap-2.5 mb-3 pb-2.5 border-b border-white/15">
+                        {msg.attachments.map((att) => {
+                          const isPdf = att.type.includes('pdf') || att.name.toLowerCase().endsWith('.pdf');
+                          return (
+                            <div
+                              key={att.id}
+                              className="flex items-center gap-2.5 p-2 px-3 rounded-2xl bg-black/35 border border-white/10 shadow-sm backdrop-blur-md"
+                            >
+                              <div
+                                className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                                  isPdf
+                                    ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                    : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                                }`}
+                              >
+                                {renderAttachmentIcon(att)}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="font-semibold text-xs text-gray-100 truncate max-w-[180px]">
+                                  {cleanFileName(att.name)}
+                                </div>
+                                <div className="text-[10px] text-gray-400 flex items-center gap-1.5 font-mono mt-0.5">
+                                  <span>{formatBytes(att.size)}</span>
+                                  <span>•</span>
+                                  <span className="text-emerald-400 font-medium">
+                                    {lang === 'ar' ? 'تمت القراءة بنجاح ✓' : 'Indexed ✓'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                     <div className="whitespace-pre-wrap">{msg.content}</div>
@@ -402,10 +434,24 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             return (
                               <p
                                 dir={isAr ? 'rtl' : 'ltr'}
-                                className={isAr ? 'text-right my-2 leading-relaxed' : 'text-left my-2 leading-relaxed'}
+                                className={`my-3 leading-[1.8] text-slate-300 font-normal ${isAr ? 'text-right' : 'text-left'}`}
+                                style={{ unicodeBidi: 'plaintext' }}
                               >
                                 {children}
                               </p>
+                            );
+                          },
+                          strong({ children }) {
+                            const text = getTextFromChildren(children);
+                            const isEnglishOnly = /^[A-Za-z0-9_\-\.\s\(\)]+$/.test(text.trim());
+                            return (
+                              <strong
+                                dir={isEnglishOnly ? 'ltr' : undefined}
+                                className="font-bold text-amber-300 bg-amber-500/15 px-1.5 py-0.5 rounded border border-amber-500/25 shadow-sm inline-block my-0.5"
+                                style={{ unicodeBidi: 'isolate' }}
+                              >
+                                {children}
+                              </strong>
                             );
                           },
                           h1({ children }) {
@@ -414,7 +460,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             return (
                               <h1
                                 dir={isAr ? 'rtl' : 'ltr'}
-                                className={`text-xl font-bold mt-4 mb-2 ${isAr ? 'text-right' : 'text-left'}`}
+                                className={`text-xl font-bold mt-5 mb-3 text-sky-400 pb-2 border-b border-white/10 ${isAr ? 'text-right' : 'text-left'}`}
                               >
                                 {children}
                               </h1>
@@ -423,32 +469,82 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                           h2({ children }) {
                             const text = getTextFromChildren(children);
                             const isAr = hasArabic(text);
+                            let icon = '📌';
+                            let cardClass = 'border-s-4 border-s-blue-500 bg-[#0e131f]/80';
+
+                            if (text.includes('الفكرة') || text.toLowerCase().includes('core idea')) {
+                              icon = '🎯';
+                              cardClass = 'border-s-4 border-s-sky-400 bg-sky-950/20';
+                            } else if (text.includes('تشبيه') || text.toLowerCase().includes('analogy')) {
+                              icon = '💡';
+                              cardClass = 'border-s-4 border-s-amber-400 bg-amber-950/20';
+                            } else if (text.includes('لماذا') || text.toLowerCase().includes('the why')) {
+                              icon = '🚀';
+                              cardClass = 'border-s-4 border-s-purple-400 bg-purple-950/20';
+                            } else if (text.includes('مثال') || text.toLowerCase().includes('working example') || text.includes('كود')) {
+                              icon = '💻';
+                              cardClass = 'border-s-4 border-s-indigo-400 bg-indigo-950/20';
+                            } else if (text.includes('خطأ') || text.toLowerCase().includes('pitfall') || text.includes('تحذير')) {
+                              icon = '⚠️';
+                              cardClass = 'border-s-4 border-s-rose-400 bg-rose-950/20';
+                            }
+
                             return (
-                              <h2
-                                dir={isAr ? 'rtl' : 'ltr'}
-                                className={`text-lg font-bold mt-3 mb-1.5 ${isAr ? 'text-right' : 'text-left'}`}
-                              >
-                                {children}
-                              </h2>
+                              <div className={`p-3.5 my-3.5 rounded-2xl border border-white/10 ${cardClass} shadow-md backdrop-blur-md`}>
+                                <h2
+                                  dir={isAr ? 'rtl' : 'ltr'}
+                                  className={`text-base font-bold text-gray-100 flex items-center gap-2.5 ${
+                                    isAr ? 'text-right' : 'text-left'
+                                  }`}
+                                >
+                                  <span className="text-base select-none">{icon}</span>
+                                  <span className="flex-1">{children}</span>
+                                </h2>
+                              </div>
                             );
                           },
                           h3({ children }) {
                             const text = getTextFromChildren(children);
                             const isAr = hasArabic(text);
+                            let icon = '🔹';
+                            let cardClass = 'border-s-4 border-s-blue-400 bg-[#0e131f]/70';
+
+                            if (text.includes('الفكرة') || text.toLowerCase().includes('core idea')) {
+                              icon = '🎯';
+                              cardClass = 'border-s-4 border-s-sky-400 bg-sky-950/20';
+                            } else if (text.includes('تشبيه') || text.toLowerCase().includes('analogy')) {
+                              icon = '💡';
+                              cardClass = 'border-s-4 border-s-amber-400 bg-amber-950/20';
+                            } else if (text.includes('لماذا') || text.toLowerCase().includes('the why')) {
+                              icon = '🚀';
+                              cardClass = 'border-s-4 border-s-purple-400 bg-purple-950/20';
+                            } else if (text.includes('مثال') || text.toLowerCase().includes('working example') || text.includes('كود')) {
+                              icon = '💻';
+                              cardClass = 'border-s-4 border-s-indigo-400 bg-indigo-950/20';
+                            } else if (text.includes('خطأ') || text.toLowerCase().includes('pitfall') || text.includes('تحذير')) {
+                              icon = '⚠️';
+                              cardClass = 'border-s-4 border-s-rose-400 bg-rose-950/20';
+                            }
+
                             return (
-                              <h3
-                                dir={isAr ? 'rtl' : 'ltr'}
-                                className={`text-base font-bold mt-2 mb-1 ${isAr ? 'text-right' : 'text-left'}`}
-                              >
-                                {children}
-                              </h3>
+                              <div className={`p-3 my-3 rounded-2xl border border-white/10 ${cardClass} shadow-sm backdrop-blur-md`}>
+                                <h3
+                                  dir={isAr ? 'rtl' : 'ltr'}
+                                  className={`text-sm font-bold text-gray-100 flex items-center gap-2 ${
+                                    isAr ? 'text-right' : 'text-left'
+                                  }`}
+                                >
+                                  <span className="text-sm select-none">{icon}</span>
+                                  <span className="flex-1">{children}</span>
+                                </h3>
+                              </div>
                             );
                           },
                           ul({ children }) {
-                            return <ul className="list-disc list-inside my-2 space-y-1">{children}</ul>;
+                            return <ul className="list-disc ps-5 my-3 space-y-3 leading-[1.8] text-slate-300">{children}</ul>;
                           },
                           ol({ children }) {
-                            return <ol className="list-decimal list-inside my-2 space-y-1">{children}</ol>;
+                            return <ol className="list-decimal ps-5 my-3 space-y-3 leading-[1.8] text-slate-300">{children}</ol>;
                           },
                           li({ children }) {
                             const text = getTextFromChildren(children);
@@ -456,7 +552,8 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             return (
                               <li
                                 dir={isAr ? 'rtl' : 'ltr'}
-                                className={isAr ? 'text-right my-1' : 'text-left my-1'}
+                                className="my-1.5 leading-[1.8] text-slate-300"
+                                style={{ unicodeBidi: 'plaintext' }}
                               >
                                 {children}
                               </li>
@@ -468,12 +565,10 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             return (
                               <blockquote
                                 dir={isAr ? 'rtl' : 'ltr'}
-                                className={`my-3 p-3 bg-white/5 rounded-xl ${
-                                  isAr
-                                    ? 'border-r-4 border-blue-500 text-right'
-                                    : 'border-l-4 border-blue-500 text-left'
-                                }`}
+                                className="my-3.5 border-s-4 border-amber-400 bg-amber-950/20 p-4 rounded-e-2xl text-xs md:text-sm leading-[1.8] text-amber-200 shadow-md backdrop-blur-md"
+                                style={{ unicodeBidi: 'plaintext' }}
                               >
+                                <span className="block font-bold text-amber-400 text-xs mb-1">💡 فكرة جوهرية:</span>
                                 {children}
                               </blockquote>
                             );

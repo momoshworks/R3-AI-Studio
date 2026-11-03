@@ -51,39 +51,106 @@ const cleanFileName = (name: string): string => {
   return name.replace(/\.pdf\.pdf$/i, '.pdf').replace(/(\.\w{2,5})\1$/i, '$1');
 };
 
+const getTextFromChildren = (children: any): string => {
+  if (!children) return '';
+  if (typeof children === 'string') return children;
+  if (Array.isArray(children)) return children.map(getTextFromChildren).join('');
+  if (typeof children === 'object' && children.props && children.props.children) {
+    return getTextFromChildren(children.props.children);
+  }
+  return '';
+};
+
 // Rich Markdown Components with Highlighting on Key Concepts
 const notebookMarkdownComponents = {
   strong({ children }: any) {
+    const text = getTextFromChildren(children);
+    const isEnglishOnly = /^[A-Za-z0-9_\-\.\s\(\)]+$/.test(text.trim());
     return (
-      <strong className="font-bold text-amber-300 bg-amber-500/15 px-1.5 py-0.5 rounded border border-amber-500/30 shadow-sm inline-block my-0.5">
+      <strong
+        dir={isEnglishOnly ? 'ltr' : undefined}
+        className="font-bold text-amber-300 bg-amber-500/15 px-1.5 py-0.5 rounded border border-amber-500/25 shadow-sm inline-block my-0.5"
+        style={{ unicodeBidi: 'isolate' }}
+      >
         {children}
       </strong>
     );
   },
   p({ children }: any) {
-    return <p className="my-2 leading-relaxed text-xs md:text-sm">{children}</p>;
+    return (
+      <p
+        className="my-2.5 leading-[1.8] text-slate-300 text-xs md:text-sm font-normal"
+        style={{ unicodeBidi: 'plaintext' }}
+      >
+        {children}
+      </p>
+    );
   },
   h1({ children }: any) {
-    return <h1 className="text-base md:text-lg font-bold text-blue-400 mt-4 mb-2 pb-1 border-b border-white/10">{children}</h1>;
+    return (
+      <h1 className="text-base md:text-lg font-bold text-sky-400 mt-4 mb-2 pb-1.5 border-b border-white/10">
+        {children}
+      </h1>
+    );
   },
   h2({ children }: any) {
-    return <h2 className="text-sm md:text-base font-bold text-purple-400 mt-3 mb-1.5">{children}</h2>;
+    const text = getTextFromChildren(children);
+    let icon = '📌';
+    let cardClass = 'border-s-4 border-s-blue-500 bg-[#0e131f]/80';
+
+    if (text.includes('الفكرة') || text.toLowerCase().includes('core idea')) {
+      icon = '🎯';
+      cardClass = 'border-s-4 border-s-sky-400 bg-sky-950/20';
+    } else if (text.includes('تشبيه') || text.toLowerCase().includes('analogy')) {
+      icon = '💡';
+      cardClass = 'border-s-4 border-s-amber-400 bg-amber-950/20';
+    } else if (text.includes('لماذا') || text.toLowerCase().includes('the why')) {
+      icon = '🚀';
+      cardClass = 'border-s-4 border-s-purple-400 bg-purple-950/20';
+    } else if (text.includes('مثال') || text.toLowerCase().includes('working example') || text.includes('كود')) {
+      icon = '💻';
+      cardClass = 'border-s-4 border-s-indigo-400 bg-indigo-950/20';
+    } else if (text.includes('خطأ') || text.toLowerCase().includes('pitfall') || text.includes('تحذير')) {
+      icon = '⚠️';
+      cardClass = 'border-s-4 border-s-rose-400 bg-rose-950/20';
+    }
+
+    return (
+      <div className={`p-3 my-3 rounded-2xl border border-white/10 ${cardClass} shadow-md backdrop-blur-md`}>
+        <h2 className="text-sm md:text-base font-bold text-gray-100 flex items-center gap-2">
+          <span className="text-base select-none">{icon}</span>
+          <span className="flex-1" style={{ unicodeBidi: 'plaintext' }}>{children}</span>
+        </h2>
+      </div>
+    );
   },
   h3({ children }: any) {
-    return <h3 className="text-xs md:text-sm font-semibold text-emerald-400 mt-2 mb-1">{children}</h3>;
+    return (
+      <h3 className="text-xs md:text-sm font-semibold text-emerald-400 mt-2.5 mb-1 flex items-center gap-1.5">
+        <span>🔹</span>
+        <span style={{ unicodeBidi: 'plaintext' }}>{children}</span>
+      </h3>
+    );
   },
   ul({ children }: any) {
-    return <ul className="list-disc ps-5 space-y-1.5 my-2 text-xs md:text-sm">{children}</ul>;
+    return <ul className="list-disc ps-5 space-y-2 my-2 text-xs md:text-sm leading-[1.8] text-slate-300">{children}</ul>;
   },
   ol({ children }: any) {
-    return <ol className="list-decimal ps-5 space-y-1.5 my-2 text-xs md:text-sm">{children}</ol>;
+    return <ol className="list-decimal ps-5 space-y-2 my-2 text-xs md:text-sm leading-[1.8] text-slate-300">{children}</ol>;
   },
   li({ children }: any) {
-    return <li className="leading-relaxed">{children}</li>;
+    return (
+      <li className="leading-[1.8] my-1" style={{ unicodeBidi: 'plaintext' }}>
+        {children}
+      </li>
+    );
   },
   blockquote({ children }: any) {
     return (
-      <blockquote className="my-3 border-s-4 border-amber-400 bg-amber-500/10 px-4 py-2.5 rounded-e-2xl text-xs md:text-sm leading-relaxed font-medium text-amber-200 shadow-sm">
+      <blockquote
+        className="my-3 border-s-4 border-amber-400 bg-amber-950/20 px-4 py-2.5 rounded-e-2xl text-xs md:text-sm leading-[1.8] font-medium text-amber-200 shadow-sm"
+        style={{ unicodeBidi: 'plaintext' }}
+      >
         <span className="block font-bold text-amber-400 text-[11px] mb-1">💡 ملحوظة وخلاصة جوهرية:</span>
         {children}
       </blockquote>
@@ -92,14 +159,19 @@ const notebookMarkdownComponents = {
   code({ inline, children, ...props }: any) {
     if (inline) {
       return (
-        <code className="px-1.5 py-0.5 rounded bg-black/40 text-pink-300 font-mono text-[11px] border border-white/10" {...props}>
+        <code
+          dir="ltr"
+          className="inline-term px-1.5 py-0.5 rounded bg-white/[0.08] text-sky-300 font-mono text-[11px] border border-white/10 mx-0.5 inline-block"
+          style={{ unicodeBidi: 'isolate' }}
+          {...props}
+        >
           {children}
         </code>
       );
     }
     return (
-      <pre className="p-3 my-2 rounded-xl bg-black/50 border border-white/10 overflow-x-auto text-[11px] font-mono leading-relaxed text-blue-300">
-        <code>{children}</code>
+      <pre dir="ltr" className="p-3 my-2.5 rounded-xl bg-black/60 border border-white/10 overflow-x-auto text-[11px] font-mono leading-relaxed text-blue-300 text-left">
+        <code dir="ltr" className="text-left font-mono">{children}</code>
       </pre>
     );
   },
@@ -708,7 +780,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                       <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5 text-gray-300">
                         {source.page_count} {t.pages}
                       </span>
-                      <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5 text-gray-300">
+                      <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5 text-gray-300 font-mono inline-block" dir="ltr" style={{ unicodeBidi: 'isolate' }}>
                         {source.size_human}
                       </span>
                     </div>
@@ -1486,8 +1558,8 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                   {getSourceIcon(viewingSource.file_type)}
                 </div>
                 <div className="truncate min-w-0">
-                  <div className="font-bold text-sm truncate flex items-center gap-2" title={viewingSource.name}>
-                    <span className="truncate">{viewingSource.name}</span>
+                  <div className="font-bold text-sm truncate flex items-center gap-2" title={cleanFileName(viewingSource.name)}>
+                    <span className="truncate">{cleanFileName(viewingSource.name)}</span>
                     <span className="text-[10px] font-mono uppercase bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-md font-bold shrink-0">
                       {viewingSource.file_type}
                     </span>
@@ -1744,7 +1816,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                 <div className="truncate">
                   <div className="font-bold text-sm truncate flex items-center gap-2">
                     <span>{lang === 'ar' ? 'محرر مستند النوتبوك:' : 'Notebook Editor:'}</span>
-                    <span className="text-purple-400 font-mono">{editingSource.name}</span>
+                    <span className="text-purple-400 font-mono">{cleanFileName(editingSource.name)}</span>
                   </div>
                   <div className="text-[11px] opacity-65">
                     {lang === 'ar' ? 'قم بتعديل المحتوى واضغط حفظ لتحديث الفهرس وسياق الذكاء الاصطناعي تلقائياً.' : 'Edit text content and save to automatically update embeddings and grounding context.'}
@@ -1877,8 +1949,8 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                         <div className="flex items-center space-x-3 space-x-reverse truncate min-w-0">
                           <div className="shrink-0">{getSourceIcon(s.file_type)}</div>
                           <div className="truncate min-w-0">
-                            <div className="font-semibold text-xs truncate" title={s.name}>
-                              {s.name}
+                            <div className="font-semibold text-xs truncate" title={cleanFileName(s.name)}>
+                              {cleanFileName(s.name)}
                             </div>
                             <div className="text-[10px] opacity-65 flex items-center gap-1.5 font-mono mt-0.5">
                               <span className="uppercase font-bold text-blue-400">{s.file_type}</span>

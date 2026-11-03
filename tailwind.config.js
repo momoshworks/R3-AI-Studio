@@ -9,18 +9,18 @@ export default {
     extend: {
       colors: {
         gemini: {
-          dark: '#131314',
-          sidebar: '#1e1f20',
-          card: '#1e1f20',
-          hover: '#282a2c',
-          input: '#1e1f20',
-          accent: '#7cacf8',
-          sparkle: '#9b72cf',
-          border: '#333537',
+          dark: '#0b0f17',
+          sidebar: '#0e131f',
+          card: '#131826',
+          hover: '#1a2236',
+          input: '#101624',
+          accent: '#38bdf8',
+          sparkle: '#a855f7',
+          border: 'rgba(255, 255, 255, 0.08)',
         }
       },
       fontFamily: {
-        sans: ['Google Sans', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['IBM Plex Sans Arabic', 'Cairo', 'Google Sans', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'Fira Code', 'monospace']
       }
     },

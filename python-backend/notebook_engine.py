@@ -417,6 +417,9 @@ class NotebookEngine:
         if not nb:
             raise ValueError(f"Notebook {notebook_id} not found")
 
+        filename = re.sub(r'\.pdf\.pdf$', '.pdf', filename, flags=re.I)
+        filename = re.sub(r'(\.[a-zA-Z0-9]{2,5})\1+$', r'\1', filename, flags=re.I)
+
         source_id = f"src_{uuid.uuid4().hex[:8]}"
         ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else "txt"
 
