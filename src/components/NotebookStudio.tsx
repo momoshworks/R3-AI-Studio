@@ -1,3 +1,5 @@
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   BookOpen,
@@ -41,6 +43,67 @@ import {
 import { api } from '../services/api';
 import { Translations, Theme, Language } from '../utils/translations';
 import { downloadPDFDirectly } from '../utils/pdfExport';
+
+
+// Clean file names by removing duplicated extensions (e.g. .pdf.pdf -> .pdf)
+const cleanFileName = (name: string): string => {
+  if (!name) return '';
+  return name.replace(/\.pdf\.pdf$/i, '.pdf').replace(/(\.\w{2,5})\1$/i, '$1');
+};
+
+// Rich Markdown Components with Highlighting on Key Concepts
+const notebookMarkdownComponents = {
+  strong({ children }: any) {
+    return (
+      <strong className="font-bold text-amber-300 bg-amber-500/15 px-1.5 py-0.5 rounded border border-amber-500/30 shadow-sm inline-block my-0.5">
+        {children}
+      </strong>
+    );
+  },
+  p({ children }: any) {
+    return <p className="my-2 leading-relaxed text-xs md:text-sm">{children}</p>;
+  },
+  h1({ children }: any) {
+    return <h1 className="text-base md:text-lg font-bold text-blue-400 mt-4 mb-2 pb-1 border-b border-white/10">{children}</h1>;
+  },
+  h2({ children }: any) {
+    return <h2 className="text-sm md:text-base font-bold text-purple-400 mt-3 mb-1.5">{children}</h2>;
+  },
+  h3({ children }: any) {
+    return <h3 className="text-xs md:text-sm font-semibold text-emerald-400 mt-2 mb-1">{children}</h3>;
+  },
+  ul({ children }: any) {
+    return <ul className="list-disc ps-5 space-y-1.5 my-2 text-xs md:text-sm">{children}</ul>;
+  },
+  ol({ children }: any) {
+    return <ol className="list-decimal ps-5 space-y-1.5 my-2 text-xs md:text-sm">{children}</ol>;
+  },
+  li({ children }: any) {
+    return <li className="leading-relaxed">{children}</li>;
+  },
+  blockquote({ children }: any) {
+    return (
+      <blockquote className="my-3 border-s-4 border-amber-400 bg-amber-500/10 px-4 py-2.5 rounded-e-2xl text-xs md:text-sm leading-relaxed font-medium text-amber-200 shadow-sm">
+        <span className="block font-bold text-amber-400 text-[11px] mb-1">💡 ملحوظة وخلاصة جوهرية:</span>
+        {children}
+      </blockquote>
+    );
+  },
+  code({ inline, children, ...props }: any) {
+    if (inline) {
+      return (
+        <code className="px-1.5 py-0.5 rounded bg-black/40 text-pink-300 font-mono text-[11px] border border-white/10" {...props}>
+          {children}
+        </code>
+      );
+    }
+    return (
+      <pre className="p-3 my-2 rounded-xl bg-black/50 border border-white/10 overflow-x-auto text-[11px] font-mono leading-relaxed text-blue-300">
+        <code>{children}</code>
+      </pre>
+    );
+  },
+};
 
 interface NotebookStudioProps {
   theme: Theme;
@@ -211,8 +274,8 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
           role: 'assistant',
           text:
             lang === 'ar'
-              ? `مرحباً بك في **${activeNotebook.title}**! 🎓\nتم تفعيل **محرك الاستيعاب الذكي المتصل بسحابة Gemini والإنترنت**. يمكنك الآن سؤالي عن أي جزئية، أو طلب شرح وحل المسائل خطوة بخطوة، مع توثيق الاستشهادات بدقة برقم الصفحة والمقطع.`
-              : `Welcome to **${activeNotebook.title}**! 🎓\nPowered by **Gemini AI & Live Web Search**. Ask questions, request step-by-step problem explanations, or generate study guides with verified page citations.`,
+              ? `### مرحباً بك في **${activeNotebook.title}**! 🎓\n\nتم تفعيل **محرك الاستيعاب الذكي المتصل بسحابة Gemini والإنترنت** لمساعدتك في فهم واستذكار المادة بالكامل.\n\n> **أهم الإمكانيات المتاحة لك:**\n> 1. سؤالي عن أي نقطة غامضة مع **توثيق فوري برقم الصفحة والمقطع**.\n> 2. طلب **شرح وتبسيط المسائل والقوانين** بأسلوب عملي وتشبيهات واقعية.\n> 3. استخراج **ملخص تنفيذي، وبطاقات مراجعة، واختبارات تدريبية**.\n\nابدأ بكتابة سؤالك بالأسفل، أو اختر أمراً من **الأوامر السريعة** بالأعلى!`
+              : `### Welcome to **${activeNotebook.title}**! 🎓\n\nPowered by **Gemini AI & Live Grounded Web Search**.\n\n> **Key Highlights:**\n> 1. Ask any question with **verified page-grounded citations**.\n> 2. Step-by-step problem walk-throughs with real analogies.\n> 3. Generate **Executive Summaries, Flashcards, and Practice Quizzes**.\n\nType your inquiry below or click a **Quick Action** above!`,
           timestamp: Date.now(),
         },
       ]);
@@ -618,7 +681,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                       : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
                   }`}
                 >
-                  {/* Row 1: Checkbox + Icon + File Name */}
+                  {/* Row 1: Checkbox + Icon + Clean File Name */}
                   <div className="flex items-center space-x-2.5 space-x-reverse min-w-0">
                     <input
                       type="checkbox"
@@ -632,20 +695,22 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                       className="font-semibold text-xs truncate flex-1 select-none"
                       title={source.name}
                     >
-                      {source.name}
+                      {cleanFileName(source.name)}
                     </span>
                   </div>
 
                   {/* Row 2: Metadata Pills & Action Buttons */}
                   <div className="flex items-center justify-between gap-1 pt-1.5 border-t border-white/5 text-[10px] font-mono">
-                    <div className="flex items-center gap-1.5 opacity-70 truncate min-w-0">
-                      <span className="px-1.5 py-0.2 rounded bg-white/10 uppercase font-bold text-blue-400">
+                    <div className="flex items-center gap-1.5 opacity-85 truncate min-w-0" dir="ltr">
+                      <span className="px-1.5 py-0.5 rounded bg-blue-500/15 uppercase font-bold text-blue-400 border border-blue-500/20">
                         {source.file_type}
                       </span>
-                      <span>•</span>
-                      <span>{source.page_count} {t.pages}</span>
-                      <span>•</span>
-                      <span>{source.size_human}</span>
+                      <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5 text-gray-300">
+                        {source.page_count} {t.pages}
+                      </span>
+                      <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5 text-gray-300">
+                        {source.size_human}
+                      </span>
                     </div>
 
                     <div className="flex items-center gap-1 shrink-0">
@@ -724,7 +789,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                 className="px-2.5 py-1 rounded-xl text-[11px] font-medium bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 shrink-0 transition-all flex items-center gap-1"
               >
                 <Brain className="w-3 h-3" />
-                <span>{lang === 'ar' ? '🧠 شرح وتبسيط المادة' : 'Explain Concepts'}</span>
+                <span>{lang === 'ar' ? 'شرح وتبسيط' : 'Explain Concepts'}</span>
               </button>
 
               <button
@@ -732,7 +797,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                 className="px-2.5 py-1 rounded-xl text-[11px] font-medium bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0 transition-all flex items-center gap-1"
               >
                 <Lightbulb className="w-3 h-3" />
-                <span>{lang === 'ar' ? '💡 حل وتوضيح المسائل' : 'Solve Problems'}</span>
+                <span>{lang === 'ar' ? 'حل المسائل' : 'Solve Problems'}</span>
               </button>
 
               <button
@@ -744,7 +809,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                 className="px-2.5 py-1 rounded-xl text-[11px] font-medium bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 shrink-0 transition-all flex items-center gap-1"
               >
                 <GraduationCap className="w-3 h-3" />
-                <span>{lang === 'ar' ? '📝 ملخص تنفيذي شامل' : 'Deep Summary'}</span>
+                <span>{lang === 'ar' ? 'ملخص شامل' : 'Deep Summary'}</span>
               </button>
 
               <button
@@ -756,7 +821,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                 className="px-2.5 py-1 rounded-xl text-[11px] font-medium bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 shrink-0 transition-all flex items-center gap-1"
               >
                 <HelpCircle className="w-3 h-3" />
-                <span>{lang === 'ar' ? '❓ اختبار تدريبي وامتحانات' : 'Exam Quiz'}</span>
+                <span>{lang === 'ar' ? 'اختبار تدريبي' : 'Exam Quiz'}</span>
               </button>
             </div>
           )}
@@ -782,7 +847,15 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                           : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none'
                       }`}
                     >
-                      <div className="whitespace-pre-wrap font-sans">{msg.text}</div>
+                      {msg.role === 'user' ? (
+                        <div className="whitespace-pre-wrap font-sans font-medium text-xs leading-relaxed">{msg.text}</div>
+                      ) : (
+                        <div className="prose prose-sm dark:prose-invert max-w-none text-xs leading-relaxed font-sans">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]} components={notebookMarkdownComponents}>
+                            {msg.text}
+                          </ReactMarkdown>
+                        </div>
+                      )}
 
                       {/* Grounded Citations Badges below assistant message */}
                       {msg.citations && msg.citations.length > 0 && (
@@ -795,12 +868,11 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                             <button
                               key={i}
                               onClick={() => setActiveCitation(cite)}
-                              className="px-2 py-1 rounded-lg text-[10px] font-mono bg-blue-500/15 hover:bg-blue-500/25 text-blue-400 border border-blue-500/30 transition-all flex items-center gap-1"
+                              className="px-2.5 py-1 rounded-xl text-[10px] font-mono bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 transition-all flex items-center gap-1.5 shadow-sm"
                             >
-                              <FileText className="w-2.5 h-2.5" />
-                              <span>
-                                {cite.source_name} - {t.sourcePage} {cite.page}
-                              </span>
+                              <FileText className="w-3 h-3 text-blue-400" />
+                              <span className="font-semibold">{cleanFileName(cite.source_name)}</span>
+                              <span className="bg-amber-500/20 text-amber-300 px-1.5 py-0.2 rounded font-bold">ص {cite.page}</span>
                             </button>
                           ))}
                         </div>
