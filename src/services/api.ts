@@ -399,4 +399,40 @@ export const api = {
     });
     return await res.json();
   },
+
+  async getNotebookSourceContent(notebookId: string, sourceId: string): Promise<any> {
+    const res = await fetch(`${API_BASE}/api/notebooks/${notebookId}/sources/${sourceId}/content`);
+    if (!res.ok) throw new Error('Failed to fetch source content');
+    return await res.json();
+  },
+
+  async updateNotebookSourceContent(notebookId: string, sourceId: string, content: string): Promise<any> {
+    const res = await fetch(`${API_BASE}/api/notebooks/${notebookId}/sources/${sourceId}/content`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content }),
+    });
+    if (!res.ok) throw new Error('Failed to update source content');
+    return await res.json();
+  },
+
+  async saveMediaFromUrl(url: string, title?: string): Promise<any> {
+    const res = await fetch(`${API_BASE}/api/media/save-from-url`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, title }),
+    });
+    if (!res.ok) throw new Error('Failed to save media from URL');
+    return await res.json();
+  },
+
+  async generateAiImage(prompt: string): Promise<any> {
+    const res = await fetch(`${API_BASE}/api/generate/image`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+    });
+    if (!res.ok) throw new Error('Failed to generate image');
+    return await res.json();
+  },
 };

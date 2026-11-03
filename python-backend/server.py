@@ -177,7 +177,7 @@ async def upload_file(file: UploadFile = File(...)):
         "type": mime_type,
         "saved_path": str(target_path),
         "is_image": is_image,
-        "preview_url": f"/api/files/{safe_filename}" if is_image else None
+        "preview_url": f"/api/files/{safe_filename}"
     }
 
 @app.get("/api/files/{filename}")
@@ -265,7 +265,7 @@ async def stream_gemini(chat_request: ChatRequest, queue: asyncio.Queue):
                 if file_path and file_path.exists():
                     file_mime = att.type or "application/octet-stream"
                     file_bytes = file_path.read_bytes()
-                    if file_mime.startswith("image/") or file_mime == "application/pdf":
+                    if file_mime.startswith("image/") or file_mime == "application/pdf" or file_mime.startswith("audio/") or file_mime.startswith("video/"): 
                         parts.append(types.Part.from_bytes(data=file_bytes, mime_type=file_mime))
                     else:
                         snippet = file_bytes[:100000].decode("utf-8", errors="replace")
@@ -1202,6 +1202,93 @@ async def delete_notebook_source_endpoint(notebook_id: str, source_id: str):
     if not success:
         raise HTTPException(status_code=404, detail="المصدر غير موجود")
     return {"status": "success", "deleted": source_id}
+
+@app.get("/api/notebooks/{notebook_id}/sources/{source_id}/content")
+async def get_notebook_source_content_endpoint(notebook_id: str, source_id: str):
+    try:
+        data = await asyncio.to_thread(notebook_engine.get_source_content, notebook_id, source_id)
+        return data
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/notebooks/{notebook_id}/sources/{source_id}/content")
+async def update_notebook_source_content_endpoint(notebook_id: str, source_id: str, payload: Dict[str, Any] = Body(...)):
+    new_content = payload.get("content", "")
+    try:
+        res = await asyncio.to_thread(notebook_engine.update_source_content, notebook_id, source_id, new_content)
+        return res
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/media/save-from-url")
+async def save_media_from_url_endpoint(payload: Dict[str, Any] = Body(...)):
+    url = payload.get("url", "").strip()
+    title = payload.get("title", "media").strip()
+    if not url:
+        raise HTTPException(status_code=400, detail="URL is required")
+
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "R3-AI-Studio/1.0"})
+        with urllib.request.urlopen(req, timeout=25) as resp:
+            content = resp.read()
+            content_type = resp.headers.get_content_type()
+            
+        ext = mimetypes.guess_extension(content_type) or ".png"
+        clean_title = re.sub(r'[^a-zA-Z0-9_-]', '_', title)[:25]
+        filename = f"{uuid.uuid4().hex[:8]}_{clean_title}{ext}"
+        
+        target = MEDIA_VAULT_DIR / filename
+        target.write_bytes(content)
+        
+        chat_target = UPLOADS_DIR / filename
+        chat_target.write_bytes(content)
+        
+        return {
+            "status": "success",
+            "filename": filename,
+            "url": f"/api/media/stream/{filename}",
+            "chat_url": f"/api/files/{filename}",
+            "size": len(content),
+            "type": content_type
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch media: {e}")
+
+@app.post("/api/generate/image")
+async def generate_image_endpoint(payload: Dict[str, Any] = Body(...)):
+    prompt = payload.get("prompt", "").strip()
+    if not prompt:
+        raise HTTPException(status_code=400, detail="Prompt is required")
+        
+    encoded_prompt = urllib.parse.quote(prompt)
+    pollinations_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=1024&nologo=true"
+    
+    try:
+        req = urllib.request.Request(pollinations_url, headers={"User-Agent": "R3-AI-Studio/1.0"})
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            img_bytes = resp.read()
+            
+        filename = f"gen_{uuid.uuid4().hex[:8]}.png"
+        target = MEDIA_VAULT_DIR / filename
+        target.write_bytes(img_bytes)
+        
+        chat_target = UPLOADS_DIR / filename
+        chat_target.write_bytes(img_bytes)
+        
+        return {
+            "status": "success",
+            "filename": filename,
+            "url": f"/api/media/stream/{filename}",
+            "chat_url": f"/api/files/{filename}",
+            "prompt": prompt
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Image generation failed: {e}")
+
 
 @app.post("/api/notebooks/{notebook_id}/query")
 async def query_notebook_endpoint(notebook_id: str, payload: Dict[str, Any] = Body(...)):

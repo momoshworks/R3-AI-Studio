@@ -133,6 +133,122 @@ class NotebookEngine:
     def _study_file(self, notebook_id: str) -> Path:
         return self._notebook_dir(notebook_id) / "study_guide.json"
 
+    def get_source_content(self, notebook_id: str, source_id: str) -> Dict[str, Any]:
+        nb = self.get_notebook(notebook_id)
+        if not nb:
+            raise ValueError(f"Notebook {notebook_id} not found")
+
+        source = next((s for s in nb.get("sources", []) if s["id"] == source_id), None)
+        if not source:
+            raise ValueError(f"Source {source_id} not found")
+
+        files_dir = self._notebook_dir(notebook_id) / "files"
+        filename = source["name"]
+        target_path = files_dir / f"{source_id}_{filename}"
+        if not target_path.exists():
+            target_path = files_dir / filename
+
+        ext = source.get("file_type", "").lower()
+        is_editable = ext in ["txt", "md", "py", "js", "ts", "json", "csv", "html", "css", "xml", "yaml", "yml", "sh", "bat", "sql"]
+
+        content = ""
+        if target_path.exists():
+            if is_editable:
+                try:
+                    content = target_path.read_text(encoding="utf-8", errors="replace")
+                except Exception as e:
+                    content = f"[Error reading file: {e}]"
+            elif ext == "pdf":
+                pages = self._extract_text_from_pdf(target_path)
+                content = "\n\n".join(f"=== [الصفحة {p['page']}] ===\n{p['text']}" for p in pages)
+            elif ext in ["docx", "doc"]:
+                pages = self._extract_text_from_docx(target_path)
+                content = "\n\n".join(f"=== [الفقرة {p['page']}] ===\n{p['text']}" for p in pages)
+            else:
+                try:
+                    content = target_path.read_text(encoding="utf-8", errors="replace")
+                    is_editable = True
+                except Exception:
+                    content = f"[الملف بصيغة ثنائية {ext}، يمكن تحميله ومعاينته مباشرة]"
+
+        return {
+            "source_id": source_id,
+            "name": filename,
+            "file_type": ext,
+            "content": content,
+            "is_editable": is_editable,
+            "size_human": source.get("size_human", "0 KB"),
+            "download_url": f"/api/notebooks/{notebook_id}/files/{filename}"
+        }
+
+    def update_source_content(self, notebook_id: str, source_id: str, new_content: str) -> Dict[str, Any]:
+        nb = self.get_notebook(notebook_id)
+        if not nb:
+            raise ValueError(f"Notebook {notebook_id} not found")
+
+        source = next((s for s in nb.get("sources", []) if s["id"] == source_id), None)
+        if not source:
+            raise ValueError(f"Source {source_id} not found")
+
+        files_dir = self._notebook_dir(notebook_id) / "files"
+        filename = source["name"]
+        target_path = files_dir / f"{source_id}_{filename}"
+        if not target_path.exists():
+            target_path = files_dir / filename
+
+        # 1. Overwrite physical file
+        target_path.write_text(new_content, encoding="utf-8")
+
+        # 2. Re-chunk the text
+        new_chunks = self._chunk_page_text(new_content, page=1, source_id=source_id, source_name=filename)
+
+        # 3. Compute Embeddings if available
+        embed_model = get_embed_model()
+        if embed_model and new_chunks:
+            try:
+                texts = [c["text"] for c in new_chunks]
+                embeddings_gen = embed_model.embed(texts)
+                for c, emb in zip(new_chunks, embeddings_gen):
+                    c["embedding"] = emb.tolist()
+            except Exception as e:
+                print(f"[Embedding Error on Update] {e}")
+
+        # 4. Update index.json by replacing old chunks of this source
+        idx_path = self._index_file(notebook_id)
+        try:
+            curr_index = json.loads(idx_path.read_text(encoding="utf-8")) if idx_path.exists() else {"chunks": []}
+        except Exception:
+            curr_index = {"chunks": []}
+
+        filtered_chunks = [c for c in curr_index.get("chunks", []) if c.get("source_id") != source_id]
+        filtered_chunks.extend(new_chunks)
+        curr_index["chunks"] = filtered_chunks
+        idx_path.write_text(json.dumps(curr_index, ensure_ascii=False), encoding="utf-8")
+
+        # 5. Update Registry metadata
+        reg = self._read_registry()
+        size_bytes = len(new_content.encode("utf-8"))
+        size_human = f"{size_bytes / 1024:.1f} KB" if size_bytes < 1024 * 1024 else f"{size_bytes / (1024 * 1024):.1f} MB"
+        for item in reg["notebooks"]:
+            if item["id"] == notebook_id:
+                for s in item["sources"]:
+                    if s["id"] == source_id:
+                        s["chunk_count"] = len(new_chunks)
+                        s["size_bytes"] = size_bytes
+                        s["size_human"] = size_human
+                        break
+                item["updated_at"] = int(time.time())
+                break
+        self._write_registry(reg)
+
+        return {
+            "source_id": source_id,
+            "name": filename,
+            "size_human": size_human,
+            "chunk_count": len(new_chunks),
+            "status": "updated_and_indexed"
+        }
+
     # =========================================================================
     # Notebook CRUD
     # =========================================================================

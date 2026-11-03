@@ -7,7 +7,7 @@ import {
   FileText,
   Search,
   Sparkles,
-  Layers,
+  Loader2,
   FileCode,
   GraduationCap,
   MessageSquare,
@@ -23,6 +23,11 @@ import {
   Brain,
   Zap,
   Copy,
+  Edit3,
+  Eye,
+  FolderOpen,
+  Save,
+  FileEdit,
 } from 'lucide-react';
 import {
   Notebook,
@@ -94,6 +99,70 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
 
   // Citation Modal Preview
   const [activeCitation, setActiveCitation] = useState<Citation | null>(null);
+  const [isVaultModalOpen, setIsVaultModalOpen] = useState(false);
+  const [vaultSearch, setVaultSearch] = useState('');
+  const [editingSource, setEditingSource] = useState<{
+    id: string;
+    name: string;
+    file_type: string;
+    content: string;
+    is_editable: boolean;
+    is_saving?: boolean;
+  } | null>(null);
+  const [viewingSource, setViewingSource] = useState<{
+    source_id: string;
+    name: string;
+    file_type: string;
+    content: string;
+    is_editable: boolean;
+    size_human: string;
+    download_url?: string;
+  } | null>(null);
+  const [isLoadingSource, setIsLoadingSource] = useState(false);
+
+  const handleOpenSourceViewer = async (sourceId: string) => {
+    if (!activeNotebook) return;
+    setIsLoadingSource(true);
+    try {
+      const data = await api.getNotebookSourceContent(activeNotebook.id, sourceId);
+      setViewingSource(data);
+    } catch (err) {
+      console.error('Error fetching source for viewing:', err);
+    } finally {
+      setIsLoadingSource(false);
+    }
+  };
+
+  const handleOpenSourceEditor = async (sourceId: string) => {
+    if (!activeNotebook) return;
+    setIsLoadingSource(true);
+    try {
+      const data = await api.getNotebookSourceContent(activeNotebook.id, sourceId);
+      setEditingSource({
+        id: sourceId,
+        name: data.name,
+        file_type: data.file_type,
+        content: data.content,
+        is_editable: data.is_editable,
+      });
+    } catch (err) {
+      console.error('Error fetching source for editing:', err);
+    } finally {
+      setIsLoadingSource(false);
+    }
+  };
+
+  const handleSaveSourceContent = async () => {
+    if (!activeNotebook || !editingSource) return;
+    setEditingSource((prev) => (prev ? { ...prev, is_saving: true } : null));
+    try {
+      await api.updateNotebookSourceContent(activeNotebook.id, editingSource.id, editingSource.content);
+      await loadNotebooks();
+      setEditingSource(null);
+    } catch (err) {
+      console.error('Error saving source content:', err);
+    }
+  };
 
   // File Upload State
   const [isUploading, setIsUploading] = useState(false);
@@ -470,29 +539,45 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
             </select>
           </div>
 
-          {/* Sources Header & Upload Button */}
-          <div className="p-3 border-b border-gemini-border/40 flex items-center justify-between">
-            <span className="text-xs font-bold flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-blue-400" />
-              {t.sources} ({activeNotebook?.sources.length || 0})
-            </span>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={(e) => handleFileUpload(e.target.files)}
-              multiple
-              accept=".pdf,.docx,.doc,.txt,.py,.csv,.json,.md"
-              className="hidden"
-            />
+          {/* Sources Header & Vault / Upload Buttons */}
+          <div className="p-2.5 border-b border-gemini-border/40 flex items-center justify-between gap-1.5">
             <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploading}
-              className="text-[11px] bg-blue-600 hover:bg-blue-500 text-white font-medium px-2.5 py-1 rounded-xl flex items-center gap-1 transition-all shadow-sm disabled:opacity-50"
+              onClick={() => setIsVaultModalOpen(true)}
+              className="text-xs font-bold flex items-center gap-1.5 hover:text-blue-400 transition-colors"
+              title={lang === 'ar' ? 'فتح مستودع ومخزن الملفات بالكامل' : 'Open Document Vault'}
             >
-              <UploadCloud className="w-3.5 h-3.5" />
-              <span>{isUploading ? t.indexing : t.addSources}</span>
+              <FolderOpen className="w-4 h-4 text-amber-400" />
+              <span>{lang === 'ar' ? 'مخزن الملفات' : 'Vault'}</span>
+              <span className="text-[10px] bg-white/10 px-1.5 py-0.2 rounded-full font-mono">
+                {activeNotebook?.sources.length || 0}
+              </span>
             </button>
+            <div className="flex items-center gap-1">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={(e) => handleFileUpload(e.target.files)}
+                multiple
+                accept=".pdf,.docx,.doc,.txt,.py,.csv,.json,.md"
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                className="text-[11px] bg-blue-600 hover:bg-blue-500 text-white font-medium px-2.5 py-1 rounded-xl flex items-center gap-1 transition-all shadow-sm disabled:opacity-50 shrink-0"
+              >
+                <UploadCloud className="w-3.5 h-3.5" />
+                <span>{isUploading ? t.indexing : t.addSources}</span>
+              </button>
+            </div>
           </div>
+
+          {isLoadingSource && (
+            <div className="p-2 text-center text-xs text-blue-400 flex items-center justify-center gap-1.5 border-b border-blue-500/20 bg-blue-500/10 animate-pulse">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <span>{lang === 'ar' ? 'جاري فتح وتحضير محتوى المستند...' : 'Loading document content...'}</span>
+            </div>
+          )}
 
           {/* Drag & Drop Upload Dropzone if no sources */}
           {activeNotebook && activeNotebook.sources.length === 0 && (
@@ -549,13 +634,39 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => handleDeleteSource(source.id)}
-                      className="opacity-0 group-hover:opacity-100 p-1 text-rose-400 hover:bg-rose-500/20 rounded transition-opacity shrink-0"
-                      title={lang === 'ar' ? 'حذف المصدر' : 'Delete Source'}
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                      <button
+                        onClick={() => handleOpenSourceViewer(source.id)}
+                        className="p-1 text-blue-400 hover:bg-blue-500/20 rounded transition-colors"
+                        title={lang === 'ar' ? 'معاينة وعرض المستند' : 'Preview Document'}
+                      >
+                        <Eye className="w-3 h-3" />
+                      </button>
+                      <button
+                        onClick={() => handleOpenSourceEditor(source.id)}
+                        className="p-1 text-purple-400 hover:bg-purple-500/20 rounded transition-colors"
+                        title={lang === 'ar' ? 'تعديل بسيط على المحتوى' : 'Quick Edit Content'}
+                      >
+                        <Edit3 className="w-3 h-3" />
+                      </button>
+                      <a
+                        href={`/api/notebooks/${activeNotebook?.id}/files/${source.name}`}
+                        download={source.name}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-1 text-emerald-400 hover:bg-emerald-500/20 rounded transition-colors"
+                        title={lang === 'ar' ? 'تحميل الملف الأصلي' : 'Download File'}
+                      >
+                        <Download className="w-3 h-3" />
+                      </a>
+                      <button
+                        onClick={() => handleDeleteSource(source.id)}
+                        className="p-1 text-rose-400 hover:bg-rose-500/20 rounded transition-colors"
+                        title={lang === 'ar' ? 'حذف المصدر' : 'Delete Source'}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -1260,6 +1371,287 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
               </button>
             </div>
           </form>
+        </div>
+      )}
+      {/* 1. DOCUMENT VIEWER MODAL */}
+      {viewingSource && (
+        <div
+          className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150"
+          onClick={() => setViewingSource(null)}
+        >
+          <div
+            className={`w-full max-w-4xl max-h-[85vh] rounded-3xl border shadow-2xl flex flex-col overflow-hidden ${
+              isDark ? 'bg-[#18191a] border-gemini-border text-gray-100' : 'bg-white border-slate-200 text-slate-800'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className={`p-4 border-b flex items-center justify-between ${isDark ? 'border-gemini-border bg-[#202124]' : 'border-slate-200 bg-slate-50'}`}>
+              <div className="flex items-center space-x-3 space-x-reverse min-w-0">
+                <div className="p-2 rounded-xl bg-blue-500/15 text-blue-400">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <div className="truncate">
+                  <div className="font-bold text-sm truncate">{viewingSource.name}</div>
+                  <div className="text-[11px] opacity-65 font-mono">
+                    {viewingSource.file_type.toUpperCase()} • {viewingSource.size_human}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {viewingSource.is_editable && (
+                  <button
+                    onClick={() => {
+                      const src = viewingSource;
+                      setViewingSource(null);
+                      setEditingSource({
+                        id: src.source_id,
+                        name: src.name,
+                        file_type: src.file_type,
+                        content: src.content,
+                        is_editable: true,
+                      });
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                    <span>{lang === 'ar' ? 'تعديل المحتوى' : 'Edit Content'}</span>
+                  </button>
+                )}
+                {viewingSource.download_url && (
+                  <a
+                    href={viewingSource.download_url}
+                    download={viewingSource.name}
+                    className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>{lang === 'ar' ? 'تحميل' : 'Download'}</span>
+                  </a>
+                )}
+                <button
+                  onClick={() => setViewingSource(null)}
+                  className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content Body */}
+            <div className="flex-1 overflow-y-auto p-5 text-xs font-mono leading-relaxed select-text whitespace-pre-wrap">
+              {viewingSource.content || (
+                <div className="text-center opacity-50 py-10">
+                  {lang === 'ar' ? 'لا يوجد محتوى نصي مستخرج لهذا الملف' : 'No text content available for this file'}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. SIMPLE DOCUMENT EDITOR MODAL */}
+      {editingSource && (
+        <div
+          className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150"
+          onClick={() => setEditingSource(null)}
+        >
+          <div
+            className={`w-full max-w-4xl max-h-[90vh] rounded-3xl border shadow-2xl flex flex-col overflow-hidden ${
+              isDark ? 'bg-[#18191a] border-gemini-border text-gray-100' : 'bg-white border-slate-200 text-slate-800'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Editor Header */}
+            <div className={`p-4 border-b flex items-center justify-between ${isDark ? 'border-gemini-border bg-[#202124]' : 'border-slate-200 bg-slate-50'}`}>
+              <div className="flex items-center space-x-3 space-x-reverse min-w-0">
+                <div className="p-2 rounded-xl bg-purple-500/15 text-purple-400">
+                  <FileEdit className="w-5 h-5" />
+                </div>
+                <div className="truncate">
+                  <div className="font-bold text-sm truncate flex items-center gap-2">
+                    <span>{lang === 'ar' ? 'محرر مستند النوتبوك:' : 'Notebook Editor:'}</span>
+                    <span className="text-purple-400 font-mono">{editingSource.name}</span>
+                  </div>
+                  <div className="text-[11px] opacity-65">
+                    {lang === 'ar' ? 'قم بتعديل المحتوى واضغط حفظ لتحديث الفهرس وسياق الذكاء الاصطناعي تلقائياً.' : 'Edit text content and save to automatically update embeddings and grounding context.'}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleSaveSourceContent}
+                  disabled={editingSource.is_saving}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md shadow-blue-500/20 disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{editingSource.is_saving ? (lang === 'ar' ? 'جاري الحفظ والفهرسة...' : 'Saving...') : (lang === 'ar' ? 'حفظ التعديلات' : 'Save Changes')}</span>
+                </button>
+                <button
+                  onClick={() => setEditingSource(null)}
+                  className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Editor Textarea */}
+            <div className="flex-1 p-4 overflow-hidden flex flex-col">
+              <textarea
+                value={editingSource.content}
+                onChange={(e) => setEditingSource({ ...editingSource, content: e.target.value })}
+                className={`w-full flex-1 p-4 rounded-2xl border font-mono text-xs leading-relaxed outline-none resize-none transition-colors ${
+                  isDark
+                    ? 'bg-[#121314] border-gemini-border text-gray-200 focus:border-purple-500/60'
+                    : 'bg-slate-50 border-slate-300 text-slate-800 focus:border-purple-500'
+                }`}
+                placeholder={lang === 'ar' ? 'اكتب أو عدل محتوى المستند هنا...' : 'Edit document text content here...'}
+                spellCheck={false}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. DEDICATED NOTEBOOK FILE VAULT MODAL */}
+      {isVaultModalOpen && activeNotebook && (
+        <div
+          className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150"
+          onClick={() => setIsVaultModalOpen(false)}
+        >
+          <div
+            className={`w-full max-w-5xl max-h-[85vh] rounded-3xl border shadow-2xl flex flex-col overflow-hidden ${
+              isDark ? 'bg-[#18191a] border-gemini-border text-gray-100' : 'bg-white border-slate-200 text-slate-800'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+            dir={lang === 'ar' ? 'rtl' : 'ltr'}
+          >
+            {/* Vault Header */}
+            <div className={`p-4 border-b flex items-center justify-between ${isDark ? 'border-gemini-border bg-[#202124]' : 'border-slate-200 bg-slate-50'}`}>
+              <div className="flex items-center space-x-3 space-x-reverse">
+                <div className="p-2.5 rounded-2xl bg-amber-500/20 text-amber-400">
+                  <FolderOpen className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base flex items-center gap-2">
+                    <span>{lang === 'ar' ? 'مخزن ملفات ومستندات النوتبوك' : 'Notebook Document Vault'}</span>
+                    <span className="text-xs font-mono font-normal bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30">
+                      {activeNotebook.title}
+                    </span>
+                  </h3>
+                  <p className="text-xs opacity-65 mt-0.5">
+                    {lang === 'ar'
+                      ? 'استعراض وتحرير وتحميل جميع ملفات ومراجع النوتبوك بكل الصيغ (PDF, DOCX, Code, CSV, Markdown)'
+                      : 'Explore, edit, preview, and download all notebook files across all formats.'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md shadow-blue-500/20"
+                >
+                  <UploadCloud className="w-4 h-4" />
+                  <span>{lang === 'ar' ? 'رفع ملفات جديدة' : 'Upload Files'}</span>
+                </button>
+                <button
+                  onClick={() => setIsVaultModalOpen(false)}
+                  className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Vault Search Bar */}
+            <div className="p-3 border-b border-gemini-border/40 flex items-center gap-2">
+              <Search className="w-4 h-4 opacity-50 shrink-0" />
+              <input
+                type="text"
+                value={vaultSearch}
+                onChange={(e) => setVaultSearch(e.target.value)}
+                placeholder={lang === 'ar' ? 'بحث في ملفات المخزن بالاسم أو الصيغة...' : 'Search files in vault...'}
+                className={`w-full bg-transparent text-xs outline-none ${isDark ? 'text-gray-200' : 'text-slate-800'}`}
+              />
+              {vaultSearch && (
+                <button onClick={() => setVaultSearch('')} className="p-1 opacity-60 hover:opacity-100">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Vault Files Grid / List */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+              {activeNotebook.sources.filter((s) => !vaultSearch || s.name.toLowerCase().includes(vaultSearch.toLowerCase()) || s.file_type.toLowerCase().includes(vaultSearch.toLowerCase())).length === 0 ? (
+                <div className="text-center py-16 opacity-50">
+                  <FolderOpen className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                  <p className="text-xs">{lang === 'ar' ? 'لا توجد ملفات مطابقة في المخزن' : 'No matching files in vault'}</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {activeNotebook.sources
+                    .filter((s) => !vaultSearch || s.name.toLowerCase().includes(vaultSearch.toLowerCase()) || s.file_type.toLowerCase().includes(vaultSearch.toLowerCase()))
+                    .map((s) => (
+                      <div
+                        key={s.id}
+                        className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between group ${
+                          isDark
+                            ? 'bg-[#1b1c1e] hover:bg-[#222326] border-white/5 hover:border-blue-500/30'
+                            : 'bg-slate-50 hover:bg-slate-100 border-slate-200 hover:border-blue-400'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-3 space-x-reverse truncate min-w-0">
+                          <div className="shrink-0">{getSourceIcon(s.file_type)}</div>
+                          <div className="truncate min-w-0">
+                            <div className="font-semibold text-xs truncate" title={s.name}>
+                              {s.name}
+                            </div>
+                            <div className="text-[10px] opacity-65 flex items-center gap-1.5 font-mono mt-0.5">
+                              <span className="uppercase font-bold text-blue-400">{s.file_type}</span>
+                              <span>•</span>
+                              <span>{s.size_human}</span>
+                              <span>•</span>
+                              <span>{s.chunk_count} {t.chunks}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            onClick={() => handleOpenSourceViewer(s.id)}
+                            className="p-1.5 rounded-lg hover:bg-blue-500/20 text-blue-400 transition-colors"
+                            title={lang === 'ar' ? 'معاينة المستند' : 'Preview'}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleOpenSourceEditor(s.id)}
+                            className="p-1.5 rounded-lg hover:bg-purple-500/20 text-purple-400 transition-colors"
+                            title={lang === 'ar' ? 'تعديل المحتوى' : 'Edit'}
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                          <a
+                            href={`/api/notebooks/${activeNotebook.id}/files/${s.name}`}
+                            download={s.name}
+                            className="p-1.5 rounded-lg hover:bg-emerald-500/20 text-emerald-400 transition-colors"
+                            title={lang === 'ar' ? 'تحميل' : 'Download'}
+                          >
+                            <Download className="w-4 h-4" />
+                          </a>
+                          <button
+                            onClick={() => handleDeleteSource(s.id)}
+                            className="p-1.5 rounded-lg hover:bg-rose-500/20 text-rose-400 transition-colors"
+                            title={lang === 'ar' ? 'حذف' : 'Delete'}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

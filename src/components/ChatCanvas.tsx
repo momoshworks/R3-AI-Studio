@@ -16,7 +16,12 @@ import {
   VolumeX,
   FileDown,
   Sparkles,
+  Maximize2,
+  Save,
+  ExternalLink,
+  X,
 } from 'lucide-react';
+import { api } from '../services/api';
 import { AttachedFile, ChatMessage } from '../types';
 import { exportTextOrHtmlToPDF, downloadPDFDirectly } from '../utils/pdfExport';
 import { Translations, Theme, Language } from '../utils/translations';
@@ -60,6 +65,21 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
   const [copiedMsgId, setCopiedMsgId] = useState<string | null>(null);
   const [downloadingPdfId, setDownloadingPdfId] = useState<string | null>(null);
   const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [savingMediaUrl, setSavingMediaUrl] = useState<string | null>(null);
+  const [savedMediaUrls, setSavedMediaUrls] = useState<string[]>([]);
+
+  const handleSaveToVault = async (url: string, title?: string) => {
+    setSavingMediaUrl(url);
+    try {
+      await api.saveMediaFromUrl(url, title || 'Gemini_Media');
+      setSavedMediaUrls((prev) => [...prev, url]);
+    } catch (err) {
+      console.error('Failed to save to vault:', err);
+    } finally {
+      setSavingMediaUrl(null);
+    }
+  };
 
   const isDark = theme === 'dark';
   const isChatGpt = selectedModel.toLowerCase().includes('gpt') || selectedModel.toLowerCase().includes('o3');
@@ -211,18 +231,52 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
 
       {/* Welcome Screen when Empty */}
       {messages.length === 0 && (
-        <div className="min-h-[60vh] flex flex-col items-center justify-center text-center space-y-6">
-          <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-2xl shadow-blue-500/20 ring-2 ring-white/10">
+        <div className="min-h-[58vh] flex flex-col items-center justify-center text-center space-y-6 relative overflow-hidden select-none py-8">
+          {/* Faint Mystical Horror Skull Watermark in Background (مش واضحة وشبه شفافة) */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-0">
+            {/* Ambient Crimson Fog Aura */}
+            <div className="w-[420px] h-[420px] rounded-full bg-red-950/25 blur-3xl" />
+            <svg
+              className="w-80 h-80 text-red-900 animate-skull-pulse opacity-15"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              stroke="currentColor"
+              strokeWidth="0.5"
+            >
+              {/* Stylized Sinister Skull Path */}
+              <path d="M12 2C6.48 2 2 6.48 2 12c0 2.85 1.2 5.41 3.12 7.23.35.33.6.76.71 1.23l.42 1.8c.18.78.88 1.34 1.68 1.34h8.14c.8 0 1.5-.56 1.68-1.34l.42-1.8c.11-.47.36-.9.71-1.23C20.8 17.41 22 14.85 22 12c0-5.52-4.48-10-10-10zm-3.5 11c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.5 4c-.83 0-1.5-.67-1.5-1.5S11.17 14 12 14s1.5.67 1.5 1.5S12.83 17 12 17zm3.5-4c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" />
+              {/* Hollow Glowing Eye Sockets */}
+              <circle cx="8.5" cy="11" r="1.8" fill="#131314" stroke="#8b0000" strokeWidth="0.8" />
+              <circle cx="15.5" cy="11" r="1.8" fill="#131314" stroke="#8b0000" strokeWidth="0.8" />
+              {/* Nasal Cavity */}
+              <path d="M12 13.5l-.8 1.5h1.6z" fill="#8b0000" />
+              {/* Teeth Gaps */}
+              <path d="M8.5 20v2.5M10.5 20v2.5M12 20v2.5M13.5 20v2.5M15.5 20v2.5" stroke="#131314" strokeWidth="0.75" />
+            </svg>
+          </div>
+
+          {/* App Logo Badge with Dark Crimson Rim Glow */}
+          <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-2xl shadow-red-900/40 ring-2 ring-red-700/30 relative z-10 transition-transform hover:scale-105 duration-300">
             <img src="/app-icon.png" alt="R3" className="w-full h-full object-cover" />
           </div>
-          <div>
-            <h2
-              className={`text-3xl font-extrabold tracking-tight flex items-center justify-center gap-2 ${
-                isDark ? 'text-white' : 'text-slate-900'
-              }`}
-            >
-              <span>{lang === 'ar' ? 'مرحباً بك في' : 'Welcome to'}</span>
-              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+
+          {/* Horror Bloody Greeting Title */}
+          <div className="relative z-10 space-y-1.5">
+            <h2 className="flex flex-col items-center justify-center">
+              <span
+                className="text-xl md:text-2xl font-bold tracking-widest text-red-400 font-serif"
+                style={{
+                  textShadow: '0 0 12px rgba(220, 20, 60, 0.7), 0 2px 4px rgba(0, 0, 0, 0.9)'
+                }}
+              >
+                {lang === 'ar' ? 'مرحباً بك في' : 'Welcome to'}
+              </span>
+              <span
+                className="text-4xl md:text-6xl font-black font-horror text-bloody tracking-wider mt-1 select-none"
+                style={{
+                  fontFamily: "'Nosifer', 'Creepster', 'Cairo', cursive"
+                }}
+              >
                 R3 AI Studio
               </span>
             </h2>
@@ -512,6 +566,137 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                               </code>
                             );
                           },
+                          img({ src, alt }: any) {
+                            if (!src) return null;
+                            const isSaved = savedMediaUrls.includes(src);
+                            const isSaving = savingMediaUrl === src;
+                            return (
+                              <div className="my-3 rounded-2xl overflow-hidden border border-gemini-border bg-black/40 group relative shadow-2xl max-w-lg transition-all hover:border-purple-500/40">
+                                <img
+                                  src={src}
+                                  alt={alt || 'Gemini Media'}
+                                  className="w-full max-h-[420px] object-contain rounded-xl cursor-pointer transition-transform duration-300 group-hover:scale-[1.01]"
+                                  onClick={() => setLightboxUrl(src)}
+                                  loading="lazy"
+                                />
+                                <div className="absolute top-2.5 end-2.5 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity bg-black/85 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-white/10 text-xs shadow-lg">
+                                  <button
+                                    onClick={() => setLightboxUrl(src)}
+                                    className="p-1 rounded-lg hover:bg-white/20 text-white transition-colors"
+                                    title={lang === 'ar' ? 'معاينة وتكبير' : 'Full Preview'}
+                                  >
+                                    <Maximize2 className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleSaveToVault(src, alt)}
+                                    disabled={isSaving || isSaved}
+                                    className={`p-1 rounded-lg transition-colors ${
+                                      isSaved
+                                        ? 'text-emerald-400 bg-emerald-500/20'
+                                        : 'hover:bg-white/20 text-purple-300'
+                                    }`}
+                                    title={lang === 'ar' ? 'حفظ في استوديو الوسائط' : 'Save to Media Vault'}
+                                  >
+                                    {isSaving ? (
+                                      <span className="text-[10px] animate-pulse">...</span>
+                                    ) : isSaved ? (
+                                      <Check className="w-3.5 h-3.5" />
+                                    ) : (
+                                      <Save className="w-3.5 h-3.5" />
+                                    )}
+                                  </button>
+                                  <a
+                                    href={src}
+                                    download={alt || 'media'}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="p-1 rounded-lg hover:bg-white/20 text-blue-400 transition-colors"
+                                    title={lang === 'ar' ? 'تحميل مباشر' : 'Download'}
+                                  >
+                                    <Download className="w-3.5 h-3.5" />
+                                  </a>
+                                </div>
+                                {alt && (
+                                  <div className="px-3 py-1.5 text-[11px] text-gray-400 font-mono truncate border-t border-white/5 bg-[#17181a]">
+                                    {alt}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          },
+                          a({ href, children }: any) {
+                            if (!href) return <span>{children}</span>;
+                            const isVideo = /\.(mp4|webm|ogg|mov)($|\?)/i.test(href);
+                            const isAudio = /\.(mp3|wav|ogg|m4a|aac)($|\?)/i.test(href);
+                            if (isVideo) {
+                              return (
+                                <div className="my-3 rounded-2xl overflow-hidden border border-gemini-border bg-black/50 p-2 max-w-lg shadow-xl">
+                                  <video controls src={href} className="w-full rounded-xl max-h-72" />
+                                  <div className="mt-1 px-1 flex items-center justify-between text-[11px] text-gray-400">
+                                    <span className="truncate">{children || 'Video'}</span>
+                                    <a
+                                      href={href}
+                                      download
+                                      className="text-blue-400 hover:underline flex items-center gap-1"
+                                    >
+                                      <Download className="w-3 h-3" />
+                                      {lang === 'ar' ? 'تحميل' : 'Download'}
+                                    </a>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            if (isAudio) {
+                              return (
+                                <div className="my-2 p-2.5 rounded-xl border border-gemini-border bg-[#18191a] max-w-md shadow-md">
+                                  <audio controls src={href} className="w-full" />
+                                </div>
+                              );
+                            }
+                            return (
+                              <a
+                                href={href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-400 hover:text-blue-300 underline underline-offset-2 inline-flex items-center gap-0.5 font-medium transition-colors"
+                              >
+                                <span>{children}</span>
+                                <ExternalLink className="w-3 h-3 inline-block shrink-0 opacity-70" />
+                              </a>
+                            );
+                          },
+                          table({ children }: any) {
+                            return (
+                              <div className="my-4 rounded-xl border border-gemini-border overflow-x-auto shadow-md">
+                                <table className="w-full text-xs text-left border-collapse">
+                                  {children}
+                                </table>
+                              </div>
+                            );
+                          },
+                          thead({ children }: any) {
+                            return (
+                              <thead className="bg-[#202124] text-gray-200 border-b border-gemini-border font-semibold">
+                                {children}
+                              </thead>
+                            );
+                          },
+                          tbody({ children }: any) {
+                            return (
+                              <tbody className="divide-y divide-gemini-border/60 bg-[#161719] text-gray-300">
+                                {children}
+                              </tbody>
+                            );
+                          },
+                          tr({ children }: any) {
+                            return <tr className="hover:bg-white/[0.03] transition-colors">{children}</tr>;
+                          },
+                          th({ children }: any) {
+                            return <th className="px-3.5 py-2 text-left font-medium">{children}</th>;
+                          },
+                          td({ children }: any) {
+                            return <td className="px-3.5 py-2 text-left">{children}</td>;
+                          },
                         }}
                       >
                         {msg.content}
@@ -639,6 +824,29 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
           </div>
         );
       })}
+      {/* Media Lightbox Full-Screen Modal */}
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-[99999] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setLightboxUrl(null)}
+        >
+          <div className="relative max-w-5xl max-h-[90vh] flex flex-col items-center">
+            <button
+              onClick={() => setLightboxUrl(null)}
+              className="absolute -top-12 end-0 p-2 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+              title="Close"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <img
+              src={lightboxUrl}
+              alt="Preview"
+              className="max-w-full max-h-[85vh] rounded-2xl shadow-2xl object-contain border border-white/10"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
