@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #f8fafc;
+    color: #0f172a;
+    font-family: 'Cairo', 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+  }
+
+  html.dark body {
+    background-color: #0d0e12;
+    color: #f3f4f6;
+  }
+}
+
+/* ============================================================================
+   LIQUID GLASS & AURORA AESTHETICS (Antigravity Glass Theme Engine)
+   ============================================================================ */
+:root {
+  --glass-blur: 16px;
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-border-highlight: rgba(255, 255, 255, 0.28);
+}
+
+.dark {
+  --glass-surface: rgba(25, 27, 34, 0.72);
+  --glass-card: rgba(30, 32, 40, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-highlight: rgba(255, 255, 255, 0.22);
+}
+
+.light {
+  --glass-surface: rgba(255, 255, 255, 0.85);
+  --glass-card: rgba(255, 255, 255, 0.92);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-border-highlight: rgba(255, 255, 255, 0.95);
+}
+
+.glass-panel {
+  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  border: 1px solid var(--glass-border);
+  border-top: 1px solid var(--glass-border-highlight);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3), inset 0 1px 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.glass-glow-blue {
+  box-shadow: 0 0 35px -5px rgba(59, 130, 246, 0.25);
+}
+
+.glass-glow-purple {
+  box-shadow: 0 0 35px -5px rgba(168, 85, 247, 0.25);
+}
+
+.glass-glow-emerald {
+  box-shadow: 0 0 35px -5px rgba(16, 185, 129, 0.25);
+}
+
+/* Bi-directional Text Support */
+.dir-auto {
+  unicode-bidi: plaintext;
+  text-align: start;
+}
+
+[dir="auto"] {
+  unicode-bidi: plaintext;
+}
+
+.code-ltr {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: isolate;
+}
+
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.25);
+  border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 150, 150, 0.45);
+}
+
+/* Gemini Sparkle Gradient */
+.gemini-sparkle {
+  background: linear-gradient(135deg, #7cacf8 0%, #a881e3 50%, #f6ad55 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gemini-sparkle-bg {
+  background: linear-gradient(135deg, rgba(124, 172, 248, 0.15) 0%, rgba(168, 129, 227, 0.15) 50%, rgba(246, 173, 85, 0.15) 100%);
+}
+
+/* Animations */
+@keyframes pulseSlow {
+  0%, 100% { opacity: 0.9; transform: scale(1); }
+  50% { opacity: 0.65; transform: scale(0.98); }
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 3s infinite ease-in-out;
+}
+
+/* Audio Waveform Equalizer Animation */
+@keyframes soundwave {
+  0%, 100% { height: 4px; }
+  50% { height: 16px; }
+}
+
+.wave-bar-1 { animation: soundwave 1.1s infinite ease-in-out; }
+.wave-bar-2 { animation: soundwave 0.8s infinite ease-in-out 0.2s; }
+.wave-bar-3 { animation: soundwave 1.3s infinite ease-in-out 0.4s; }
+.wave-bar-4 { animation: soundwave 0.9s infinite ease-in-out 0.1s; }
+.wave-bar-5 { animation: soundwave 1.2s infinite ease-in-out 0.3s; }

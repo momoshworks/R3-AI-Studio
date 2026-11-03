@@ -1,0 +1,895 @@
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Sparkles,
+  Cpu,
+  HardDrive,
+  ChevronDown,
+  LogOut,
+  Key,
+  Plus,
+  Users,
+  Bot,
+  Check,
+  Sun,
+  Moon,
+  Globe,
+  Search,
+} from 'lucide-react';
+import { Sidebar } from './components/Sidebar';
+import { ChatCanvas } from './components/ChatCanvas';
+import { InputBar } from './components/InputBar';
+import { UsefulToolsHub } from './components/UsefulToolsHub';
+import { SettingsModal } from './components/SettingsModal';
+import { GoogleAuthModal } from './components/GoogleAuthModal';
+import { MediaVault } from './components/MediaVault';
+import { BackgroundMediaPlayer } from './components/BackgroundMediaPlayer';
+import { CommandPalette } from './components/CommandPalette';
+import { api } from './services/api';
+import {
+  AttachedFile,
+  ChatMessage,
+  DriveStatus,
+  GoogleUser,
+  MediaItem,
+  Session,
+  SidebarTab,
+  SystemMetrics,
+  UserAccount,
+} from './types';
+import { translations, Language, Theme } from './utils/translations';
+
+const AVAILABLE_MODELS = [
+  {
+    category: 'Google Gemini',
+    models: [
+      { id: 'Google Gemini (gemini-3.5-flash)', name: 'Gemini 3.5 Flash', desc: 'الأفضل في السرعة والتحليل (موصى به)', tag: 'افتراضي' },
+      { id: 'Google Gemini Flash Lite (gemini-3.5-flash-lite)', name: 'Gemini Flash Lite', desc: 'فائق الخفة وسريع جداً', tag: 'خفيف' },
+      { id: 'Google Gemini 3.8 Flash (gemini-3.8-flash)', name: 'Gemini 3.8 Flash', desc: 'النسخة المتقدمة للترميز', tag: 'قوي' },
+    ],
+  },
+  {
+    category: 'ChatGPT / OpenAI',
+    models: [
+      { id: 'ChatGPT 4o Mini (gpt-4o-mini)', name: 'ChatGPT 4o-mini', desc: 'سريع وذكي واقتصادي للغاية', tag: 'شائع' },
+      { id: 'ChatGPT 4o (gpt-4o)', name: 'ChatGPT 4o', desc: 'النموذج الأقوى متعدد الوسائط', tag: 'شامل' },
+      { id: 'ChatGPT o3-mini (o3-mini)', name: 'ChatGPT o3-mini', desc: 'تفكير واستدلال عميق للأكواد', tag: 'تفكير' },
+    ],
+  },
+];
+
+export const App: React.FC = () => {
+  // Theme & Language State
+  const [lang, setLang] = useState<Language>(() => {
+    try {
+      const saved = localStorage.getItem('R3_LANG');
+      return saved === 'en' || saved === 'ar' ? saved : 'ar';
+    } catch {
+      return 'ar';
+    }
+  });
+
+  const [theme, setTheme] = useState<Theme>(() => {
+    try {
+      const saved = localStorage.getItem('R3_THEME');
+      return saved === 'light' || saved === 'dark' ? saved : 'dark';
+    } catch {
+      return 'dark';
+    }
+  });
+
+  const t = translations[lang];
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
+    }
+    try {
+      localStorage.setItem('R3_THEME', theme);
+    } catch {}
+  }, [theme]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('R3_LANG', lang);
+      document.documentElement.setAttribute('lang', lang);
+    } catch {}
+  }, [lang]);
+
+  const toggleLanguage = () => {
+    setLang((prev) => (prev === 'ar' ? 'en' : 'ar'));
+  };
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
+  // Navigation & UI State
+  const [currentTab, setCurrentTab] = useState<SidebarTab>('chats');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isGoogleAuthModalOpen, setIsGoogleAuthModalOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+
+  // Global Ctrl+K / Cmd+K Command Palette Shortcut
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
+
+  // Accounts & API Keys
+  const [accounts, setAccounts] = useState<UserAccount[]>([]);
+  const [activeAccount, setActiveAccount] = useState<UserAccount | null>(null);
+  const [hasApiKey, setHasApiKey] = useState(false);
+  const [hasOpenaiKey, setHasOpenaiKey] = useState(false);
+  const [googleUser, setGoogleUser] = useState<GoogleUser>({ authenticated: false });
+
+  // Chat Sessions
+  const [sessions, setSessions] = useState<Session[]>([
+    {
+      id: 'session-1',
+      title: lang === 'ar' ? 'محادثة ذكية جديدة' : 'New AI Session',
+      timestamp: Date.now(),
+      messages: [],
+    },
+  ]);
+  const [activeSessionId, setActiveSessionId] = useState<string>('session-1');
+
+  // Execution & Models
+  const [selectedModel, setSelectedModel] = useState<string>('Google Gemini (gemini-3.5-flash)');
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const stopGenerationRef = useRef<(() => void) | null>(null);
+
+  // Global Background Media Player State (Persistent across all tabs)
+  const [activeMedia, setActiveMedia] = useState<MediaItem | null>(null);
+
+  // System & Backend Data
+  const [metrics, setMetrics] = useState<SystemMetrics>({
+    cpu_usage: 0,
+    memory_used_mb: 0,
+    memory_total_mb: 0,
+    memory_percentage: 0,
+    disk_free_gb: 0,
+    disk_total_gb: 0,
+  });
+  const [driveStatus, setDriveStatus] = useState<DriveStatus>({
+    authenticated: false,
+  });
+
+  const activeSession =
+    sessions.find((s) => s.id === activeSessionId) || sessions[0];
+
+  const isChatGpt =
+    selectedModel.toLowerCase().includes('gpt') ||
+    selectedModel.toLowerCase().includes('o3');
+
+  // Refresh Accounts & Settings
+  const refreshUserData = async () => {
+    try {
+      const [accRes, setRes, user] = await Promise.allSettled([
+        api.getAccounts(),
+        api.getSettings(),
+        api.getGoogleUser(),
+      ]);
+
+      if (accRes.status === 'fulfilled' && accRes.value.accounts) {
+        setAccounts(accRes.value.accounts);
+        setActiveAccount(accRes.value.active || accRes.value.accounts[0] || null);
+      }
+      if (setRes.status === 'fulfilled') {
+        setHasApiKey(Boolean(setRes.value.has_api_key));
+        setHasOpenaiKey(Boolean(setRes.value.has_openai_key));
+      }
+      if (user.status === 'fulfilled') {
+        setGoogleUser(user.value);
+        setDriveStatus(user.value);
+      }
+    } catch (err) {
+      console.warn('Refresh user data notice:', err);
+    }
+  };
+
+  // Initial load
+  useEffect(() => {
+    const initData = async () => {
+      try {
+        const sys = await api.getSystemMetrics();
+        setMetrics(sys);
+      } catch {}
+      await refreshUserData();
+    };
+    initData();
+
+    // Telemetry pulse
+    const metricsInterval = setInterval(async () => {
+      try {
+        const sys = await api.getSystemMetrics();
+        setMetrics(sys);
+      } catch {}
+    }, 10000);
+
+    return () => clearInterval(metricsInterval);
+  }, []);
+
+  const handleGoogleLogout = async () => {
+    try {
+      await api.logoutGoogle();
+      setGoogleUser({ authenticated: false });
+      setDriveStatus({ authenticated: false });
+      setIsUserMenuOpen(false);
+      refreshUserData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSwitchAccount = async (accId: string) => {
+    try {
+      const res = await api.switchAccount(accId);
+      if (res.status === 'success') {
+        setActiveAccount(res.active);
+        setAccounts(res.accounts);
+        setGoogleUser({
+          authenticated: true,
+          name: res.active.name,
+          email: res.active.email,
+          picture: res.active.picture,
+        });
+        setIsUserMenuOpen(false);
+        refreshUserData();
+      }
+    } catch (err) {
+      console.error('Failed to switch account:', err);
+    }
+  };
+
+  // New Chat Session
+  const handleNewChat = () => {
+    const newId = `session-${Date.now()}`;
+    const newSession: Session = {
+      id: newId,
+      title: lang === 'ar' ? 'محادثة جديدة' : 'New Chat',
+      timestamp: Date.now(),
+      messages: [],
+    };
+    setSessions([newSession, ...sessions]);
+    setActiveSessionId(newId);
+  };
+
+  // Delete Chat Session
+  const handleDeleteSession = (id: string) => {
+    const filtered = sessions.filter((s) => s.id !== id);
+    if (filtered.length === 0) {
+      const fallback: Session = {
+        id: `session-${Date.now()}`,
+        title: lang === 'ar' ? 'محادثة جديدة' : 'New Chat',
+        timestamp: Date.now(),
+        messages: [],
+      };
+      setSessions([fallback]);
+      setActiveSessionId(fallback.id);
+    } else {
+      setSessions(filtered);
+      if (activeSessionId === id) {
+        setActiveSessionId(filtered[0].id);
+      }
+    }
+  };
+
+  // Send Message & Stream Chat
+  const handleSendMessage = (text: string, attachments?: AttachedFile[]) => {
+    if (!text.trim() && (!attachments || attachments.length === 0)) return;
+
+    const userMessage: ChatMessage = {
+      id: `msg-${Date.now()}`,
+      role: 'user',
+      content: text,
+      timestamp: Date.now(),
+      attachments,
+    };
+
+    const assistantPlaceholderId = `msg-${Date.now() + 1}`;
+    const assistantMessage: ChatMessage = {
+      id: assistantPlaceholderId,
+      role: 'assistant',
+      content: '',
+      timestamp: Date.now() + 1,
+    };
+
+    setSessions((prevSessions) =>
+      prevSessions.map((s) => {
+        if (s.id === activeSessionId) {
+          const isFirst = s.messages.length === 0;
+          return {
+            ...s,
+            title: isFirst ? text.slice(0, 30) || (lang === 'ar' ? 'محادثة ذكية' : 'AI Chat') : s.title,
+            messages: [...s.messages, userMessage, assistantMessage],
+          };
+        }
+        return s;
+      })
+    );
+
+    setIsGenerating(true);
+
+    const chatHistory = [...activeSession.messages, userMessage];
+
+    const abort = api.streamChat(
+      chatHistory,
+      selectedModel,
+      (chunk: string) => {
+        setSessions((prevSessions) =>
+          prevSessions.map((s) => {
+            if (s.id === activeSessionId) {
+              return {
+                ...s,
+                messages: s.messages.map((m) =>
+                  m.id === assistantPlaceholderId
+                    ? { ...m, content: m.content + chunk }
+                    : m
+                ),
+              };
+            }
+            return s;
+          })
+        );
+      },
+      () => {
+        setIsGenerating(false);
+        stopGenerationRef.current = null;
+      },
+      (error: any) => {
+        console.error('Chat stream error:', error);
+        setSessions((prevSessions) =>
+          prevSessions.map((s) => {
+            if (s.id === activeSessionId) {
+              return {
+                ...s,
+                messages: s.messages.map((m) =>
+                  m.id === assistantPlaceholderId
+                    ? {
+                        ...m,
+                        content:
+                          m.content +
+                          `\n\n⚠️ **${lang === 'ar' ? 'تنبيه' : 'Notice'}:** ${error.message || (lang === 'ar' ? 'يرجى التحقق من إدخال مفتاح API في الإعدادات.' : 'Please check API key settings.')}`,
+                      }
+                    : m
+                ),
+              };
+            }
+            return s;
+          })
+        );
+        setIsGenerating(false);
+        stopGenerationRef.current = null;
+      }
+    );
+
+    stopGenerationRef.current = abort;
+  };
+
+  const handleStop = () => {
+    if (stopGenerationRef.current) {
+      stopGenerationRef.current();
+      stopGenerationRef.current = null;
+    }
+    setIsGenerating(false);
+  };
+
+  const currentDisplayName =
+    activeAccount?.name || googleUser.name || 'Mohamed Shabaan';
+  const currentEmail =
+    activeAccount?.email || googleUser.email || 'momosh991@gmail.com';
+  const currentPicture =
+    activeAccount?.picture ||
+    googleUser.picture ||
+    'https://api.dicebear.com/7.x/identicon/svg?seed=momosh991@gmail.com';
+
+  const isDark = theme === 'dark';
+
+  return (
+    // Outer Flex is strictly dir="ltr" so Sidebar is ALWAYS anchored to the left of the screen!
+    <div
+      className={`flex flex-row h-screen w-screen overflow-hidden font-sans transition-colors duration-200 ${
+        isDark ? 'bg-gemini-dark text-gray-100' : 'bg-slate-50 text-slate-800'
+      }`}
+      dir="ltr"
+    >
+      {/* 1. Left Collapsible Sidebar (ALWAYS ON THE LEFT SIDE) */}
+      <Sidebar
+        currentTab={currentTab}
+        onSelectTab={(tab) => setCurrentTab(tab)}
+        sessions={sessions}
+        activeSessionId={activeSessionId}
+        onSelectSession={(id) => {
+          setActiveSessionId(id);
+          setCurrentTab('chats');
+        }}
+        onNewChat={handleNewChat}
+        onDeleteSession={handleDeleteSession}
+        driveStatus={driveStatus}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        t={t}
+        theme={theme}
+        lang={lang}
+      />
+
+      {/* 2. Main Workspace (dir adapts for Arabic or English content) */}
+      <div
+        className="flex-1 flex flex-col h-full overflow-hidden relative"
+        dir={lang === 'ar' ? 'rtl' : 'ltr'}
+      >
+        {/* Top Navigation Bar */}
+        <header
+          className={`h-14 px-4 md:px-6 border-b flex items-center justify-between select-none z-10 transition-colors ${
+            isDark
+              ? 'bg-gemini-dark/80 backdrop-blur-md border-gemini-border/70 text-gray-100'
+              : 'bg-white/90 backdrop-blur-md border-slate-200 text-slate-800'
+          }`}
+        >
+          {/* Left section of Topbar */}
+          <div className="flex items-center space-x-2.5">
+            {/* Model Selector Dropdown Button */}
+            <div className="relative">
+              <button
+                onClick={() => setIsModelMenuOpen(!isModelMenuOpen)}
+                className={`flex items-center space-x-2 px-3 py-1.5 rounded-full border text-xs font-medium transition-all shadow-sm ${
+                  isChatGpt
+                    ? isDark
+                      ? 'bg-emerald-950/30 hover:bg-emerald-900/40 border-emerald-500/40 text-emerald-300'
+                      : 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-700'
+                    : isDark
+                    ? 'bg-[#1e1f20] hover:bg-[#282a2c] border-gemini-border text-gray-200'
+                    : 'bg-white hover:bg-slate-100 border-slate-300 text-slate-800'
+                }`}
+              >
+                {isChatGpt ? (
+                  <Bot className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                ) : (
+                  <Sparkles className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                )}
+                <span className="truncate max-w-[150px]">{selectedModel}</span>
+                <ChevronDown className="w-3 h-3 opacity-60 shrink-0" />
+              </button>
+
+              {/* Models Menu */}
+              {isModelMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setIsModelMenuOpen(false)}
+                  />
+                  <div
+                    dir={lang === 'ar' ? 'rtl' : 'ltr'}
+                    className={`absolute top-full mt-2 w-72 max-w-[calc(100vw-32px)] rounded-2xl shadow-2xl p-2.5 text-xs z-50 space-y-3 animate-in fade-in zoom-in-95 duration-150 border ${
+                      lang === 'ar' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'
+                    } ${
+                      isDark
+                        ? 'bg-[#1e1f20] border-gemini-border text-gray-200'
+                        : 'bg-white border-slate-200 text-slate-800'
+                    }`}
+                  >
+                    {AVAILABLE_MODELS.map((group) => (
+                      <div key={group.category} className="space-y-1">
+                        <div className="px-2 text-[10px] font-semibold opacity-60 uppercase tracking-wider">
+                          {group.category}
+                        </div>
+                        {group.models.map((m) => {
+                          const isSelected = selectedModel === m.id;
+                          return (
+                            <button
+                              key={m.id}
+                              onClick={() => {
+                                setSelectedModel(m.id);
+                                setIsModelMenuOpen(false);
+                              }}
+                              className={`w-full p-2 rounded-xl text-right transition-colors flex items-center justify-between ${
+                                isSelected
+                                  ? isDark
+                                    ? 'bg-white/10 text-white font-medium border border-white/10'
+                                    : 'bg-blue-50 text-blue-700 font-medium border border-blue-200'
+                                  : isDark
+                                  ? 'hover:bg-white/5 text-gray-300'
+                                  : 'hover:bg-slate-100 text-slate-700'
+                              }`}
+                            >
+                              <div className="truncate">
+                                <div className="font-medium text-xs flex items-center gap-1.5">
+                                  <span>{m.name}</span>
+                                  <span className={`text-[9px] px-1.5 py-0.2 rounded font-mono ${
+                                    isDark ? 'bg-black/40 text-gray-400' : 'bg-slate-200 text-slate-600'
+                                  }`}>
+                                    {m.tag}
+                                  </span>
+                                </div>
+                                <div className="text-[10px] opacity-60 truncate mt-0.5">
+                                  {m.desc}
+                                </div>
+                              </div>
+                              {isSelected && <Check className="w-3.5 h-3.5 text-blue-500 shrink-0" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Quick Command Palette Spotlight Trigger */}
+            <button
+              onClick={() => setIsCommandPaletteOpen(true)}
+              className={`hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-full border text-xs font-medium transition-all ${
+                isDark
+                  ? 'bg-[#1e1f20] hover:bg-[#282a2c] border-gemini-border text-gray-400 hover:text-gray-200'
+                  : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-600 hover:text-slate-900'
+              }`}
+              title={t.commandPalette}
+            >
+              <Search className="w-3.5 h-3.5 opacity-60 shrink-0" />
+              <span className="truncate max-w-[120px]">{t.commandPalette}</span>
+              <kbd className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-black/20 text-gray-400 border border-white/5">
+                Ctrl+K
+              </kbd>
+            </button>
+          </div>
+
+          {/* Right section of Topbar */}
+          <div className="flex items-center space-x-2 md:space-x-3">
+            {/* System Resource Metrics */}
+            <div className="hidden xl:flex items-center space-x-2 text-[11px] font-mono">
+              <div className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-full border ${
+                isDark ? 'bg-[#1e1f20] border-gemini-border text-gray-300' : 'bg-slate-100 border-slate-200 text-slate-600'
+              }`}>
+                <Cpu className="w-3 h-3 text-blue-500" />
+                <span>{t.cpu}: {metrics.cpu_usage.toFixed(1)}%</span>
+              </div>
+              <div className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-full border ${
+                isDark ? 'bg-[#1e1f20] border-gemini-border text-gray-300' : 'bg-slate-100 border-slate-200 text-slate-600'
+              }`}>
+                <div className="w-2 h-2 rounded-full bg-purple-500" />
+                <span>{t.ram}: {metrics.memory_percentage.toFixed(0)}%</span>
+              </div>
+              <div className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-full border ${
+                isDark ? 'bg-[#1e1f20] border-gemini-border text-gray-300' : 'bg-slate-100 border-slate-200 text-slate-600'
+              }`}>
+                <HardDrive className="w-3 h-3 text-cyan-500" />
+                <span>{t.diskFree}: {metrics.disk_free_gb.toFixed(0)} GB</span>
+              </div>
+            </div>
+
+            {/* Smart API Key Indicator Button */}
+            {isChatGpt ? (
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className={`hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                  hasOpenaiKey
+                    ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                    : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/30 animate-pulse'
+                }`}
+                title={hasOpenaiKey ? t.chatGptActive : t.addApiKey}
+              >
+                <Bot className="w-3.5 h-3.5 text-emerald-500" />
+                <span>{hasOpenaiKey ? t.chatGptActive : t.addApiKey}</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className={`hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                  hasApiKey
+                    ? 'bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border-purple-500/30'
+                    : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/30 animate-pulse'
+                }`}
+                title={hasApiKey ? t.geminiNotice : t.addApiKey}
+              >
+                <Key className="w-3.5 h-3.5" />
+                <span>{hasApiKey ? t.geminiActive : t.addApiKey}</span>
+              </button>
+            )}
+
+            {/* Language Switch Button (1-Click Toggle: Arabic ⇄ English) */}
+            <button
+              onClick={toggleLanguage}
+              className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-full border text-xs font-medium transition-all ${
+                isDark
+                  ? 'bg-[#1e1f20] hover:bg-[#282a2c] border-gemini-border text-gray-200'
+                  : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-800'
+              }`}
+              title={lang === 'ar' ? 'Switch to English' : 'التحويل إلى العربية'}
+            >
+              <Globe className="w-3.5 h-3.5 text-blue-500" />
+              <span className="font-semibold">{lang === 'ar' ? 'EN' : 'عربي'}</span>
+            </button>
+
+            {/* Theme Switch Button (1-Click Toggle: Dark ⇄ Light) */}
+            <button
+              onClick={toggleTheme}
+              className={`p-1.5 rounded-full border transition-all ${
+                isDark
+                  ? 'bg-[#1e1f20] hover:bg-[#282a2c] border-gemini-border text-amber-400'
+                  : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-purple-600'
+              }`}
+              title={lang === 'ar' ? 'تبديل المظهر (فاتح / داكن)' : 'Toggle Theme (Light / Dark)'}
+            >
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+
+            {/* User Account Avatar Trigger */}
+            <button
+              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              className={`flex items-center space-x-2 pl-2 pr-2.5 py-1 rounded-full border transition-colors text-xs ${
+                isDark
+                  ? 'bg-[#1e1f20] hover:bg-[#282a2c] border-gemini-border'
+                  : 'bg-slate-100 hover:bg-slate-200 border-slate-300'
+              }`}
+            >
+              <img
+                src={currentPicture}
+                alt={currentDisplayName}
+                className="w-6 h-6 rounded-full border border-blue-500 object-cover shrink-0"
+              />
+              <span className="font-medium max-w-[110px] truncate hidden md:inline">
+                {currentDisplayName}
+              </span>
+              <ChevronDown className="w-3 h-3 opacity-60" />
+            </button>
+          </div>
+        </header>
+
+        {/* User Account Dropdown Menu (Fixed Positioning at top-14 right-4 guarantees 100% visibility inside screen) */}
+        {isUserMenuOpen && (
+          <>
+            <div
+              className="fixed inset-0 z-[9998]"
+              onClick={() => setIsUserMenuOpen(false)}
+            />
+            <div
+              dir={lang === 'ar' ? 'rtl' : 'ltr'}
+              className={`fixed top-14 right-4 z-[9999] w-80 max-w-[calc(100vw-32px)] rounded-2xl shadow-2xl p-4 text-xs space-y-3.5 border transition-all animate-in fade-in zoom-in-95 duration-150 ${
+                isDark
+                  ? 'bg-[#1e1f20] border-gemini-border text-gray-200'
+                  : 'bg-white border-slate-200 text-slate-800'
+              }`}
+              style={{ right: '16px', left: 'auto' }}
+            >
+              {/* Current Active Account Card */}
+              <div
+                className={`flex items-center space-x-3 ${
+                  lang === 'ar' ? 'space-x-reverse' : ''
+                } pb-3 border-b ${
+                  isDark ? 'border-gemini-border' : 'border-slate-200'
+                }`}
+              >
+                <img
+                  src={currentPicture}
+                  alt={currentDisplayName}
+                  className="w-10 h-10 rounded-full border-2 border-blue-500 object-cover shrink-0"
+                />
+                <div className="overflow-hidden min-w-0 flex-1">
+                  <div className="font-semibold text-sm truncate">{currentDisplayName}</div>
+                  <div className="text-[11px] opacity-70 truncate font-mono" dir="ltr">
+                    {currentEmail}
+                  </div>
+                  <span className="inline-block mt-1 text-[10px] bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                    {t.activeAccount}
+                  </span>
+                </div>
+              </div>
+
+              {/* Switch to Other Accounts */}
+              {accounts.length > 1 && (
+                <div className="space-y-1.5">
+                  <div className="text-[10px] font-semibold opacity-60 uppercase tracking-wider">
+                    {t.switchAccount}
+                  </div>
+                  <div className="space-y-1 max-h-36 overflow-y-auto pr-1">
+                    {accounts
+                      .filter((a) => a.id !== activeAccount?.id)
+                      .map((acc) => (
+                        <button
+                          key={acc.id}
+                          onClick={() => handleSwitchAccount(acc.id)}
+                          className={`w-full p-2 rounded-xl flex items-center justify-between text-right transition-colors ${
+                            isDark
+                              ? 'bg-[#171819] hover:bg-[#252628]'
+                              : 'bg-slate-100 hover:bg-slate-200'
+                          }`}
+                        >
+                          <div
+                            className={`flex items-center space-x-2 ${
+                              lang === 'ar' ? 'space-x-reverse' : ''
+                            } truncate min-w-0`}
+                          >
+                            <img
+                              src={
+                                acc.picture ||
+                                'https://api.dicebear.com/7.x/identicon/svg?seed=' + acc.email
+                              }
+                              alt={acc.name}
+                              className="w-6 h-6 rounded-full object-cover shrink-0"
+                            />
+                            <div className="truncate text-left">
+                              <div className="font-medium text-xs truncate">{acc.name}</div>
+                              <div className="text-[10px] opacity-60 truncate" dir="ltr">
+                                {acc.email}
+                              </div>
+                            </div>
+                          </div>
+                          <span className="text-[11px] text-blue-500 font-medium px-2 py-0.5 rounded-md hover:bg-blue-500/10 shrink-0">
+                            {t.switchBtn}
+                          </span>
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div
+                className={`space-y-1.5 pt-2 border-t ${
+                  isDark ? 'border-gemini-border' : 'border-slate-200'
+                }`}
+              >
+                <button
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    setIsSettingsOpen(true);
+                  }}
+                  className={`w-full py-2 px-3 rounded-xl flex items-center justify-between transition-colors ${
+                    isDark
+                      ? 'bg-white/5 hover:bg-white/10 text-gray-200'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-blue-500" />
+                    <span>{t.addAccount}</span>
+                  </span>
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    setIsSettingsOpen(true);
+                  }}
+                  className={`w-full py-2 px-3 rounded-xl flex items-center justify-between transition-colors ${
+                    isDark
+                      ? 'bg-white/5 hover:bg-white/10 text-gray-200'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <Key className="w-4 h-4 text-purple-500" />
+                    <span>{t.aiSettings}</span>
+                  </span>
+                </button>
+
+                <button
+                  onClick={handleGoogleLogout}
+                  className="w-full py-2 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 flex items-center justify-center space-x-2 space-x-reverse transition-colors font-medium"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>{t.signOut}</span>
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Workspace Body: Useful Tools Hub vs Media Vault vs AI Chat */}
+        {currentTab === 'tools' ? (
+          <UsefulToolsHub theme={theme} lang={lang} />
+        ) : currentTab === 'media' ? (
+          <MediaVault
+            activeMedia={activeMedia}
+            onPlayMedia={(item) => setActiveMedia(item)}
+            onSendToChat={(_mediaFile) => {
+              setCurrentTab('chats');
+            }}
+            theme={theme}
+            lang={lang}
+            t={t}
+          />
+        ) : (
+          <>
+            <ChatCanvas
+              messages={activeSession.messages}
+              isStreaming={isGenerating}
+              selectedModel={selectedModel}
+              onOpenSettings={() => setIsSettingsOpen(true)}
+              onSwitchModel={(modelId) => setSelectedModel(modelId)}
+              onPromptSelect={(prompt) => handleSendMessage(prompt)}
+              t={t}
+              theme={theme}
+              lang={lang}
+            />
+
+            <InputBar
+              onSendMessage={handleSendMessage}
+              onStop={handleStop}
+              isGenerating={isGenerating}
+              selectedModel={selectedModel}
+              t={t}
+              theme={theme}
+              lang={lang}
+            />
+          </>
+        )}
+
+        {/* Global Background Media Player (Plays across all tabs & in background!) */}
+        <BackgroundMediaPlayer
+          activeMedia={activeMedia}
+          onClose={() => setActiveMedia(null)}
+          currentTab={currentTab}
+        />
+      </div>
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        selectedModel={selectedModel}
+        onSelectModel={setSelectedModel}
+        driveStatus={driveStatus}
+        onRefreshDrive={refreshUserData}
+        onOpenGoogleAuth={() => setIsGoogleAuthModalOpen(true)}
+        onLogoutGoogle={handleGoogleLogout}
+        onAccountSwitched={(acc) => {
+          setActiveAccount(acc);
+          setGoogleUser({
+            authenticated: true,
+            name: acc.name,
+            email: acc.email,
+            picture: acc.picture,
+          });
+          refreshUserData();
+        }}
+        theme={theme}
+        lang={lang}
+        onToggleTheme={setTheme}
+        onToggleLang={setLang}
+        t={t}
+      />
+
+      {/* Google Auth Modal */}
+      <GoogleAuthModal
+        isOpen={isGoogleAuthModalOpen}
+        onClose={() => setIsGoogleAuthModalOpen(false)}
+        onSuccess={(user) => {
+          setGoogleUser(user);
+          setDriveStatus(user);
+          refreshUserData();
+        }}
+      />
+
+      {/* Universal Command Palette (Ctrl+K) */}
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        onSelectTab={(tab) => setCurrentTab(tab)}
+        onNewChat={handleNewChat}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        onToggleTheme={toggleTheme}
+        onToggleLang={toggleLanguage}
+        theme={theme}
+        lang={lang}
+        t={t}
+      />
+    </div>
+  );
+};

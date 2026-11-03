@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+python-backend/venv/
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Production Build Output
+dist/
+dist-ssr/
+
+# Local credentials & sensitive data
+.env
+.env.*
+!.env.example
+client_secret.json
+client_secrets.json
+token.json
+token.pickle
+credentials.json
+*.log
+
+# Local browser & user data
+browser_profile/
+.doqs/
+
+# Local backup directory
+BUCKUP/
+BACKUP/
+
+# Editor & OS
+*.tsbuildinfo
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
