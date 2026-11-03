@@ -24,6 +24,7 @@ import { GoogleAuthModal } from './components/GoogleAuthModal';
 import { MediaVault } from './components/MediaVault';
 import { BackgroundMediaPlayer } from './components/BackgroundMediaPlayer';
 import { CommandPalette } from './components/CommandPalette';
+import { NotebookStudio } from './components/NotebookStudio';
 import { api } from './services/api';
 import {
   AttachedFile,
@@ -791,7 +792,7 @@ export const App: React.FC = () => {
           </>
         )}
 
-        {/* Workspace Body: Useful Tools Hub vs Media Vault vs AI Chat */}
+        {/* Workspace Body: Useful Tools Hub vs Media Vault vs Notebook Studio vs AI Chat */}
         {currentTab === 'tools' ? (
           <UsefulToolsHub theme={theme} lang={lang} />
         ) : currentTab === 'media' ? (
@@ -804,6 +805,13 @@ export const App: React.FC = () => {
             theme={theme}
             lang={lang}
             t={t}
+          />
+        ) : currentTab === 'notebook' ? (
+          <NotebookStudio
+            theme={theme}
+            lang={lang}
+            t={t}
+            onOpenSettings={() => setIsSettingsOpen(true)}
           />
         ) : (
           <>

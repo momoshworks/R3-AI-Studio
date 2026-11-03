@@ -11,6 +11,7 @@ import {
   ExternalLink,
   Command,
   X,
+  BookOpen,
 } from 'lucide-react';
 import { USEFUL_WEBSITES } from '../data/usefulWebsites';
 import { Translations, Theme, Language } from '../utils/translations';
@@ -115,6 +116,18 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
           onClose();
         },
         shortcut: 'Ctrl+M',
+      },
+      {
+        id: 'notebook-tab',
+        title: t.notebookStudio,
+        subtitle: lang === 'ar' ? 'نظام استيعاب المستندات والكتب، استشهادات ومذاكرة (NotebookLM)' : 'Offline-first research notebooks, citations & study suite (NotebookLM)',
+        icon: <BookOpen className="w-4 h-4 text-purple-400" />,
+        category: 'navigation',
+        action: () => {
+          onSelectTab('notebook');
+          onClose();
+        },
+        shortcut: 'Ctrl+B',
       },
       {
         id: 'toggle-theme',

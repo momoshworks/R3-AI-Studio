@@ -78,6 +78,40 @@ export interface Translations {
   chipCode: string;
   chipDesign: string;
   chipPdf: string;
+  notebookStudio: string;
+  notebooks: string;
+  newNotebook: string;
+  createNotebook: string;
+  notebookTitle: string;
+  notebookDesc: string;
+  sources: string;
+  addSources: string;
+  dropSources: string;
+  indexedLocally: string;
+  indexing: string;
+  pages: string;
+  chunks: string;
+  chatWithSources: string;
+  studyTools: string;
+  executiveSummary: string;
+  flashcards: string;
+  practiceQuiz: string;
+  keyConcepts: string;
+  generateSummary: string;
+  generateFlashcards: string;
+  generateQuiz: string;
+  generateConcepts: string;
+  citations: string;
+  sourcePage: string;
+  offlineReady: string;
+  hybridSearch: string;
+  noSourcesYet: string;
+  noNotebooksYet: string;
+  askNotebookPlaceholder: string;
+  flipCard: string;
+  showExplanation: string;
+  correct: string;
+  incorrect: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -89,6 +123,40 @@ export const translations: Record<Language, Translations> = {
     tools: 'أدوات ومواقع',
     media: 'مخزن الوسائط',
     drive: 'Google Drive',
+    notebookStudio: 'دفاتر الملاحظات (NotebookLM)',
+    notebooks: 'الدفاتر والمصادر',
+    newNotebook: 'دفتر أبحاث جديد',
+    createNotebook: 'إنشاء دفتر ملاحظات',
+    notebookTitle: 'عنوان الدفتر (مثال: فيزياء حديثة)',
+    notebookDesc: 'وصف قصير للدفتر أو المادة...',
+    sources: 'المصادر والكتب المرفوعة',
+    addSources: 'إضافة كتب ومستندات (PDF, DOCX, TXT)',
+    dropSources: 'اسحب وأفلت الكتب والملازم هنا أو انقر للاختيار',
+    indexedLocally: 'مفهرس محلياً ✓',
+    indexing: 'جاري الفهرسة والاستيعاب...',
+    pages: 'صفحة',
+    chunks: 'مقطع دلالي',
+    chatWithSources: 'المحادثة والاستفسار مع الاستشهادات',
+    studyTools: 'أدوات الاستذكار والدراسة الذكية',
+    executiveSummary: 'الملخص التنفيذي',
+    flashcards: 'بطاقات الاستذكار (Flashcards)',
+    practiceQuiz: 'اختبار تدريبي (MCQ Quiz)',
+    keyConcepts: 'المفاهيم والمصطلحات الأساسية',
+    generateSummary: 'توليد ملخص تنفيذي فوري',
+    generateFlashcards: 'توليد بطاقات المراجعة',
+    generateQuiz: 'توليد أسئلة الاختبار',
+    generateConcepts: 'استخراج المصطلحات والمفاهيم',
+    citations: 'الاستشهادات والمصادر المؤكدة',
+    sourcePage: 'ص',
+    offlineReady: 'جاهز أوفلاين 100%',
+    hybridSearch: 'بحث دلالي هجين فائق السرعة',
+    noSourcesYet: 'لم يتم رفع مستندات بعد في هذا الدفتر.',
+    noNotebooksYet: 'لا توجد دفاتر ملاحظات حتى الآن. أنشئ أول دفتر لمادتك أو بحثك!',
+    askNotebookPlaceholder: 'اطرح سؤالاً حول المستندات المرفوعة وسيتم الإجابة برقم الصفحة والمقطع...',
+    flipCard: 'انقر لقلب البطاقة ومعرفة الإجابة',
+    showExplanation: 'عرض التفسير والمصدر',
+    correct: 'إجابة صحيحة ✓',
+    incorrect: 'إجابة غير صحيحة ✗',
     settings: 'الإعدادات',
     toggleSidebar: 'طي / فتح الشريط الجانبي',
     cpu: 'المعالج',
@@ -236,5 +304,39 @@ export const translations: Record<Language, Translations> = {
     chipCode: '💻 Debug and review my code snippets',
     chipDesign: '🎨 Brainstorm modern UI/UX design concepts',
     chipPdf: '📊 Summarize document and extract bullet points',
+    notebookStudio: 'Notebook Studio (NotebookLM)',
+    notebooks: 'Notebooks & Sources',
+    newNotebook: 'New Research Notebook',
+    createNotebook: 'Create Notebook',
+    notebookTitle: 'Notebook Title (e.g., Quantum Physics)',
+    notebookDesc: 'Short description of the course or project...',
+    sources: 'Uploaded Documents & Sources',
+    addSources: 'Upload Sources (PDF, DOCX, TXT, PY, CSV)',
+    dropSources: 'Drag & drop research papers or books here or click to browse',
+    indexedLocally: 'Locally Indexed ✓',
+    indexing: 'Indexing & Chunks Processing...',
+    pages: 'Pages',
+    chunks: 'Chunks',
+    chatWithSources: 'Source-Grounded Chat & Inquiry',
+    studyTools: 'Study Guide & Knowledge Generation',
+    executiveSummary: 'Executive Summary',
+    flashcards: 'Flashcards',
+    practiceQuiz: 'Practice Quiz & MCQs',
+    keyConcepts: 'Key Concepts & Terms',
+    generateSummary: 'Generate Executive Brief',
+    generateFlashcards: 'Generate Review Flashcards',
+    generateQuiz: 'Generate Practice Quiz',
+    generateConcepts: 'Extract Key Terms & Formulas',
+    citations: 'Grounding Citations',
+    sourcePage: 'p.',
+    offlineReady: '100% Offline Ready',
+    hybridSearch: 'Ultra-Fast Hybrid Vector Search',
+    noSourcesYet: 'No sources uploaded to this notebook yet.',
+    noNotebooksYet: 'No notebooks created yet. Create your first notebook to begin research!',
+    askNotebookPlaceholder: 'Ask a question about the uploaded sources, with exact page citations...',
+    flipCard: 'Click to flip and reveal answer',
+    showExplanation: 'Show Explanation & Source',
+    correct: 'Correct Answer ✓',
+    incorrect: 'Incorrect ✗',
   },
 };

@@ -1,4 +1,4 @@
-import { AttachedFile, ChatMessage, DriveStatus, SystemMetrics } from '../types';
+import { AttachedFile, ChatMessage, DriveStatus, SystemMetrics, Notebook, NotebookChunk, Citation, StudyGuideData } from '../types';
 
 const API_BASE = 'http://127.0.0.1:8000';
 
@@ -306,6 +306,89 @@ export const api = {
   async deleteAccount(accountId: string): Promise<any> {
     const res = await fetch(`${API_BASE}/api/accounts/${accountId}`, {
       method: 'DELETE',
+    });
+    return await res.json();
+  },
+
+  // =========================================================================
+  // Notebook Studio / RAG Engine APIs
+  // =========================================================================
+  async listNotebooks(): Promise<{ notebooks: Notebook[] }> {
+    try {
+      const res = await fetch(`${API_BASE}/api/notebooks`);
+      return await res.json();
+    } catch {
+      return { notebooks: [] };
+    }
+  },
+
+  async createNotebook(title: string, description?: string): Promise<Notebook> {
+    const res = await fetch(`${API_BASE}/api/notebooks`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, description: description || '' }),
+    });
+    return await res.json();
+  },
+
+  async getNotebook(notebookId: string): Promise<Notebook> {
+    const res = await fetch(`${API_BASE}/api/notebooks/${notebookId}`);
+    return await res.json();
+  },
+
+  async deleteNotebook(notebookId: string): Promise<any> {
+    const res = await fetch(`${API_BASE}/api/notebooks/${notebookId}`, { method: 'DELETE' });
+    return await res.json();
+  },
+
+  async uploadNotebookSources(notebookId: string, files: File[]): Promise<any> {
+    const formData = new FormData();
+    files.forEach((f) => formData.append('files', f));
+    const res = await fetch(`${API_BASE}/api/notebooks/${notebookId}/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+    return await res.json();
+  },
+
+  async deleteNotebookSource(notebookId: string, sourceId: string): Promise<any> {
+    const res = await fetch(`${API_BASE}/api/notebooks/${notebookId}/sources/${sourceId}`, {
+      method: 'DELETE',
+    });
+    return await res.json();
+  },
+
+  async queryNotebook(notebookId: string, query: string, topK: number = 6, sourceIds?: string[]): Promise<{ chunks: NotebookChunk[] }> {
+    const res = await fetch(`${API_BASE}/api/notebooks/${notebookId}/query`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, top_k: topK, source_ids: sourceIds }),
+    });
+    return await res.json();
+  },
+
+  async chatWithNotebook(
+    notebookId: string,
+    query: string,
+    sourceIds?: string[]
+  ): Promise<{ answer: string; citations: Citation[] }> {
+    const res = await fetch(`${API_BASE}/api/notebooks/${notebookId}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, source_ids: sourceIds }),
+    });
+    return await res.json();
+  },
+
+  async generateStudyTools(
+    notebookId: string,
+    type: string = 'all',
+    forceRefresh: boolean = false
+  ): Promise<StudyGuideData> {
+    const res = await fetch(`${API_BASE}/api/notebooks/${notebookId}/study-tools`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type, force_refresh: forceRefresh }),
     });
     return await res.json();
   },

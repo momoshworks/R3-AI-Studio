@@ -10,6 +10,7 @@ import {
   Search,
   Settings as SettingsIcon,
   Menu,
+  BookOpen,
 } from 'lucide-react';
 import { DriveStatus, Session, SidebarTab } from '../types';
 import { USEFUL_WEBSITES } from '../data/usefulWebsites';
@@ -235,6 +236,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
         >
           <Film className="w-4 h-4 shrink-0" />
           {!isCollapsed && <span className="text-[11px]">{t.media}</span>}
+        </button>
+
+        {/* 5. NotebookLM / Research Studio Tab */}
+        <button
+          onClick={() => onSelectTab('notebook')}
+          className={`rounded-xl flex transition-all ${
+            isCollapsed
+              ? 'w-10 h-10 items-center justify-center'
+              : 'p-2 flex-1 flex-col items-center gap-1'
+          } ${
+            currentTab === 'notebook'
+              ? 'text-amber-500 bg-amber-500/15 font-semibold border border-amber-500/30'
+              : isDark
+              ? 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
+              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+          }`}
+          title={t.notebookStudio}
+        >
+          <BookOpen className="w-4 h-4 shrink-0" />
+          {!isCollapsed && <span className="text-[11px] truncate max-w-[45px]">{lang === 'ar' ? 'النوتبوك' : 'Notebook'}</span>}
         </button>
       </div>
 
