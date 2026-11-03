@@ -79,7 +79,7 @@ const notebookMarkdownComponents = {
   p({ children }: any) {
     return (
       <p
-        className="my-2.5 leading-[1.8] text-slate-300 text-xs md:text-sm font-normal"
+        className="my-2 leading-[1.68] text-slate-300 text-xs md:text-[13px] font-normal"
         style={{ unicodeBidi: 'plaintext' }}
       >
         {children}
@@ -88,7 +88,7 @@ const notebookMarkdownComponents = {
   },
   h1({ children }: any) {
     return (
-      <h1 className="text-base md:text-lg font-bold text-sky-400 mt-4 mb-2 pb-1.5 border-b border-white/10">
+      <h1 className="text-sm md:text-base font-bold text-sky-400 mt-3 mb-1.5 pb-1 border-b border-white/10">
         {children}
       </h1>
     );
@@ -116,8 +116,8 @@ const notebookMarkdownComponents = {
     }
 
     return (
-      <div className={`p-3 my-3 rounded-2xl border border-white/10 ${cardClass} shadow-md backdrop-blur-md`}>
-        <h2 className="text-sm md:text-base font-bold text-gray-100 flex items-center gap-2">
+      <div className={`p-2 my-2 rounded-xl border border-white/10 ${cardClass} shadow-md backdrop-blur-md`}>
+        <h2 className="text-xs md:text-[13px] font-bold text-gray-100 flex items-center gap-2">
           <span className="text-base select-none">{icon}</span>
           <span className="flex-1" style={{ unicodeBidi: 'plaintext' }}>{children}</span>
         </h2>
@@ -126,21 +126,21 @@ const notebookMarkdownComponents = {
   },
   h3({ children }: any) {
     return (
-      <h3 className="text-xs md:text-sm font-semibold text-emerald-400 mt-2.5 mb-1 flex items-center gap-1.5">
+      <h3 className="text-[11.5px] md:text-xs font-semibold text-emerald-400 mt-2 mb-1 flex items-center gap-1.5">
         <span>🔹</span>
         <span style={{ unicodeBidi: 'plaintext' }}>{children}</span>
       </h3>
     );
   },
   ul({ children }: any) {
-    return <ul className="list-disc ps-5 space-y-2 my-2 text-xs md:text-sm leading-[1.8] text-slate-300">{children}</ul>;
+    return <ul className="list-disc ps-5 space-y-1.5 my-1.5 text-xs md:text-[13px] leading-[1.68] text-slate-300">{children}</ul>;
   },
   ol({ children }: any) {
-    return <ol className="list-decimal ps-5 space-y-2 my-2 text-xs md:text-sm leading-[1.8] text-slate-300">{children}</ol>;
+    return <ol className="list-decimal ps-5 space-y-1.5 my-1.5 text-xs md:text-[13px] leading-[1.68] text-slate-300">{children}</ol>;
   },
   li({ children }: any) {
     return (
-      <li className="leading-[1.8] my-1" style={{ unicodeBidi: 'plaintext' }}>
+      <li className="leading-[1.68] my-0.5" style={{ unicodeBidi: 'plaintext' }}>
         {children}
       </li>
     );
@@ -148,7 +148,7 @@ const notebookMarkdownComponents = {
   blockquote({ children }: any) {
     return (
       <blockquote
-        className="my-3 border-s-4 border-amber-400 bg-amber-950/20 px-4 py-2.5 rounded-e-2xl text-xs md:text-sm leading-[1.8] font-medium text-amber-200 shadow-sm"
+        className="my-2.5 border-s-4 border-amber-400 bg-amber-950/20 px-3 py-2 rounded-e-xl text-xs md:text-[12.5px] leading-[1.68] font-medium text-amber-200 shadow-sm"
         style={{ unicodeBidi: 'plaintext' }}
       >
         <span className="block font-bold text-amber-400 text-[11px] mb-1">💡 ملحوظة وخلاصة جوهرية:</span>
