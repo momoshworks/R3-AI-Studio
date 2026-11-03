@@ -1082,9 +1082,28 @@ async def delete_media_file(filename: str):
 # ==============================================================================
 # NotebookLM / R3 Research Notebook & Offline-First RAG Engine
 # ==============================================================================
-from notebook_engine import NotebookEngine
+from notebook_engine import NotebookEngine, search_web_knowledge
 
 notebook_engine = NotebookEngine(base_storage_dir=BASE_DIR / "notebooks")
+
+def generate_gemini_fallback(prompt: str, client: genai.Client) -> Optional[str]:
+    """Smart fallback across active Gemini models to bypass 429 quota or 503 load spikes."""
+    models_to_try = [
+        "gemini-3.5-flash-lite",
+        "gemini-3.1-flash-lite",
+        "gemini-flash-lite-latest",
+        "gemini-3.5-flash",
+        "gemini-3.8-flash",
+        "gemini-3.1-pro-preview"
+    ]
+    for m in models_to_try:
+        try:
+            resp = client.models.generate_content(model=m, contents=prompt)
+            if resp and resp.text:
+                return resp.text
+        except Exception:
+            continue
+    return None
 
 @app.get("/api/notebooks")
 async def list_notebooks_endpoint():
@@ -1135,7 +1154,7 @@ async def delete_notebook_source_endpoint(notebook_id: str, source_id: str):
 @app.post("/api/notebooks/{notebook_id}/query")
 async def query_notebook_endpoint(notebook_id: str, payload: Dict[str, Any] = Body(...)):
     query_text = payload.get("query", "").strip()
-    top_k = int(payload.get("top_k", 6))
+    top_k = int(payload.get("top_k", 8))
     source_ids = payload.get("source_ids", None)
     if not query_text:
         return {"chunks": []}
@@ -1147,85 +1166,88 @@ async def query_notebook_endpoint(notebook_id: str, payload: Dict[str, Any] = Bo
 async def notebook_chat_endpoint(notebook_id: str, payload: Dict[str, Any] = Body(...)):
     query = payload.get("query", "").strip()
     source_ids = payload.get("source_ids", None)
+    enable_web = payload.get("enable_web", False)
+    mode = payload.get("mode", "qa")  # "qa" | "explain" | "solve"
     if not query:
         raise HTTPException(status_code=400, detail="الرجاء كتابة سؤال")
     
-    # 1. Retrieve most relevant chunks using Hybrid Search
-    chunks = await asyncio.to_thread(notebook_engine.query_notebook, notebook_id, query, top_k=6, source_ids=source_ids)
+    # 1. Retrieve local relevant chunks
+    chunks = await asyncio.to_thread(notebook_engine.query_notebook, notebook_id, query, top_k=8, source_ids=source_ids)
     
+    # 2. Live Web Knowledge Search if enabled or requested
+    web_results = []
+    if enable_web:
+        try:
+            web_results = await asyncio.to_thread(search_web_knowledge, query, max_results=4)
+        except Exception as ex:
+            print(f"[Notebook Web Search Note] {ex}")
+
     citations = []
     for c in chunks:
         citations.append({
             "source_id": c.get("source_id", ""),
             "source_name": c.get("source_name", ""),
             "page": c.get("page", 1),
-            "excerpt": c.get("text", "")[:280] + "..."
+            "excerpt": c.get("text", "")[:300] + "..."
         })
     
-    if not chunks:
+    # Add web citations
+    for w in web_results:
+        citations.append({
+            "source_id": "web",
+            "source_name": f"🌐 {w.get('title', 'الويب')}",
+            "page": 1,
+            "excerpt": w.get("snippet", "")[:280] + "..."
+        })
+    
+    # If both local chunks and web are empty
+    if not chunks and not web_results:
         return {
-            "answer": "لم أجد أي معلومات متعلقة بهذا السؤال في المستندات المرفوعة داخل هذا الدفتر. يرجى التأكد من رفع مراجع أو ملازم تحتوي على موضوع السؤال.",
+            "answer": "لم أجد أي معلومات متعلقة بهذا السؤال في المستندات المرفوعة. يمكنك تفعيل خيار 'البحث في الويب' للبحث عن حلول إضافية على الإنترنت.",
             "citations": []
         }
     
-    # 2. Check if we have Gemini or OpenAI key for synthesis, or do offline synthesis
-    gemini_key = get_gemini_api_key()
-    openai_key = get_openai_api_key()
-    
-    grounded_prompt = notebook_engine.build_grounded_context_prompt(query, chunks)
+    # 3. Build comprehensive prompt
+    grounded_prompt = notebook_engine.build_grounded_context_prompt(query, chunks, web_results)
+    if mode == "explain":
+        grounded_prompt += "\nملاحظة: المطلوب شرح أكاديمي مفصل وتبسيط عميق للموضوع من الصفر مع أمثلة توضيحية وقوانين."
+    elif mode == "solve":
+        grounded_prompt += "\nملاحظة: المطلوب حل وتوضيح المسألة أو التمرين خطوة بخطوة مع توضيح القوانين والمعادلات."
+
     answer_text = ""
+    gemini_key = get_gemini_api_key()
     
-    # Try Gemini first if key available
+    # Call Gemini with multi-model fallback (gemini-3.5-flash-lite, gemini-3.1-flash-lite, etc.)
     if gemini_key:
         try:
             client = genai.Client(api_key=gemini_key)
-            resp = await asyncio.to_thread(
-                client.models.generate_content,
-                model="gemini-2.5-flash",
-                contents=grounded_prompt
-            )
-            answer_text = resp.text
+            answer_text = await asyncio.to_thread(generate_gemini_fallback, grounded_prompt, client)
         except Exception as e:
             print(f"[Notebook Gemini Error] {e}")
-            answer_text = ""
 
-    # If Gemini failed or no key, try OpenAI if available
-    if not answer_text and openai_key:
-        try:
-            async with httpx.AsyncClient(timeout=30.0) as http_client:
-                res = await http_client.post(
-                    "https://api.openai.com/v1/chat/completions",
-                    headers={"Authorization": f"Bearer {openai_key}"},
-                    json={
-                        "model": "gpt-4o-mini",
-                        "messages": [{"role": "user", "content": grounded_prompt}],
-                        "temperature": 0.3
-                    }
-                )
-                if res.status_code == 200:
-                    j_data = res.json()
-                    answer_text = j_data["choices"][0]["message"]["content"]
-        except Exception as e:
-            print(f"[Notebook OpenAI Error] {e}")
-
-    # If offline / no cloud API: synthesise directly from top retrieved chunks
+    # Fallback to local synthesis if no key or offline
     if not answer_text:
         top_chunks_summary = []
-        for i, c in enumerate(chunks[:3], 1):
+        for i, c in enumerate(chunks[:4], 1):
             top_chunks_summary.append(
-                f"**المقتبس {i}** من [{c['source_name']} - ص {c['page']}]:\n"
+                f"**المقطع {i}** من [{c['source_name']} - ص {c['page']}]:\n"
                 f"> \"{c['text'][:350]}...\"\n"
             )
+        if web_results:
+            for w in web_results[:2]:
+                top_chunks_summary.append(
+                    f"**معلومة من الويب** [{w['title']}]:\n"
+                    f"> \"{w['snippet']}...\"\n"
+                )
         answer_text = (
-            f"### 📚 نتائج الاسترجاع المحلي (وضع Offline-First):\n\n"
-            f"تم العثور على أهم المقاطع المتعلقة بـ **\"{query}\"** داخل مستنداتك المرفوعة:\n\n"
-            + "\n".join(top_chunks_summary) +
-            f"\n\n*💡 ملاحظة: يمكنك تفعيل مفتاح Gemini API في الإعدادات للحصول على صياغة واستنتاج ذكي متقدم.*"
+            f"### 📚 نتائج الاسترجاع والبحث (وضع Offline / Fallback):\n\n"
+            + "\n".join(top_chunks_summary)
         )
     
     return {
         "answer": answer_text,
-        "citations": citations
+        "citations": citations,
+        "web_results": web_results
     }
 
 @app.post("/api/notebooks/{notebook_id}/study-tools")
@@ -1237,28 +1259,52 @@ async def notebook_study_tools_endpoint(notebook_id: str, payload: Dict[str, Any
     if not nb:
         raise HTTPException(status_code=404, detail="الدفتر غير موجود")
     
+    # Generate base study data
     study_data = await asyncio.to_thread(notebook_engine.generate_offline_study_tools, notebook_id, tool_type)
     
     gemini_key = get_gemini_api_key()
     if gemini_key and (force_refresh or not study_data.get("ai_enhanced")):
         try:
-            chunks = notebook_engine.query_notebook(notebook_id, "summary key concepts terms definitions", top_k=8)
+            chunks = notebook_engine.query_notebook(notebook_id, "summary key concepts terms definitions formulas", top_k=15)
             if chunks:
-                joined_text = "\n".join([f"[{c['source_name']} ص{c['page']}]: {c['text'][:400]}" for c in chunks[:6]])
+                joined_text = "\n".join([f"[{c['source_name']} ص{c['page']}]: {c['text'][:350]}" for c in chunks[:8]])
                 ai_prompt = (
-                    f"بناءً على نصوص المستندات التالية، قم بإعداد دليل دراسة متكامل باللغة العربية يشمل:\n"
-                    f"1. ملخص تنفيذي مركز (Executive Summary) بنقاط واضحة مع الاستشهادات.\n"
-                    f"2. أهم 5 نقاط رئيسية (Key Takeaways).\n\n"
-                    f"المستندات:\n{joined_text}\n"
+                    f"أنت أستاذ ومصمم مناهج أكاديمي ذكي. بناءً على محتوى المستندات المرفقة أدناه، أنشئ دليلاً دراسياً فائق الذكاء بصيغة JSON حصراً.\n\n"
+                    f"المستندات المرفقة:\n{joined_text}\n\n"
+                    f"يجب أن تكون الإجابة عبارة عن كود JSON صالح فقط بدون أي علامات ماركداون إضافية بالهيكل التالي:\n"
+                    f"{{\n"
+                    f'  "summary": "ملخص تنفيذي وأكاديمي عميق يشرح موضوع المادة وقوانينها بالتفصيل مع الاستشهادات",\n'
+                    f'  "key_points": ["نقطة رئيسية 1", "نقطة رئيسية 2", "نقطة رئيسية 3", "نقطة رئيسية 4", "نقطة رئيسية 5"],\n'
+                    f'  "flashcards": [\n'
+                    f'    {{"question": "سؤال استذكار عميق حول مفهوم أو قانون؟", "answer": "الإجابة العلمية الوافية", "source_name": "المصدر", "page": 1}}\n'
+                    f'  ],\n'
+                    f'  "quiz": [\n'
+                    f'    {{"question": "سؤال امتحانات اختياري دقيق؟", "options": [{{"key": "A", "text": "خيار 1"}}, {{"key": "B", "text": "خيار 2"}}, {{"key": "C", "text": "خيار 3"}}, {{"key": "D", "text": "خيار 4"}}], "correct_option": "A", "explanation": "تفسير أكاديمي مع التعليل", "source_name": "المصدر", "page": 1}}\n'
+                    f'  ],\n'
+                    f'  "key_concepts": [\n'
+                    f'    {{"term": "المصطلح أو المفهوم", "definition": "التعريف والصيغة الرياضية أو العلمية", "source_name": "المصدر", "page": 1}}\n'
+                    f'  ]\n'
+                    f"}}"
                 )
                 client = genai.Client(api_key=gemini_key)
-                resp = await asyncio.to_thread(
-                    client.models.generate_content,
-                    model="gemini-2.5-flash",
-                    contents=ai_prompt
-                )
-                if resp.text:
-                    study_data["summary"] = resp.text
+                resp_text = await asyncio.to_thread(generate_gemini_fallback, ai_prompt, client)
+                if resp_text:
+                    # Clean json tags if present
+                    clean_json = resp_text.strip()
+                    if clean_json.startswith("```"):
+                        clean_json = re.sub(r"^```(?:json)?\n?", "", clean_json)
+                        clean_json = re.sub(r"\n?```$", "", clean_json)
+                    parsed = json.loads(clean_json)
+                    if "summary" in parsed:
+                        study_data["summary"] = parsed["summary"]
+                    if "key_points" in parsed and parsed["key_points"]:
+                        study_data["key_points"] = parsed["key_points"]
+                    if "flashcards" in parsed and parsed["flashcards"]:
+                        study_data["flashcards"] = parsed["flashcards"]
+                    if "quiz" in parsed and parsed["quiz"]:
+                        study_data["quiz"] = parsed["quiz"]
+                    if "key_concepts" in parsed and parsed["key_concepts"]:
+                        study_data["key_concepts"] = parsed["key_concepts"]
                     study_data["ai_enhanced"] = True
                     notebook_engine._study_file(notebook_id).write_text(json.dumps(study_data, indent=2, ensure_ascii=False), encoding="utf-8")
         except Exception as ex:

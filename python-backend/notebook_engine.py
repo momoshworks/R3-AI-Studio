@@ -11,9 +11,61 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 
 import pypdf
+import urllib.request
+import urllib.parse
 
 # Lazy-loaded fastembed embedding model
 _EMBED_MODEL = None
+
+def search_web_knowledge(query: str, max_results: int = 4) -> List[Dict[str, str]]:
+    """Live internet search via DuckDuckGo and Wikipedia APIs."""
+    results = []
+    clean_q = query.strip()
+    if not clean_q:
+        return results
+
+    # 1. Wikipedia Search (Arabic & English)
+    for lang_code in ["ar", "en"]:
+        try:
+            wiki_url = f"https://{lang_code}.wikipedia.org/w/api.php?action=query&list=search&srsearch=" + urllib.parse.quote(clean_q) + "&format=json&srlimit=2"
+            req = urllib.request.Request(wiki_url, headers={"User-Agent": "R3-AI-Workstation/1.0"})
+            with urllib.request.urlopen(req, timeout=3.5) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                for item in data.get("query", {}).get("search", []):
+                    raw_snippet = item.get("snippet", "")
+                    clean_snippet = re.sub(r"<[^>]+>", "", raw_snippet).strip()
+                    if clean_snippet:
+                        results.append({
+                            "title": f"ويكيبيديا ({item.get('title')})",
+                            "snippet": clean_snippet,
+                            "url": f"https://{lang_code}.wikipedia.org/wiki/" + urllib.parse.quote(item.get("title", ""))
+                        })
+        except Exception:
+            pass
+
+    # 2. DuckDuckGo Instant Answers
+    try:
+        ddg_url = "https://api.duckduckgo.com/?q=" + urllib.parse.quote(clean_q) + "&format=json"
+        req = urllib.request.Request(ddg_url, headers={"User-Agent": "R3-AI-Workstation/1.0"})
+        with urllib.request.urlopen(req, timeout=3.5) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            if data.get("AbstractText"):
+                results.append({
+                    "title": data.get("Heading", clean_q),
+                    "snippet": data.get("AbstractText"),
+                    "url": data.get("AbstractURL", "")
+                })
+            for topic in data.get("RelatedTopics", [])[:2]:
+                if isinstance(topic, dict) and "Text" in topic:
+                    results.append({
+                        "title": topic.get("Text", "")[:60] + "...",
+                        "snippet": topic.get("Text", ""),
+                        "url": topic.get("FirstURL", "")
+                    })
+    except Exception:
+        pass
+
+    return results[:max_results]
 
 def get_embed_model():
     global _EMBED_MODEL
@@ -426,29 +478,45 @@ class NotebookEngine:
     # =========================================================================
     # Study Guide & Auto-Generation Tools (Summary, Flashcards, Quiz, Concepts)
     # =========================================================================
-    def build_grounded_context_prompt(self, query: str, chunks: List[Dict[str, Any]]) -> str:
-        """Assembles strict source grounding instructions with page citations."""
+    def build_grounded_context_prompt(self, query: str, chunks: List[Dict[str, Any]], web_results: Optional[List[Dict[str, str]]] = None) -> str:
+        """Assembles strict source grounding instructions with page citations and optional web knowledge."""
         snippets = []
         for idx, c in enumerate(chunks, 1):
             snippets.append(
-                f"--- [مقطع {idx}] ---\n"
+                f"--- [مقطع محلي {idx}] ---\n"
                 f"المصدر: {c['source_name']}\n"
                 f"الصفحة: {c['page']}\n"
                 f"النص:\n{c['text']}\n"
             )
 
-        context_block = "\n".join(snippets)
+        context_block = "\n".join(snippets) if snippets else "لا توجد مقاطع محلية مباشرة."
+
+        web_block = ""
+        if web_results:
+            web_items = []
+            for w_idx, w in enumerate(web_results, 1):
+                web_items.append(
+                    f"--- [معلومة ويب {w_idx}] ---\n"
+                    f"المصدر: {w.get('title', 'الإنترنت')}\n"
+                    f"النص: {w.get('snippet', '')}\n"
+                )
+            web_block = (
+                f"\n=== نتائج البحث الحي من الإنترنت والحلول الإضافية (Web Search Knowledge) ===\n"
+                + "\n".join(web_items) + "\n"
+            )
 
         prompt = (
-            f"أنت مساعد دراسي وبحثي ذكي متخصص في استيعاب المستندات بدقة متناهية (مثل Google NotebookLM).\n"
-            f"مهمتك هي الإجابة عن سؤال المستخدم بالاعتماد **حصراً** على المقاطع المقتبسة التالية.\n"
+            f"أنت أستاذ أكاديمي وباحث ذكي فائق الدقة متخصص في شرح وتفكيك المواد والمحاضرات (مثل Google NotebookLM المتطور).\n"
+            f"مهمتك هي الإجابة عن سؤال المستخدم، وشرح المسائل والمفاهيم بدقة واحترافية عالية باللغة العربية الواضحة.\n\n"
             f"قواعد إلزامية:\n"
-            f"1. اذكر المعلومات الدقيقة المؤكدة فقط، وامنع أي تخمين أو هلوسة.\n"
-            f"2. في نهاية كل فقرة أو معلومة تذكرها، ضع الاستشهاد الصريح بصيغة: `[المصدر: اسم_الملف - ص رقم]`.\n"
-            f"3. إذا لم تجد الإجابة في المقاطع المتاحة، صرّح بوضوح: 'هذه المعلومة غير مذكورة في المستندات المرفوعة'.\n\n"
-            f"=== المقاطع والمصادر المقتبسة ===\n"
-            f"{context_block}\n\n"
-            f"=== سؤال المستخدم ===\n"
+            f"1. اشرح المفهوم أو المسألة بتفصيل وترتيب منطقي (مقدمة، خطوات الحل أو القوانين، الشرح العملي، الاستنتاج).\n"
+            f"2. استند في الإجابة بالدرجة الأولى إلى المقاطع المحلية المرفوعة أدناه. وضع الاستشهاد في نهاية كل معلومة بصيغة: `[المصدر: اسم_الملف - ص رقم]`.\n"
+            f"3. إذا استعنت بمعلومات من نتائج الويب المرفقة لتكملة الشرح أو إعطاء حل إضافي، اذكر الاستشهاد بصيغة: `[المصدر: الويب - عنوان المصدر]`.\n"
+            f"4. استخدم التنسيق الأكاديمي الممتاز (Markdown، نقاط، عناوين فرعية، كتل برمجية أو معادلات رياضية واضحة).\n\n"
+            f"=== المقاطع والمصادر المقتبسة من المستندات ===\n"
+            f"{context_block}\n"
+            f"{web_block}\n"
+            f"=== سؤال / استفسار المستخدم ===\n"
             f"{query}\n"
         )
         return prompt

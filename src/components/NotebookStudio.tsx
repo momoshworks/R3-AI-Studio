@@ -7,7 +7,6 @@ import {
   FileText,
   Search,
   Sparkles,
-  CheckCircle2,
   Layers,
   FileCode,
   GraduationCap,
@@ -18,6 +17,11 @@ import {
   RotateCcw,
   Download,
   FileSpreadsheet,
+  Globe,
+  Lightbulb,
+  HelpCircle,
+  Brain,
+  Zap,
 } from 'lucide-react';
 import {
   Notebook,
@@ -42,6 +46,7 @@ interface ChatHistoryItem {
   text: string;
   timestamp: number;
   citations?: Citation[];
+  web_results?: any[];
 }
 
 export const NotebookStudio: React.FC<NotebookStudioProps> = ({
@@ -65,6 +70,9 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
   // Studio Mode: 'chat' | 'study' | 'search'
   const [activeMode, setActiveMode] = useState<'chat' | 'study' | 'search'>('chat');
   const [studySubTab, setStudySubTab] = useState<'summary' | 'flashcards' | 'quiz' | 'concepts'>('summary');
+
+  // Web Search Knowledge Toggle
+  const [enableWebSearch, setEnableWebSearch] = useState<boolean>(true);
 
   // Chat State
   const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([]);
@@ -127,8 +135,8 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
           role: 'assistant',
           text:
             lang === 'ar'
-              ? `مرحباً بك في **${activeNotebook.title}**! يمكنك الآن سؤالي عن أي جزئية في المستندات المرفوعة وسأجيبك مع الاستشهاد برقم الصفحة والمقطع بدقة، أو الانتقال لتبويب أدوات المذاكرة لتوليد الملخص والبطاقات والاختبارات.`
-              : `Welcome to **${activeNotebook.title}**! You can now ask any question grounded in the uploaded sources with exact page citations, or explore the Study Tools for summaries, flashcards, and quizzes.`,
+              ? `مرحباً بك في **${activeNotebook.title}**! 🎓\nتم تفعيل **محرك الاستيعاب الذكي المتصل بسحابة Gemini والإنترنت**. يمكنك الآن سؤالي عن أي جزئية، أو طلب شرح وحل المسائل خطوة بخطوة، مع توثيق الاستشهادات بدقة برقم الصفحة والمقطع.`
+              : `Welcome to **${activeNotebook.title}**! 🎓\nPowered by **Gemini AI & Live Web Search**. Ask questions, request step-by-step problem explanations, or generate study guides with verified page citations.`,
           timestamp: Date.now(),
         },
       ]);
@@ -177,7 +185,6 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
       const fileArr = Array.from(files);
       const res = await api.uploadNotebookSources(activeNotebook.id, fileArr);
       if (res && res.sources) {
-        // Refresh notebook data
         const updatedNb = await api.getNotebook(activeNotebook.id);
         setNotebooks((prev) => prev.map((n) => (n.id === updatedNb.id ? updatedNb : n)));
       }
@@ -201,28 +208,29 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
     }
   };
 
-  // Chat with Notebook (RAG)
-  const handleSendChat = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!chatInput.trim() || !activeNotebook || isQuerying) return;
+  // Chat with Notebook (RAG + AI Model + Web Search)
+  const handleSendChat = async (customPrompt?: string, mode: 'qa' | 'explain' | 'solve' = 'qa') => {
+    const textToSend = customPrompt || chatInput.trim();
+    if (!textToSend || !activeNotebook || isQuerying) return;
 
     const userMsg: ChatHistoryItem = {
       id: `usr_${Date.now()}`,
       role: 'user',
-      text: chatInput.trim(),
+      text: textToSend,
       timestamp: Date.now(),
     };
 
     setChatHistory((prev) => [...prev, userMsg]);
-    const query = chatInput.trim();
-    setChatInput('');
+    if (!customPrompt) setChatInput('');
     setIsQuerying(true);
 
     try {
       const res = await api.chatWithNotebook(
         activeNotebook.id,
-        query,
-        selectedSourceIds.length > 0 ? selectedSourceIds : undefined
+        textToSend,
+        selectedSourceIds.length > 0 ? selectedSourceIds : undefined,
+        enableWebSearch,
+        mode
       );
 
       const botMsg: ChatHistoryItem = {
@@ -231,6 +239,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
         text: res.answer,
         timestamp: Date.now(),
         citations: res.citations,
+        web_results: res.web_results,
       };
 
       setChatHistory((prev) => [...prev, botMsg]);
@@ -241,7 +250,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
         {
           id: `err_${Date.now()}`,
           role: 'assistant',
-          text: lang === 'ar' ? '⚠️ حدث خطأ أثناء الاتصال بمحرك الاسترجاع.' : '⚠️ Error querying retrieval engine.',
+          text: lang === 'ar' ? '⚠️ حدث خطأ أثناء الاتصال بمحرك الاسترجاع والذكاء الاصطناعي.' : '⚠️ Error querying retrieval and AI engine.',
           timestamp: Date.now(),
         },
       ]);
@@ -259,7 +268,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
       const res = await api.queryNotebook(
         activeNotebook.id,
         searchQuery.trim(),
-        8,
+        10,
         selectedSourceIds.length > 0 ? selectedSourceIds : undefined
       );
       setSearchResults(res.chunks || []);
@@ -270,7 +279,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
     }
   };
 
-  // Generate / Load Study Tools
+  // Generate / Load Study Tools via Gemini AI
   const handleGenerateStudyTools = async (forceRefresh: boolean = false) => {
     if (!activeNotebook || isGeneratingStudy) return;
     setIsGeneratingStudy(true);
@@ -322,11 +331,11 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
       {/* Top Header Bar */}
       <div
         className={`px-4 py-2.5 border-b flex items-center justify-between shrink-0 transition-colors ${
-          isDark ? 'bg-gemini-sidebar/70 border-gemini-border' : 'bg-white/80 border-slate-200'
+          isDark ? 'bg-gemini-sidebar/80 border-gemini-border' : 'bg-white border-slate-200'
         } backdrop-blur-md z-10`}
       >
         <div className="flex items-center space-x-3 space-x-reverse min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 shrink-0">
+          <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-purple-600 flex items-center justify-center text-white shadow-md shadow-orange-500/20 shrink-0">
             <BookOpen className="w-5 h-5" />
           </div>
           <div className="min-w-0">
@@ -334,9 +343,9 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
               <h2 className="font-bold text-sm truncate">
                 {activeNotebook?.title || t.notebookStudio}
               </h2>
-              <span className="text-[10px] bg-emerald-500/15 text-emerald-400 font-mono px-2 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1 shrink-0">
-                <CheckCircle2 className="w-2.5 h-2.5" />
-                {t.offlineReady}
+              <span className="text-[10px] bg-amber-500/15 text-amber-400 font-mono px-2 py-0.5 rounded-full border border-amber-500/30 flex items-center gap-1 shrink-0">
+                <Brain className="w-2.5 h-2.5" />
+                Gemini AI Connected
               </span>
             </div>
             <p className="text-[11px] opacity-65 truncate max-w-sm">
@@ -345,8 +354,30 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
           </div>
         </div>
 
-        {/* Action Tabs: Chat | Study Tools | Search */}
-        <div className="flex items-center space-x-2 space-x-reverse">
+        {/* Action Controls & Navigation Tabs */}
+        <div className="flex items-center space-x-2.5 space-x-reverse">
+          {/* Live Web Search Toggle Pill */}
+          <button
+            onClick={() => setEnableWebSearch(!enableWebSearch)}
+            className={`px-2.5 py-1 rounded-xl text-xs font-medium border flex items-center gap-1.5 transition-all ${
+              enableWebSearch
+                ? 'bg-blue-600/15 border-blue-500/40 text-blue-400 shadow-sm'
+                : isDark
+                ? 'bg-white/5 border-white/10 text-gray-400 hover:text-gray-200'
+                : 'bg-slate-100 border-slate-200 text-slate-500 hover:text-slate-800'
+            }`}
+            title={lang === 'ar' ? 'تفعيل البحث في الويب للحلول والمراجع الخارجية' : 'Toggle live web search for external solutions'}
+          >
+            <Globe className={`w-3.5 h-3.5 ${enableWebSearch ? 'text-blue-400 animate-spin-slow' : ''}`} />
+            <span>{lang === 'ar' ? 'البحث بالإنترنت' : 'Web Search'}</span>
+            <span
+              className={`w-2 h-2 rounded-full ${
+                enableWebSearch ? 'bg-blue-500 shadow-sm shadow-blue-500' : 'bg-gray-500'
+              }`}
+            />
+          </button>
+
+          {/* Mode Switcher Tabs */}
           <div
             className={`p-1 rounded-xl border flex items-center space-x-1 space-x-reverse text-xs ${
               isDark ? 'bg-[#1a1b1d] border-white/10' : 'bg-slate-100 border-slate-200'
@@ -400,7 +431,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
 
           <button
             onClick={() => setIsCreatingNotebook(true)}
-            className="p-2 rounded-xl bg-blue-600/10 hover:bg-blue-600/20 text-blue-500 border border-blue-500/30 transition-all"
+            className="p-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 transition-all"
             title={t.newNotebook}
           >
             <Plus className="w-4 h-4" />
@@ -410,10 +441,10 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
 
       {/* Main Studio Body: Sources Sidebar + Dynamic Work Canvas */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Column: Notebook Sources & Management Drawer (280px) */}
+        {/* Left Column: Notebook Sources & Management Drawer (290px) */}
         <div
           className={`w-72 border-e flex flex-col shrink-0 transition-colors ${
-            isDark ? 'bg-gemini-sidebar/40 border-gemini-border' : 'bg-white border-slate-200'
+            isDark ? 'bg-gemini-sidebar/50 border-gemini-border' : 'bg-white border-slate-200'
           }`}
         >
           {/* Notebook Selector Dropdown */}
@@ -455,7 +486,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
-              className="text-[11px] bg-blue-600 hover:bg-blue-500 text-white font-medium px-2.5 py-1 rounded-lg flex items-center gap-1 transition-all shadow-sm disabled:opacity-50"
+              className="text-[11px] bg-blue-600 hover:bg-blue-500 text-white font-medium px-2.5 py-1 rounded-xl flex items-center gap-1 transition-all shadow-sm disabled:opacity-50"
             >
               <UploadCloud className="w-3.5 h-3.5" />
               <span>{isUploading ? t.indexing : t.addSources}</span>
@@ -485,7 +516,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
               return (
                 <div
                   key={source.id}
-                  className={`p-2.5 rounded-xl border text-xs transition-all relative group ${
+                  className={`p-2.5 rounded-2xl border text-xs transition-all relative group ${
                     isSelected
                       ? isDark
                         ? 'bg-blue-600/10 border-blue-500/40 text-blue-200'
@@ -501,7 +532,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                       checked={isSelected}
                       onChange={() => toggleSourceSelection(source.id)}
                       className="mt-1 rounded cursor-pointer accent-blue-600 shrink-0"
-                      title={lang === 'ar' ? 'تضمين في البحث' : 'Include in query'}
+                      title={lang === 'ar' ? 'تضمين في التحليل والبحث' : 'Include in analysis'}
                     />
                     <div className="mt-0.5">{getSourceIcon(source.file_type)}</div>
                     <div className="min-w-0 flex-1">
@@ -540,13 +571,67 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
               <span>{lang === 'ar' ? 'حذف هذا الدفتر' : 'Delete Notebook'}</span>
             </button>
             <span className="text-[10px] opacity-50 font-mono">
-              {activeNotebook?.sources.reduce((acc, s) => acc + s.chunk_count, 0) || 0} Chunks Indexed
+              {activeNotebook?.sources.reduce((acc, s) => acc + s.chunk_count, 0) || 0} Chunks
             </span>
           </div>
         </div>
 
         {/* Center Canvas: Dynamic Workspace */}
         <div className="flex-1 flex flex-col overflow-hidden relative">
+          {/* Quick Learning Action Starter Chips (Available in Chat Mode) */}
+          {activeMode === 'chat' && (
+            <div
+              className={`px-4 py-2 border-b flex items-center space-x-2 space-x-reverse overflow-x-auto text-xs shrink-0 ${
+                isDark ? 'bg-[#151618] border-gemini-border/40' : 'bg-slate-50 border-slate-200'
+              }`}
+            >
+              <span className="text-[10px] font-bold opacity-60 uppercase tracking-wider shrink-0 flex items-center gap-1">
+                <Zap className="w-3 h-3 text-amber-400" />
+                {lang === 'ar' ? 'أوامر سريعة:' : 'Quick Actions:'}
+              </span>
+
+              <button
+                onClick={() => handleSendChat(lang === 'ar' ? 'اشرح لي محتوى المستندات المرفوعة بالتفصيل مع تبسيط المفاهيم الصعبة والقوانين الرياضية' : 'Explain the core material step-by-step with analogies and principles', 'explain')}
+                className="px-2.5 py-1 rounded-xl text-[11px] font-medium bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 shrink-0 transition-all flex items-center gap-1"
+              >
+                <Brain className="w-3 h-3" />
+                <span>{lang === 'ar' ? '🧠 شرح وتبسيط المادة' : 'Explain Concepts'}</span>
+              </button>
+
+              <button
+                onClick={() => handleSendChat(lang === 'ar' ? 'حل ووضح المسائل والتمارين الموجودة في المستندات مع خطوات الحل والقوانين المستخدمة' : 'Solve and walk through the problems in the sources step-by-step', 'solve')}
+                className="px-2.5 py-1 rounded-xl text-[11px] font-medium bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0 transition-all flex items-center gap-1"
+              >
+                <Lightbulb className="w-3 h-3" />
+                <span>{lang === 'ar' ? '💡 حل وتوضيح المسائل' : 'Solve Problems'}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setActiveMode('study');
+                  setStudySubTab('summary');
+                  handleGenerateStudyTools(true);
+                }}
+                className="px-2.5 py-1 rounded-xl text-[11px] font-medium bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 shrink-0 transition-all flex items-center gap-1"
+              >
+                <GraduationCap className="w-3 h-3" />
+                <span>{lang === 'ar' ? '📝 ملخص تنفيذي شامل' : 'Deep Summary'}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setActiveMode('study');
+                  setStudySubTab('quiz');
+                  handleGenerateStudyTools(true);
+                }}
+                className="px-2.5 py-1 rounded-xl text-[11px] font-medium bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 shrink-0 transition-all flex items-center gap-1"
+              >
+                <HelpCircle className="w-3 h-3" />
+                <span>{lang === 'ar' ? '❓ اختبار تدريبي وامتحانات' : 'Exam Quiz'}</span>
+              </button>
+            </div>
+          )}
+
           {/* MODE 1: Grounded Source Chat (NotebookLM Style) */}
           {activeMode === 'chat' && (
             <div className="flex-1 flex flex-col overflow-hidden">
@@ -596,8 +681,12 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                 ))}
                 {isQuerying && (
                   <div className="flex items-center space-x-2 space-x-reverse text-xs opacity-70 p-2 animate-pulse">
-                    <Sparkles className="w-4 h-4 text-blue-400 animate-spin" />
-                    <span>{lang === 'ar' ? 'جاري البحث والاسترجاع الدقيق مع توثيق الاستشهادات...' : 'Retrieving grounded source chunks with citations...'}</span>
+                    <Sparkles className="w-4 h-4 text-amber-400 animate-spin" />
+                    <span>
+                      {lang === 'ar'
+                        ? 'جاري الاسترجاع الذكي والاتصال بموديل الذكاء الاصطناعي وتوثيق الحلول...'
+                        : 'Retrieving sources, searching web knowledge, and synthesizing AI answer...'}
+                    </span>
                   </div>
                 )}
               </div>
@@ -608,23 +697,35 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                   isDark ? 'bg-gemini-sidebar/50 border-gemini-border' : 'bg-white border-slate-200'
                 }`}
               >
-                <form onSubmit={handleSendChat} className="flex items-center space-x-2 space-x-reverse">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSendChat();
+                  }}
+                  className="flex items-center space-x-2 space-x-reverse"
+                >
                   <input
                     type="text"
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
-                    placeholder={t.askNotebookPlaceholder}
+                    placeholder={
+                      enableWebSearch
+                        ? lang === 'ar'
+                          ? 'اسأل سؤالاً، أو اطلب شرح مسألة (مدعوم بالمستندات + بحث الويب)...'
+                          : 'Ask a question or request problem explanation (Sources + Web Search enabled)...'
+                        : t.askNotebookPlaceholder
+                    }
                     disabled={isQuerying}
                     className={`flex-1 rounded-xl px-4 py-2.5 text-xs outline-none border transition-all ${
                       isDark
-                        ? 'bg-[#1a1b1d] border-white/10 focus:border-blue-500 text-gray-200'
-                        : 'bg-slate-50 border-slate-300 focus:border-blue-500 text-slate-800'
+                        ? 'bg-[#1a1b1d] border-white/10 focus:border-amber-500 text-gray-200'
+                        : 'bg-slate-50 border-slate-300 focus:border-amber-500 text-slate-800'
                     }`}
                   />
                   <button
                     type="submit"
                     disabled={isQuerying || !chatInput.trim()}
-                    className="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-xl text-xs font-semibold transition-all shadow-md flex items-center gap-1.5"
+                    className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 disabled:opacity-50 text-white rounded-xl text-xs font-semibold transition-all shadow-md flex items-center gap-1.5"
                   >
                     <span>{t.send}</span>
                     <ChevronLeft className={`w-3.5 h-3.5 ${isRtl ? '' : 'rotate-180'}`} />
@@ -699,7 +800,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                   className="px-3 py-1.5 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 text-purple-400 border border-purple-500/30 text-xs font-medium flex items-center gap-1.5 transition-all disabled:opacity-50"
                 >
                   <RotateCcw className={`w-3.5 h-3.5 ${isGeneratingStudy ? 'animate-spin' : ''}`} />
-                  <span>{isGeneratingStudy ? t.indexing : lang === 'ar' ? 'تحديث وتوليد جديد' : 'Regenerate'}</span>
+                  <span>{isGeneratingStudy ? t.indexing : lang === 'ar' ? 'توليد ذكي جديد (Gemini AI)' : 'Regenerate via AI'}</span>
                 </button>
               </div>
 
@@ -724,7 +825,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                               downloadPDFDirectly(studyData.summary, {
                                 filename: `${activeNotebook.title}_Summary.pdf`,
                                 title: activeNotebook.title,
-                                modelName: 'R3 NotebookLM',
+                                modelName: 'R3 NotebookLM AI',
                               });
                             }
                           }}
@@ -735,16 +836,16 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                         </button>
                       </div>
 
-                      <div className="whitespace-pre-wrap font-sans">
-                        {studyData?.summary || t.indexing}
+                      <div className="whitespace-pre-wrap font-sans text-xs leading-relaxed">
+                        {studyData?.summary || (isGeneratingStudy ? 'جاري التحليل المعمق وتوليد الدليل الدراسي عبر Gemini AI...' : t.indexing)}
                       </div>
 
                       {studyData?.key_points && studyData.key_points.length > 0 && (
                         <div className="pt-3 border-t border-gemini-border/40 space-y-2">
-                          <span className="font-bold text-xs opacity-80 block">
+                          <span className="font-bold text-xs opacity-80 block text-amber-400">
                             {lang === 'ar' ? '📌 أهم النقاط الرئيسية المستخلصة:' : '📌 Core Key Points:'}
                           </span>
-                          <ul className="list-disc list-inside space-y-1.5 opacity-90">
+                          <ul className="list-disc list-inside space-y-1.5 opacity-90 text-[11px]">
                             {studyData.key_points.map((pt, i) => (
                               <li key={i}>{pt}</li>
                             ))}
@@ -767,7 +868,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                         {/* Interactive 3D Flip Card */}
                         <div
                           onClick={() => setIsCardFlipped(!isCardFlipped)}
-                          className={`w-full h-64 rounded-3xl p-6 border shadow-xl flex flex-col justify-between cursor-pointer transition-all duration-300 transform hover:scale-[1.01] ${
+                          className={`w-full min-h-[240px] rounded-3xl p-6 border shadow-xl flex flex-col justify-between cursor-pointer transition-all duration-300 transform hover:scale-[1.01] ${
                             isCardFlipped
                               ? 'bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-900 border-purple-500/50 text-purple-100'
                               : isDark
@@ -785,7 +886,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                             </span>
                           </div>
 
-                          <div className="text-center my-auto px-4">
+                          <div className="text-center my-auto px-4 py-4">
                             <p className="text-sm md:text-base font-semibold leading-relaxed">
                               {isCardFlipped
                                 ? studyData.flashcards[currentFlashcardIndex].answer
@@ -834,7 +935,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                       </>
                     ) : (
                       <div className="text-xs opacity-60 text-center py-10">
-                        {lang === 'ar' ? 'لا توجد بطاقات مراجعة متاحة بعد.' : 'No flashcards available.'}
+                        {lang === 'ar' ? 'جاري توليد بطاقات المراجعة بالذكاء الاصطناعي...' : 'No flashcards available.'}
                       </div>
                     )}
                   </div>
@@ -924,7 +1025,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                       })
                     ) : (
                       <div className="text-xs opacity-60 text-center py-10">
-                        {lang === 'ar' ? 'لا توجد أسئلة اختبار بعد.' : 'No quiz questions available.'}
+                        {lang === 'ar' ? 'جاري إعداد وتوليد أسئلة الاختبار...' : 'No quiz questions available.'}
                       </div>
                     )}
                   </div>

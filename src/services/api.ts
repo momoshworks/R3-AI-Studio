@@ -370,12 +370,19 @@ export const api = {
   async chatWithNotebook(
     notebookId: string,
     query: string,
-    sourceIds?: string[]
-  ): Promise<{ answer: string; citations: Citation[] }> {
+    sourceIds?: string[],
+    enableWeb: boolean = false,
+    mode: 'qa' | 'explain' | 'solve' = 'qa'
+  ): Promise<{ answer: string; citations: Citation[]; web_results?: any[] }> {
     const res = await fetch(`${API_BASE}/api/notebooks/${notebookId}/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, source_ids: sourceIds }),
+      body: JSON.stringify({
+        query,
+        source_ids: sourceIds,
+        enable_web: enableWeb,
+        mode,
+      }),
     });
     return await res.json();
   },

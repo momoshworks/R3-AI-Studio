@@ -148,114 +148,128 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </button>
       </div>
 
-      {/* Navigation Hub Tabs */}
+      {/* Navigation Hub Tabs: 2-Column Grid When Open, Vertical Icons When Collapsed */}
       <div
         className={`border-b ${
           isDark ? 'border-gemini-border/50' : 'border-slate-200'
-        } text-xs transition-all ${
+        } transition-all ${
           isCollapsed
-            ? 'flex flex-col items-center py-2 space-y-1 px-1'
-            : 'px-2 py-1 flex items-center justify-between gap-1'
+            ? 'flex flex-col items-center py-2.5 space-y-2 px-1'
+            : 'grid grid-cols-2 gap-2 p-2.5'
         }`}
       >
         {/* 1. Chats Tab */}
         <button
           onClick={() => onSelectTab('chats')}
-          className={`rounded-xl flex transition-all ${
+          className={`rounded-2xl transition-all ${
             isCollapsed
-              ? 'w-10 h-10 items-center justify-center'
-              : 'p-2 flex-1 flex-col items-center gap-1'
+              ? 'w-10 h-10 flex items-center justify-center'
+              : 'p-3 flex flex-col items-center justify-center gap-1.5 border'
           } ${
             currentTab === 'chats'
-              ? 'text-blue-500 bg-blue-500/15 font-semibold border border-blue-500/30'
+              ? 'text-blue-500 bg-blue-500/15 font-semibold border-blue-500/40 shadow-sm shadow-blue-500/10'
               : isDark
-              ? 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+              ? 'text-gray-300 hover:text-white bg-[#1a1b1d] hover:bg-[#252628] border-white/5'
+              : 'text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200'
           }`}
           title={t.chat}
         >
-          <MessageSquare className="w-4 h-4 shrink-0" />
-          {!isCollapsed && <span className="text-[11px]">{t.chat}</span>}
+          <MessageSquare className="w-5 h-5 shrink-0 text-blue-400" />
+          {!isCollapsed && <span className="text-xs font-medium">{t.chat}</span>}
         </button>
 
         {/* 2. Useful Tools & Websites Tab */}
         <button
           onClick={() => onSelectTab('tools')}
-          className={`rounded-xl flex transition-all ${
+          className={`rounded-2xl transition-all ${
             isCollapsed
-              ? 'w-10 h-10 items-center justify-center'
-              : 'p-2 flex-1 flex-col items-center gap-1'
+              ? 'w-10 h-10 flex items-center justify-center'
+              : 'p-3 flex flex-col items-center justify-center gap-1.5 border'
           } ${
             currentTab === 'tools'
-              ? 'text-purple-500 bg-purple-500/15 font-semibold border border-purple-500/30'
+              ? 'text-purple-500 bg-purple-500/15 font-semibold border-purple-500/40 shadow-sm shadow-purple-500/10'
               : isDark
-              ? 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+              ? 'text-gray-300 hover:text-white bg-[#1a1b1d] hover:bg-[#252628] border-white/5'
+              : 'text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200'
           }`}
           title={t.tools}
         >
-          <Globe className="w-4 h-4 shrink-0" />
-          {!isCollapsed && <span className="text-[11px]">{t.tools}</span>}
+          <Globe className="w-5 h-5 shrink-0 text-purple-400" />
+          {!isCollapsed && <span className="text-xs font-medium">{t.tools}</span>}
         </button>
 
-        {/* 3. Google Drive Tab */}
-        <button
-          onClick={() => onSelectTab('drive')}
-          className={`rounded-xl flex transition-all ${
-            isCollapsed
-              ? 'w-10 h-10 items-center justify-center'
-              : 'p-2 flex-1 flex-col items-center gap-1'
-          } ${
-            currentTab === 'drive'
-              ? 'text-emerald-500 bg-emerald-500/15 font-semibold border border-emerald-500/30'
-              : isDark
-              ? 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
-          }`}
-          title={t.drive}
-        >
-          <Cloud className="w-4 h-4 shrink-0" />
-          {!isCollapsed && <span className="text-[11px]">{t.drive}</span>}
-        </button>
-
-        {/* 4. Local Media Vault Tab */}
+        {/* 3. Local Media Vault Tab */}
         <button
           onClick={() => onSelectTab('media')}
-          className={`rounded-xl flex transition-all ${
+          className={`rounded-2xl transition-all ${
             isCollapsed
-              ? 'w-10 h-10 items-center justify-center'
-              : 'p-2 flex-1 flex-col items-center gap-1'
+              ? 'w-10 h-10 flex items-center justify-center'
+              : 'p-3 flex flex-col items-center justify-center gap-1.5 border'
           } ${
             currentTab === 'media'
-              ? 'text-cyan-500 bg-cyan-500/15 font-semibold border border-cyan-500/30'
+              ? 'text-cyan-500 bg-cyan-500/15 font-semibold border-cyan-500/40 shadow-sm shadow-cyan-500/10'
               : isDark
-              ? 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+              ? 'text-gray-300 hover:text-white bg-[#1a1b1d] hover:bg-[#252628] border-white/5'
+              : 'text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200'
           }`}
           title={t.media}
         >
-          <Film className="w-4 h-4 shrink-0" />
-          {!isCollapsed && <span className="text-[11px]">{t.media}</span>}
+          <Film className="w-5 h-5 shrink-0 text-cyan-400" />
+          {!isCollapsed && <span className="text-xs font-medium">{t.media}</span>}
         </button>
 
-        {/* 5. NotebookLM / Research Studio Tab */}
+        {/* 4. Google Drive Tab */}
+        <button
+          onClick={() => onSelectTab('drive')}
+          className={`rounded-2xl transition-all ${
+            isCollapsed
+              ? 'w-10 h-10 flex items-center justify-center'
+              : 'p-3 flex flex-col items-center justify-center gap-1.5 border'
+          } ${
+            currentTab === 'drive'
+              ? 'text-emerald-500 bg-emerald-500/15 font-semibold border-emerald-500/40 shadow-sm shadow-emerald-500/10'
+              : isDark
+              ? 'text-gray-300 hover:text-white bg-[#1a1b1d] hover:bg-[#252628] border-white/5'
+              : 'text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200'
+          }`}
+          title={t.drive}
+        >
+          <Cloud className="w-5 h-5 shrink-0 text-emerald-400" />
+          {!isCollapsed && <span className="text-xs font-medium">{t.drive}</span>}
+        </button>
+
+        {/* 5. NotebookLM / Research Studio Tab (Spans both columns for full visibility) */}
         <button
           onClick={() => onSelectTab('notebook')}
-          className={`rounded-xl flex transition-all ${
+          className={`rounded-2xl transition-all ${
             isCollapsed
-              ? 'w-10 h-10 items-center justify-center'
-              : 'p-2 flex-1 flex-col items-center gap-1'
+              ? 'w-10 h-10 flex items-center justify-center'
+              : 'col-span-2 p-3 flex items-center justify-between border'
           } ${
             currentTab === 'notebook'
-              ? 'text-amber-500 bg-amber-500/15 font-semibold border border-amber-500/30'
+              ? 'text-amber-400 bg-amber-500/15 font-semibold border-amber-500/40 shadow-sm shadow-amber-500/10'
               : isDark
-              ? 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+              ? 'text-gray-200 hover:text-white bg-gradient-to-r from-[#1a1b1d] to-[#202124] hover:bg-[#252628] border-white/10'
+              : 'text-slate-700 hover:text-slate-900 bg-gradient-to-r from-slate-50 to-slate-100 hover:bg-slate-200 border-slate-200'
           }`}
           title={t.notebookStudio}
         >
-          <BookOpen className="w-4 h-4 shrink-0" />
-          {!isCollapsed && <span className="text-[11px] truncate max-w-[45px]">{lang === 'ar' ? 'النوتبوك' : 'Notebook'}</span>}
+          <div className="flex items-center space-x-2.5 space-x-reverse">
+            <div className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+              <BookOpen className="w-4 h-4 shrink-0" />
+            </div>
+            {!isCollapsed && (
+              <div className="text-right">
+                <div className="text-xs font-bold leading-none">{t.notebookStudio}</div>
+                <div className="text-[10px] opacity-60 mt-0.5">{lang === 'ar' ? 'أبحاث ودراسة RAG' : 'AI Research & RAG'}</div>
+              </div>
+            )}
+          </div>
+          {!isCollapsed && (
+            <span className="text-[9px] font-mono bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded-md border border-amber-500/30">
+              AI Study
+            </span>
+          )}
         </button>
       </div>
 

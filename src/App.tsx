@@ -629,168 +629,168 @@ export const App: React.FC = () => {
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
-            {/* User Account Avatar Trigger */}
-            <button
-              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-              className={`flex items-center space-x-2 pl-2 pr-2.5 py-1 rounded-full border transition-colors text-xs ${
-                isDark
-                  ? 'bg-[#1e1f20] hover:bg-[#282a2c] border-gemini-border'
-                  : 'bg-slate-100 hover:bg-slate-200 border-slate-300'
-              }`}
-            >
-              <img
-                src={currentPicture}
-                alt={currentDisplayName}
-                className="w-6 h-6 rounded-full border border-blue-500 object-cover shrink-0"
-              />
-              <span className="font-medium max-w-[110px] truncate hidden md:inline">
-                {currentDisplayName}
-              </span>
-              <ChevronDown className="w-3 h-3 opacity-60" />
-            </button>
-          </div>
-        </header>
-
-        {/* User Account Dropdown Menu (Fixed Positioning at top-14 right-4 guarantees 100% visibility inside screen) */}
-        {isUserMenuOpen && (
-          <>
-            <div
-              className="fixed inset-0 z-[9998]"
-              onClick={() => setIsUserMenuOpen(false)}
-            />
-            <div
-              dir={lang === 'ar' ? 'rtl' : 'ltr'}
-              className={`fixed top-14 right-4 z-[9999] w-80 max-w-[calc(100vw-32px)] rounded-2xl shadow-2xl p-4 text-xs space-y-3.5 border transition-all animate-in fade-in zoom-in-95 duration-150 ${
-                isDark
-                  ? 'bg-[#1e1f20] border-gemini-border text-gray-200'
-                  : 'bg-white border-slate-200 text-slate-800'
-              }`}
-              style={{ right: '16px', left: 'auto' }}
-            >
-              {/* Current Active Account Card */}
-              <div
-                className={`flex items-center space-x-3 ${
-                  lang === 'ar' ? 'space-x-reverse' : ''
-                } pb-3 border-b ${
-                  isDark ? 'border-gemini-border' : 'border-slate-200'
+            {/* User Account Avatar Trigger & Dropdown Menu */}
+            <div className="relative">
+              <button
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                className={`flex items-center space-x-2 pl-2 pr-2.5 py-1 rounded-full border transition-colors text-xs ${
+                  isDark
+                    ? 'bg-[#1e1f20] hover:bg-[#282a2c] border-gemini-border'
+                    : 'bg-slate-100 hover:bg-slate-200 border-slate-300'
                 }`}
               >
                 <img
                   src={currentPicture}
                   alt={currentDisplayName}
-                  className="w-10 h-10 rounded-full border-2 border-blue-500 object-cover shrink-0"
+                  className="w-6 h-6 rounded-full border border-blue-500 object-cover shrink-0"
                 />
-                <div className="overflow-hidden min-w-0 flex-1">
-                  <div className="font-semibold text-sm truncate">{currentDisplayName}</div>
-                  <div className="text-[11px] opacity-70 truncate font-mono" dir="ltr">
-                    {currentEmail}
-                  </div>
-                  <span className="inline-block mt-1 text-[10px] bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                    {t.activeAccount}
-                  </span>
-                </div>
-              </div>
+                <span className="font-medium max-w-[110px] truncate hidden md:inline">
+                  {currentDisplayName}
+                </span>
+                <ChevronDown className="w-3 h-3 opacity-60" />
+              </button>
 
-              {/* Switch to Other Accounts */}
-              {accounts.length > 1 && (
-                <div className="space-y-1.5">
-                  <div className="text-[10px] font-semibold opacity-60 uppercase tracking-wider">
-                    {t.switchAccount}
+              {isUserMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-[9998]"
+                    onClick={() => setIsUserMenuOpen(false)}
+                  />
+                  <div
+                    dir={lang === 'ar' ? 'rtl' : 'ltr'}
+                    className={`absolute top-full mt-2 end-0 z-[9999] w-80 max-w-[calc(100vw-32px)] rounded-2xl shadow-2xl p-4 text-xs space-y-3.5 border transition-all animate-in fade-in zoom-in-95 duration-150 ${
+                      isDark
+                        ? 'bg-[#1e1f20] border-gemini-border text-gray-200 shadow-black/60'
+                        : 'bg-white border-slate-200 text-slate-800 shadow-slate-300/60'
+                    }`}
+                  >
+                    {/* Current Active Account Card */}
+                    <div
+                      className={`flex items-center space-x-3 ${
+                        lang === 'ar' ? 'space-x-reverse' : ''
+                      } pb-3 border-b ${
+                        isDark ? 'border-gemini-border' : 'border-slate-200'
+                      }`}
+                    >
+                      <img
+                        src={currentPicture}
+                        alt={currentDisplayName}
+                        className="w-10 h-10 rounded-full border-2 border-blue-500 object-cover shrink-0"
+                      />
+                      <div className="overflow-hidden min-w-0 flex-1">
+                        <div className="font-semibold text-sm truncate">{currentDisplayName}</div>
+                        <div className="text-[11px] opacity-70 truncate font-mono" dir="ltr">
+                          {currentEmail}
+                        </div>
+                        <span className="inline-block mt-1 text-[10px] bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                          {t.activeAccount}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Switch to Other Accounts */}
+                    {accounts.length > 1 && (
+                      <div className="space-y-1.5">
+                        <div className="text-[10px] font-semibold opacity-60 uppercase tracking-wider">
+                          {t.switchAccount}
+                        </div>
+                        <div className="space-y-1 max-h-36 overflow-y-auto pr-1">
+                          {accounts
+                            .filter((a) => a.id !== activeAccount?.id)
+                            .map((acc) => (
+                              <button
+                                key={acc.id}
+                                onClick={() => handleSwitchAccount(acc.id)}
+                                className={`w-full p-2 rounded-xl flex items-center justify-between text-right transition-colors ${
+                                  isDark
+                                    ? 'bg-[#171819] hover:bg-[#252628]'
+                                    : 'bg-slate-100 hover:bg-slate-200'
+                                }`}
+                              >
+                                <div
+                                  className={`flex items-center space-x-2 ${
+                                    lang === 'ar' ? 'space-x-reverse' : ''
+                                  } truncate min-w-0`}
+                                >
+                                  <img
+                                    src={
+                                      acc.picture ||
+                                      'https://api.dicebear.com/7.x/identicon/svg?seed=' + acc.email
+                                    }
+                                    alt={acc.name}
+                                    className="w-6 h-6 rounded-full object-cover shrink-0"
+                                  />
+                                  <div className="truncate text-left">
+                                    <div className="font-medium text-xs truncate">{acc.name}</div>
+                                    <div className="text-[10px] opacity-60 truncate" dir="ltr">
+                                      {acc.email}
+                                    </div>
+                                  </div>
+                                </div>
+                                <span className="text-[11px] text-blue-500 font-medium px-2 py-0.5 rounded-md hover:bg-blue-500/10 shrink-0">
+                                  {t.switchBtn}
+                                </span>
+                              </button>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div
+                      className={`space-y-1.5 pt-2 border-t ${
+                        isDark ? 'border-gemini-border' : 'border-slate-200'
+                      }`}
+                    >
+                      <button
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          setIsSettingsOpen(true);
+                        }}
+                        className={`w-full py-2 px-3 rounded-xl flex items-center justify-between transition-colors ${
+                          isDark
+                            ? 'bg-white/5 hover:bg-white/10 text-gray-200'
+                            : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-blue-500" />
+                          <span>{t.addAccount}</span>
+                        </span>
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          setIsSettingsOpen(true);
+                        }}
+                        className={`w-full py-2 px-3 rounded-xl flex items-center justify-between transition-colors ${
+                          isDark
+                            ? 'bg-white/5 hover:bg-white/10 text-gray-200'
+                            : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <Key className="w-4 h-4 text-purple-500" />
+                          <span>{t.aiSettings}</span>
+                        </span>
+                      </button>
+
+                      <button
+                        onClick={handleGoogleLogout}
+                        className="w-full py-2 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 flex items-center justify-center space-x-2 space-x-reverse transition-colors font-medium"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>{t.signOut}</span>
+                      </button>
+                    </div>
                   </div>
-                  <div className="space-y-1 max-h-36 overflow-y-auto pr-1">
-                    {accounts
-                      .filter((a) => a.id !== activeAccount?.id)
-                      .map((acc) => (
-                        <button
-                          key={acc.id}
-                          onClick={() => handleSwitchAccount(acc.id)}
-                          className={`w-full p-2 rounded-xl flex items-center justify-between text-right transition-colors ${
-                            isDark
-                              ? 'bg-[#171819] hover:bg-[#252628]'
-                              : 'bg-slate-100 hover:bg-slate-200'
-                          }`}
-                        >
-                          <div
-                            className={`flex items-center space-x-2 ${
-                              lang === 'ar' ? 'space-x-reverse' : ''
-                            } truncate min-w-0`}
-                          >
-                            <img
-                              src={
-                                acc.picture ||
-                                'https://api.dicebear.com/7.x/identicon/svg?seed=' + acc.email
-                              }
-                              alt={acc.name}
-                              className="w-6 h-6 rounded-full object-cover shrink-0"
-                            />
-                            <div className="truncate text-left">
-                              <div className="font-medium text-xs truncate">{acc.name}</div>
-                              <div className="text-[10px] opacity-60 truncate" dir="ltr">
-                                {acc.email}
-                              </div>
-                            </div>
-                          </div>
-                          <span className="text-[11px] text-blue-500 font-medium px-2 py-0.5 rounded-md hover:bg-blue-500/10 shrink-0">
-                            {t.switchBtn}
-                          </span>
-                        </button>
-                      ))}
-                  </div>
-                </div>
+                </>
               )}
-
-              {/* Action Buttons */}
-              <div
-                className={`space-y-1.5 pt-2 border-t ${
-                  isDark ? 'border-gemini-border' : 'border-slate-200'
-                }`}
-              >
-                <button
-                  onClick={() => {
-                    setIsUserMenuOpen(false);
-                    setIsSettingsOpen(true);
-                  }}
-                  className={`w-full py-2 px-3 rounded-xl flex items-center justify-between transition-colors ${
-                    isDark
-                      ? 'bg-white/5 hover:bg-white/10 text-gray-200'
-                      : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
-                  }`}
-                >
-                  <span className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-blue-500" />
-                    <span>{t.addAccount}</span>
-                  </span>
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
-
-                <button
-                  onClick={() => {
-                    setIsUserMenuOpen(false);
-                    setIsSettingsOpen(true);
-                  }}
-                  className={`w-full py-2 px-3 rounded-xl flex items-center justify-between transition-colors ${
-                    isDark
-                      ? 'bg-white/5 hover:bg-white/10 text-gray-200'
-                      : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
-                  }`}
-                >
-                  <span className="flex items-center gap-2">
-                    <Key className="w-4 h-4 text-purple-500" />
-                    <span>{t.aiSettings}</span>
-                  </span>
-                </button>
-
-                <button
-                  onClick={handleGoogleLogout}
-                  className="w-full py-2 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 flex items-center justify-center space-x-2 space-x-reverse transition-colors font-medium"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>{t.signOut}</span>
-                </button>
-              </div>
             </div>
-          </>
-        )}
+          </div>
+        </header>
 
         {/* Workspace Body: Useful Tools Hub vs Media Vault vs Notebook Studio vs AI Chat */}
         {currentTab === 'tools' ? (
