@@ -40,6 +40,12 @@ import {
 } from './types';
 import { translations, Language, Theme } from './utils/translations';
 
+const getDisplayModelName = (modelId: string) => {
+  const found = AVAILABLE_MODELS.flatMap((g) => g.models).find((m) => m.id === modelId);
+  if (found) return found.name;
+  return modelId.replace(/^Google\s+/i, '').replace(/^OpenAI\s+/i, '').replace(/\(.*\)/, '').trim();
+};
+
 const AVAILABLE_MODELS = [
   {
     category: 'Google Gemini',
@@ -111,7 +117,7 @@ export const App: React.FC = () => {
 
   // Navigation & UI State
   const [currentTab, setCurrentTab] = useState<SidebarTab>('chats');
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isGoogleAuthModalOpen, setIsGoogleAuthModalOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -483,14 +489,14 @@ export const App: React.FC = () => {
       >
         {/* Top Navigation Bar */}
         <header
-          className={`h-14 px-4 md:px-6 border-b flex items-center justify-between select-none z-10 transition-colors ${
+          className={`h-14 px-2 sm:px-4 md:px-6 border-b flex items-center justify-between select-none z-10 transition-colors gap-1.5 sm:gap-2 ${
             isDark
               ? 'bg-gemini-dark/80 backdrop-blur-md border-gemini-border/70 text-gray-100'
               : 'bg-white/90 backdrop-blur-md border-slate-200 text-slate-800'
           }`}
         >
           {/* Left section of Topbar */}
-          <div className="flex items-center space-x-2.5">
+          <div className="flex items-center space-x-1.5 sm:space-x-2.5 min-w-0">
             {/* Model Selector Dropdown Button */}
             <div className="relative">
               <button
@@ -510,7 +516,7 @@ export const App: React.FC = () => {
                 ) : (
                   <Sparkles className="w-3.5 h-3.5 text-blue-500 shrink-0" />
                 )}
-                <span className="truncate max-w-[150px]">{selectedModel}</span>
+                <span className="truncate max-w-[110px] sm:max-w-[160px] md:max-w-xs font-semibold">{getDisplayModelName(selectedModel)}</span>
                 <ChevronDown className="w-3 h-3 opacity-60 shrink-0" />
               </button>
 

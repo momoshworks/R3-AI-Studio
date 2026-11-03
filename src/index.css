@@ -221,3 +221,9 @@ code.inline-term, .inline-term {
 .teaching-card-rose {
   border-inline-start: 4px solid #f43f5e;
 }
+
+
+/* Safe Area Insets for Mobile Navigation Bar (Android gestures & home bar) */
+.safe-bottom {
+  padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
+}

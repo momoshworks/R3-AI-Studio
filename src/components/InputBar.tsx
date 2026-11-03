@@ -205,7 +205,7 @@ export const InputBar: React.FC<InputBarProps> = ({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 pb-4">
+    <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 pb-2 sm:pb-4 safe-bottom">
       {/* Input Outer Container with Liquid Glass and Drag State */}
       <div
         onDragOver={(e) => {
@@ -218,7 +218,7 @@ export const InputBar: React.FC<InputBarProps> = ({
           setIsDragging(false);
           handleFiles(e.dataTransfer.files);
         }}
-        className={`relative rounded-3xl p-3 border transition-all duration-200 shadow-xl backdrop-blur-xl ${
+        className={`relative rounded-2xl sm:rounded-3xl p-2 sm:p-3 border transition-all duration-200 shadow-xl backdrop-blur-xl ${
           isDragging
             ? 'border-blue-500 bg-blue-500/10 ring-4 ring-blue-500/20'
             : isDark
@@ -296,7 +296,7 @@ export const InputBar: React.FC<InputBarProps> = ({
           style={{ unicodeBidi: 'plaintext' }}
           placeholder={t.askPlaceholder}
           rows={1}
-          className={`w-full bg-transparent text-sm md:text-base outline-none resize-none px-3 py-2 max-h-48 leading-relaxed font-sans ${
+          className={`w-full bg-transparent text-xs sm:text-sm md:text-base outline-none resize-none px-2 sm:px-3 py-1 sm:py-2 max-h-32 sm:max-h-48 leading-relaxed font-sans ${
             isDark
               ? 'text-gray-100 placeholder-gray-500'
               : 'text-slate-900 placeholder-slate-400'
@@ -374,7 +374,7 @@ export const InputBar: React.FC<InputBarProps> = ({
       </div>
 
       {/* Footer Info Pill */}
-      <div className="text-center mt-2.5 text-[11px] opacity-60 flex items-center justify-center gap-1.5 font-medium">
+      <div className="hidden md:flex text-center mt-2 text-[10px] opacity-60 items-center justify-center gap-1.5 font-medium select-none">
         <Sparkles className="w-3 h-3 text-blue-400" />
         <span>
           {lang === 'ar'

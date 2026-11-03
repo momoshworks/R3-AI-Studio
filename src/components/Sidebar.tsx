@@ -53,6 +53,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const isDark = theme === 'dark';
 
+  const autoCollapseMobile = () => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768 && !isCollapsed) {
+      onToggleCollapse();
+    }
+  };
+
+  const handleSelectTab = (tab: SidebarTab) => {
+    onSelectTab(tab);
+    autoCollapseMobile();
+  };
+
+  const handleSelectSession = (id: string) => {
+    onSelectSession(id);
+    autoCollapseMobile();
+  };
+
+  const handleNewChat = () => {
+    onNewChat();
+    autoCollapseMobile();
+  };
+
   // Group sessions chronologically
   const groupSessions = () => {
     const now = Date.now();
@@ -90,7 +111,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <aside
       className={`h-screen border-r flex flex-col transition-all duration-300 select-none z-20 overflow-x-hidden ${
-        isCollapsed ? 'w-16' : 'w-[260px]'
+        isCollapsed ? 'w-12 sm:w-16' : 'w-[260px]'
       } ${
         isDark
           ? 'bg-gemini-sidebar border-gemini-border text-gray-100'
@@ -102,7 +123,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div
         className={`h-14 flex items-center border-b transition-colors ${
           isDark ? 'border-gemini-border/60' : 'border-slate-200'
-        } ${isCollapsed ? 'px-2 justify-center' : 'px-3 justify-between'}`}
+        } ${isCollapsed ? 'px-1 sm:px-2 justify-center' : 'px-3 justify-between'}`}
       >
         <button
           onClick={onToggleCollapse}
@@ -137,8 +158,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="p-2.5 flex justify-center">
         <button
           onClick={() => {
-            onSelectTab('chats');
-            onNewChat();
+            handleSelectTab('chats');
+            handleNewChat();
           }}
           className={`group relative overflow-hidden transition-all duration-300 border ${
             isDark
@@ -176,7 +197,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         {/* 1. Chats Tab */}
         <button
-          onClick={() => onSelectTab('chats')}
+          onClick={() => handleSelectTab('chats')}
           className={`rounded-2xl transition-all ${
             isCollapsed
               ? 'w-10 h-10 flex items-center justify-center'
@@ -196,7 +217,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* 2. Useful Tools & Websites Tab */}
         <button
-          onClick={() => onSelectTab('tools')}
+          onClick={() => handleSelectTab('tools')}
           className={`rounded-2xl transition-all ${
             isCollapsed
               ? 'w-10 h-10 flex items-center justify-center'
@@ -216,7 +237,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* 3. Local Media Vault Tab */}
         <button
-          onClick={() => onSelectTab('media')}
+          onClick={() => handleSelectTab('media')}
           className={`rounded-2xl transition-all ${
             isCollapsed
               ? 'w-10 h-10 flex items-center justify-center'
@@ -236,7 +257,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* 4. Google Drive Tab */}
         <button
-          onClick={() => onSelectTab('drive')}
+          onClick={() => handleSelectTab('drive')}
           className={`rounded-2xl transition-all ${
             isCollapsed
               ? 'w-10 h-10 flex items-center justify-center'
@@ -256,7 +277,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* 5. NotebookLM / Research Studio Tab (Spans both columns for full visibility) */}
         <button
-          onClick={() => onSelectTab('notebook')}
+          onClick={() => handleSelectTab('notebook')}
           className={`rounded-2xl transition-all ${
             isCollapsed
               ? 'w-10 h-10 flex items-center justify-center'
@@ -336,7 +357,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {items.map((s) => (
                     <div
                       key={s.id}
-                      onClick={() => onSelectSession(s.id)}
+                      onClick={() => handleSelectSession(s.id)}
                       className={`group flex items-center cursor-pointer text-xs transition-colors ${
                         isCollapsed
                           ? 'justify-center w-10 h-10 rounded-xl mx-auto'
