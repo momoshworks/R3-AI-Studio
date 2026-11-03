@@ -14,6 +14,7 @@ import {
   Moon,
   Globe,
   Search,
+  Activity,
 } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
 import { ChatCanvas } from './components/ChatCanvas';
@@ -156,6 +157,7 @@ export const App: React.FC = () => {
   const [activeMedia, setActiveMedia] = useState<MediaItem | null>(null);
 
   // System & Backend Data
+  const [isMetricsMenuOpen, setIsMetricsMenuOpen] = useState(false);
   const [metrics, setMetrics] = useState<SystemMetrics>({
     cpu_usage: 0,
     memory_used_mb: 0,
@@ -534,100 +536,175 @@ export const App: React.FC = () => {
             {/* Quick Command Palette Spotlight Trigger */}
             <button
               onClick={() => setIsCommandPaletteOpen(true)}
-              className={`hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-full border text-xs font-medium transition-all ${
+              className={`hidden md:flex items-center space-x-2 space-x-reverse px-3 py-1.5 rounded-full border text-xs font-medium transition-all ${
                 isDark
-                  ? 'bg-[#1e1f20] hover:bg-[#282a2c] border-gemini-border text-gray-400 hover:text-gray-200'
+                  ? 'bg-[#1a1b1d] hover:bg-[#222325] border-white/10 text-gray-400 hover:text-gray-200'
                   : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-600 hover:text-slate-900'
               }`}
               title={t.commandPalette}
             >
               <Search className="w-3.5 h-3.5 opacity-60 shrink-0" />
-              <span className="truncate max-w-[120px]">{t.commandPalette}</span>
-              <kbd className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-black/20 text-gray-400 border border-white/5">
+              <span className="truncate max-w-[120px]">{lang === 'ar' ? 'بحث أو أوامر...' : 'Search or actions...'}</span>
+              <kbd className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-black/30 text-gray-400 border border-white/5">
                 Ctrl+K
               </kbd>
             </button>
           </div>
 
           {/* Right section of Topbar */}
-          <div className="flex items-center space-x-2 md:space-x-3">
-            {/* System Resource Metrics */}
-            <div className="hidden xl:flex items-center space-x-2 text-[11px] font-mono">
-              <div className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-full border ${
-                isDark ? 'bg-[#1e1f20] border-gemini-border text-gray-300' : 'bg-slate-100 border-slate-200 text-slate-600'
-              }`}>
-                <Cpu className="w-3 h-3 text-blue-500" />
-                <span>{t.cpu}: {metrics.cpu_usage.toFixed(1)}%</span>
-              </div>
-              <div className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-full border ${
-                isDark ? 'bg-[#1e1f20] border-gemini-border text-gray-300' : 'bg-slate-100 border-slate-200 text-slate-600'
-              }`}>
-                <div className="w-2 h-2 rounded-full bg-purple-500" />
-                <span>{t.ram}: {metrics.memory_percentage.toFixed(0)}%</span>
-              </div>
-              <div className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-full border ${
-                isDark ? 'bg-[#1e1f20] border-gemini-border text-gray-300' : 'bg-slate-100 border-slate-200 text-slate-600'
-              }`}>
-                <HardDrive className="w-3 h-3 text-cyan-500" />
-                <span>{t.diskFree}: {metrics.disk_free_gb.toFixed(0)} GB</span>
-              </div>
+          <div className="flex items-center space-x-2 space-x-reverse">
+            {/* Unified System Health Pulse Widget (بسيط ومفيد جداً) */}
+            <div className="relative hidden lg:block">
+              <button
+                onClick={() => setIsMetricsMenuOpen(!isMetricsMenuOpen)}
+                className={`flex items-center space-x-2 space-x-reverse px-2.5 py-1.5 rounded-full border text-xs font-mono transition-all hover:border-blue-500/40 shadow-sm ${
+                  isDark
+                    ? 'bg-[#1a1b1d] border-white/10 text-gray-300'
+                    : 'bg-slate-100 border-slate-200 text-slate-700'
+                }`}
+                title={lang === 'ar' ? 'اضغط لعرض تفاصيل استهلاك وموارد الجهاز' : 'System Performance & Resources'}
+              >
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    metrics.cpu_usage > 85
+                      ? 'bg-rose-500 animate-ping'
+                      : metrics.cpu_usage > 60
+                      ? 'bg-amber-400'
+                      : 'bg-emerald-400 animate-pulse'
+                  }`}
+                />
+                <span dir="ltr" className="font-semibold text-[11px] tracking-tight text-gray-300">
+                  CPU {metrics.cpu_usage.toFixed(0)}% • RAM {metrics.memory_percentage.toFixed(0)}%
+                </span>
+                <ChevronDown className="w-2.5 h-2.5 opacity-50" />
+              </button>
+
+              {/* System Performance Details Popover */}
+              {isMetricsMenuOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setIsMetricsMenuOpen(false)} />
+                  <div
+                    dir={lang === 'ar' ? 'rtl' : 'ltr'}
+                    className={`absolute top-full mt-2 end-0 z-50 w-64 rounded-2xl p-3.5 shadow-2xl border text-xs space-y-3 animate-in fade-in zoom-in-95 duration-150 ${
+                      isDark
+                        ? 'bg-[#1e1f20] border-gemini-border text-gray-200 shadow-black/60'
+                        : 'bg-white border-slate-200 text-slate-800 shadow-slate-300/60'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between pb-2 border-b border-white/10">
+                      <span className="font-bold flex items-center gap-1.5">
+                        <Activity className="w-3.5 h-3.5 text-blue-400" />
+                        {lang === 'ar' ? 'موارد الجهاز ومحرك الذكاء' : 'System & AI Engine'}
+                      </span>
+                      <span className="text-[10px] text-emerald-400 font-mono bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                        {lang === 'ar' ? 'متصل محلياً' : 'Local Connected'}
+                      </span>
+                    </div>
+
+                    {/* CPU Meter */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[11px] opacity-80">
+                        <span className="flex items-center gap-1.5"><Cpu className="w-3 h-3 text-blue-400" />{t.cpu}</span>
+                        <span dir="ltr" className="font-mono font-bold text-blue-400">{metrics.cpu_usage.toFixed(1)}%</span>
+                      </div>
+                      <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+                        <div
+                          className="h-full bg-blue-500 rounded-full transition-all duration-300"
+                          style={{ width: `${Math.min(100, metrics.cpu_usage)}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* RAM Meter */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[11px] opacity-80">
+                        <span>{t.ram} ({((metrics.memory_used_mb || 0) / 1024).toFixed(1)} / {((metrics.memory_total_mb || 1) / 1024).toFixed(1)} GB)</span>
+                        <span dir="ltr" className="font-mono font-bold text-purple-400">{metrics.memory_percentage.toFixed(0)}%</span>
+                      </div>
+                      <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+                        <div
+                          className="h-full bg-purple-500 rounded-full transition-all duration-300"
+                          style={{ width: `${Math.min(100, metrics.memory_percentage)}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Disk Free */}
+                    <div className="flex justify-between items-center pt-1.5 text-[11px] border-t border-white/10">
+                      <span className="opacity-70 flex items-center gap-1">
+                        <HardDrive className="w-3 h-3 text-cyan-400" />
+                        {t.diskFree}
+                      </span>
+                      <span dir="ltr" className="font-mono font-bold text-cyan-400">
+                        {metrics.disk_free_gb.toFixed(0)} GB
+                      </span>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
-            {/* Smart API Key Indicator Button */}
+            {/* Smart Minimalist AI Status Pill */}
             {isChatGpt ? (
               <button
                 onClick={() => setIsSettingsOpen(true)}
-                className={`hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                className={`hidden sm:flex items-center space-x-1.5 space-x-reverse px-2.5 py-1.5 rounded-full text-xs font-medium border transition-all ${
                   hasOpenaiKey
-                    ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                    : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/30 animate-pulse'
+                    ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                    : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/30 animate-pulse'
                 }`}
                 title={hasOpenaiKey ? t.chatGptActive : t.addApiKey}
               >
-                <Bot className="w-3.5 h-3.5 text-emerald-500" />
-                <span>{hasOpenaiKey ? t.chatGptActive : t.addApiKey}</span>
+                <Bot className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{hasOpenaiKey ? 'ChatGPT' : t.addApiKey}</span>
               </button>
             ) : (
               <button
                 onClick={() => setIsSettingsOpen(true)}
-                className={`hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                className={`hidden sm:flex items-center space-x-1.5 space-x-reverse px-2.5 py-1.5 rounded-full text-xs font-medium border transition-all ${
                   hasApiKey
-                    ? 'bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border-purple-500/30'
-                    : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/30 animate-pulse'
+                    ? 'bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border-purple-500/30'
+                    : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/30 animate-pulse'
                 }`}
                 title={hasApiKey ? t.geminiNotice : t.addApiKey}
               >
-                <Key className="w-3.5 h-3.5" />
-                <span>{hasApiKey ? t.geminiActive : t.addApiKey}</span>
+                <span className={`w-1.5 h-1.5 rounded-full ${hasApiKey ? 'bg-purple-400' : 'bg-amber-400 animate-ping'}`} />
+                <span>{hasApiKey ? 'Gemini' : t.addApiKey}</span>
               </button>
             )}
 
-            {/* Language Switch Button (1-Click Toggle: Arabic ⇄ English) */}
+            {/* Subtle Divider */}
+            <div className="h-4 w-px bg-white/10 hidden sm:block mx-0.5" />
+
+            {/* Language Switch Button */}
             <button
               onClick={toggleLanguage}
-              className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-full border text-xs font-medium transition-all ${
+              className={`flex items-center space-x-1 space-x-reverse px-2.5 py-1.5 rounded-full border text-xs font-semibold transition-all ${
                 isDark
-                  ? 'bg-[#1e1f20] hover:bg-[#282a2c] border-gemini-border text-gray-200'
+                  ? 'bg-[#1a1b1d] hover:bg-[#252629] border-white/10 text-gray-200'
                   : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-800'
               }`}
               title={lang === 'ar' ? 'Switch to English' : 'التحويل إلى العربية'}
             >
-              <Globe className="w-3.5 h-3.5 text-blue-500" />
-              <span className="font-semibold">{lang === 'ar' ? 'EN' : 'عربي'}</span>
+              <Globe className="w-3.5 h-3.5 text-blue-400" />
+              <span>{lang === 'ar' ? 'EN' : 'عربي'}</span>
             </button>
 
-            {/* Theme Switch Button (1-Click Toggle: Dark ⇄ Light) */}
+            {/* Theme Switch Button */}
             <button
               onClick={toggleTheme}
               className={`p-1.5 rounded-full border transition-all ${
                 isDark
-                  ? 'bg-[#1e1f20] hover:bg-[#282a2c] border-gemini-border text-amber-400'
+                  ? 'bg-[#1a1b1d] hover:bg-[#252629] border-white/10 text-amber-400'
                   : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-purple-600'
               }`}
               title={lang === 'ar' ? 'تبديل المظهر (فاتح / داكن)' : 'Toggle Theme (Light / Dark)'}
             >
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
+
+            {/* Subtle Divider */}
+            <div className="h-4 w-px bg-white/10 mx-0.5" />
 
             {/* User Account Avatar Trigger & Dropdown Menu */}
             <div className="relative">
