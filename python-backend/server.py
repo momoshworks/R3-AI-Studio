@@ -1,3 +1,4 @@
+import gc
 import os
 import sys
 import json
@@ -468,6 +469,7 @@ async def chat_stream_endpoint(request: ChatRequest):
             event = await queue.get()
             yield f"data: {json.dumps(event)}\n\n"
             if event.get("type") == "done":
+                gc.collect()
                 break
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
@@ -751,16 +753,26 @@ async def delete_account(account_id: str):
     active = next((a for a in filtered if a.get("is_active")), None)
     return {"status": "success", "accounts": filtered, "active": active}
 
-# System Status Telemetry
+# System Status Telemetry (30s Disk I/O Cached)
+_cached_disk_stats = {"time": 0.0, "free": 0.0, "total": 0.0}
+
 @app.get("/api/system/status")
 async def get_system_status():
+    global _cached_disk_stats
+    now = time.time()
+    if now - _cached_disk_stats["time"] > 30.0 or _cached_disk_stats["total"] == 0.0:
+        try:
+            disk = shutil.disk_usage(Path.home())
+            _cached_disk_stats = {
+                "time": now,
+                "free": round(disk.free / (1024 ** 3), 2),
+                "total": round(disk.total / (1024 ** 3), 2),
+            }
+        except Exception:
+            pass
+
     cpu = psutil.cpu_percent(interval=None)
     mem = psutil.virtual_memory()
-    disk = shutil.disk_usage(Path.home())
-
-    disk_free_gb = disk.free / (1024 ** 3)
-    disk_total_gb = disk.total / (1024 ** 3)
-
     user_info = drive_sync.get_user_profile()
 
     return {
@@ -768,8 +780,8 @@ async def get_system_status():
         "memory_used_mb": int(mem.used / (1024 * 1024)),
         "memory_total_mb": int(mem.total / (1024 * 1024)),
         "memory_percentage": mem.percent,
-        "disk_free_gb": round(disk_free_gb, 2),
-        "disk_total_gb": round(disk_total_gb, 2),
+        "disk_free_gb": _cached_disk_stats.get("free", 0.0),
+        "disk_total_gb": _cached_disk_stats.get("total", 0.0),
         "user": user_info
     }
 

@@ -214,15 +214,31 @@ export const App: React.FC = () => {
     };
     initData();
 
-    // Telemetry pulse
-    const metricsInterval = setInterval(async () => {
+    // Telemetry pulse: idle-throttled to save CPU when window is inactive
+    const fetchMetrics = async () => {
+      if (document.hidden) return; // Do not consume CPU/disk when tab/window is minimized
       try {
         const sys = await api.getSystemMetrics();
         setMetrics(sys);
       } catch {}
-    }, 10000);
+    };
 
-    return () => clearInterval(metricsInterval);
+    const metricsInterval = setInterval(fetchMetrics, 10000);
+
+    // Refresh immediately when returning to the app window
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchMetrics();
+      }
+    };
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleVisibilityChange);
+
+    return () => {
+      clearInterval(metricsInterval);
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleVisibilityChange);
+    };
   }, []);
 
   const handleGoogleLogout = async () => {
@@ -328,31 +344,61 @@ export const App: React.FC = () => {
 
     const chatHistory = [...activeSession.messages, userMessage];
 
+    // High-performance RAF Chunk Buffer: groups rapid tokens and renders at 60fps
+    let streamBuffer = '';
+    let streamRafId: number | null = null;
+
+    const flushStreamBuffer = () => {
+      if (!streamBuffer) return;
+      const flushedChunk = streamBuffer;
+      streamBuffer = '';
+      setSessions((prevSessions) =>
+        prevSessions.map((s) => {
+          if (s.id === activeSessionId) {
+            return {
+              ...s,
+              messages: s.messages.map((m) =>
+                m.id === assistantPlaceholderId
+                  ? { ...m, content: m.content + flushedChunk }
+                  : m
+              ),
+            };
+          }
+          return s;
+        })
+      );
+    };
+
+    const scheduleStreamFlush = () => {
+      if (streamRafId !== null) return;
+      streamRafId = requestAnimationFrame(() => {
+        streamRafId = null;
+        flushStreamBuffer();
+      });
+    };
+
     const abort = api.streamChat(
       chatHistory,
       selectedModel,
       (chunk: string) => {
-        setSessions((prevSessions) =>
-          prevSessions.map((s) => {
-            if (s.id === activeSessionId) {
-              return {
-                ...s,
-                messages: s.messages.map((m) =>
-                  m.id === assistantPlaceholderId
-                    ? { ...m, content: m.content + chunk }
-                    : m
-                ),
-              };
-            }
-            return s;
-          })
-        );
+        streamBuffer += chunk;
+        scheduleStreamFlush();
       },
       () => {
+        if (streamRafId !== null) {
+          cancelAnimationFrame(streamRafId);
+          streamRafId = null;
+        }
+        flushStreamBuffer();
         setIsGenerating(false);
         stopGenerationRef.current = null;
       },
       (error: any) => {
+        if (streamRafId !== null) {
+          cancelAnimationFrame(streamRafId);
+          streamRafId = null;
+        }
+        flushStreamBuffer();
         console.error('Chat stream error:', error);
         setSessions((prevSessions) =>
           prevSessions.map((s) => {

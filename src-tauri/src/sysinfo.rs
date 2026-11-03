@@ -18,7 +18,6 @@ pub fn get_system_metrics() -> SystemMetrics {
             .with_cpu(CpuRefreshKind::everything())
             .with_memory(MemoryRefreshKind::everything()),
     );
-    std::thread::sleep(std::time::Duration::from_millis(150));
     sys.refresh_cpu();
     sys.refresh_memory();
 

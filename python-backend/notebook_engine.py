@@ -1,3 +1,4 @@
+import gc
 import os
 import sys
 import json
@@ -10,7 +11,6 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
-import pypdf
 import urllib.request
 import urllib.parse
 
@@ -305,9 +305,10 @@ class NotebookEngine:
     # Document Ingestion & Chunking
     # =========================================================================
     def _extract_text_from_pdf(self, file_path: Path) -> List[Dict[str, Any]]:
-        """Extracts text page by page with exact page numbers."""
+        """Extracts text page by page with exact page numbers (lazy pypdf + memory cleanup)."""
         pages = []
         try:
+            import pypdf
             reader = pypdf.PdfReader(str(file_path))
             for idx, page in enumerate(reader.pages):
                 page_text = page.extract_text() or ""
@@ -316,6 +317,8 @@ class NotebookEngine:
                     pages.append({"page": idx + 1, "text": cleaned})
         except Exception as e:
             print(f"[PDF Extraction Error] {e}")
+        finally:
+            gc.collect()
         return pages
 
     def _extract_text_from_docx(self, file_path: Path) -> List[Dict[str, Any]]:

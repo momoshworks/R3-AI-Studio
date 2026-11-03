@@ -25,8 +25,12 @@ impl SystemMonitor {
                     .with_memory(MemoryRefreshKind::everything()),
             );
 
+            let mut disk_check_counter = 0;
+            let mut cached_disk_total_gb = 0.0;
+            let mut cached_disk_free_gb = 0.0;
+
             loop {
-                tokio::time::sleep(tokio::time::Duration::from_millis(1000)).await;
+                tokio::time::sleep(tokio::time::Duration::from_millis(3000)).await;
 
                 sys.refresh_cpu();
                 sys.refresh_memory();
@@ -40,17 +44,24 @@ impl SystemMonitor {
                     0.0
                 };
 
-                let disks = Disks::new_with_refreshed_list();
-                let mut total_space: u64 = 0;
-                let mut available_space: u64 = 0;
+                // Refresh disk info only once every 10 iterations (~30 seconds) to eliminate continuous disk I/O
+                if disk_check_counter == 0 || cached_disk_total_gb == 0.0 {
+                    let disks = Disks::new_with_refreshed_list();
+                    let mut total_space: u64 = 0;
+                    let mut available_space: u64 = 0;
 
-                for disk in &disks {
-                    total_space += disk.total_space();
-                    available_space += disk.available_space();
+                    for disk in &disks {
+                        total_space += disk.total_space();
+                        available_space += disk.available_space();
+                    }
+
+                    cached_disk_total_gb = (total_space as f64) / (1024.0 * 1024.0 * 1024.0);
+                    cached_disk_free_gb = (available_space as f64) / (1024.0 * 1024.0 * 1024.0);
                 }
+                disk_check_counter = (disk_check_counter + 1) % 10;
 
-                let disk_total_gb = (total_space as f64) / (1024.0 * 1024.0 * 1024.0);
-                let disk_free_gb = (available_space as f64) / (1024.0 * 1024.0 * 1024.0);
+                let disk_total_gb = cached_disk_total_gb;
+                let disk_free_gb = cached_disk_free_gb;
 
                 let telemetry = SystemTelemetry {
                     cpu: format!("{:.1}%", cpu_usage),
@@ -74,7 +85,6 @@ impl SystemMonitor {
                 .with_cpu(CpuRefreshKind::everything())
                 .with_memory(MemoryRefreshKind::everything()),
         );
-        std::thread::sleep(std::time::Duration::from_millis(100));
         sys.refresh_cpu();
         sys.refresh_memory();
 
