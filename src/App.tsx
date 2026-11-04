@@ -32,6 +32,7 @@ import { DeveloperModal } from './components/DeveloperModal';
 import { UpdateModal } from './components/UpdateModal';
 import { checkGitHubRelease, ReleaseInfo } from './services/updateService';
 import { api } from './services/api';
+import { storageService } from './services/storage';
 import {
   AttachedFile,
   ChatMessage,
@@ -194,16 +195,33 @@ export const App: React.FC = () => {
   const [hasOpenaiKey, setHasOpenaiKey] = useState(false);
   const [googleUser, setGoogleUser] = useState<GoogleUser>({ authenticated: false });
 
-  // Chat Sessions
-  const [sessions, setSessions] = useState<Session[]>([
-    {
-      id: 'session-1',
-      title: lang === 'ar' ? 'محادثة ذكية جديدة' : 'New AI Session',
-      timestamp: Date.now(),
-      messages: [],
-    },
-  ]);
-  const [activeSessionId, setActiveSessionId] = useState<string>('session-1');
+  // Chat Sessions (Persistent Offline-First across Android & Desktop)
+  const [sessions, setSessions] = useState<Session[]>(() => storageService.getInitialSessions());
+  const [activeSessionId, setActiveSessionId] = useState<string>(() => storageService.getInitialActiveSessionId());
+
+  // Load complete offline sessions and attachments on launch
+  useEffect(() => {
+    storageService.loadSessions().then((loaded) => {
+      if (loaded && loaded.length > 0) {
+        setSessions(loaded);
+        storageService.loadActiveSessionId().then((savedId) => {
+          if (savedId && loaded.some((s) => s.id === savedId)) {
+            setActiveSessionId(savedId);
+          }
+        });
+      }
+    });
+  }, []);
+
+  // Auto-save all chat sessions and messages immediately
+  useEffect(() => {
+    storageService.saveAllSessions(sessions);
+  }, [sessions]);
+
+  // Remember active session
+  useEffect(() => {
+    storageService.saveActiveSessionId(activeSessionId);
+  }, [activeSessionId]);
 
   // Execution & Models
   const [selectedModel, setSelectedModel] = useState<string>('Google Gemini (gemini-3.5-flash)');
@@ -349,6 +367,7 @@ export const App: React.FC = () => {
 
   // Delete Chat Session
   const handleDeleteSession = (id: string) => {
+    storageService.deleteSession(id);
     const filtered = sessions.filter((s) => s.id !== id);
     if (filtered.length === 0) {
       const fallback: Session = {
@@ -370,6 +389,12 @@ export const App: React.FC = () => {
   // Send Message & Stream Chat
   const handleSendMessage = (text: string, attachments?: AttachedFile[]) => {
     if (!text.trim() && (!attachments || attachments.length === 0)) return;
+
+    if (attachments && attachments.length > 0) {
+      for (const att of attachments) {
+        storageService.saveAttachment(att);
+      }
+    }
 
     const userMessage: ChatMessage = {
       id: `msg-${Date.now()}`,

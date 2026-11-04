@@ -90,6 +90,22 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [savingMediaUrl, setSavingMediaUrl] = useState<string | null>(null);
   const [savedMediaUrls, setSavedMediaUrls] = useState<string[]>([]);
+
+  const handleViewOrDownloadAttachment = (att: AttachedFile) => {
+    if (att.is_image && (att.preview_url || att.data)) {
+      setLightboxUrl(att.preview_url || att.data || null);
+      return;
+    }
+    const fileSource = att.data || att.preview_url;
+    if (fileSource) {
+      const a = document.createElement('a');
+      a.href = fileSource;
+      a.download = att.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  };
   const [inlineKey, setInlineKey] = useState('');
   const [isSavingInlineKey, setIsSavingInlineKey] = useState(false);
   const [inlineKeyStatus, setInlineKeyStatus] = useState<string | null>(null);
@@ -431,7 +447,9 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                           return (
                             <div
                               key={att.id}
-                              className="flex items-center gap-2.5 p-2 px-3 rounded-2xl bg-black/35 border border-white/10 shadow-sm backdrop-blur-md"
+                              onClick={() => handleViewOrDownloadAttachment(att)}
+                              className="flex items-center gap-2.5 p-2 px-3 rounded-2xl bg-black/35 hover:bg-black/55 border border-white/10 hover:border-blue-400/50 shadow-sm backdrop-blur-md cursor-pointer transition-all active:scale-95 group"
+                              title={lang === 'ar' ? 'انقر لفتح أو تحميل الملف محلياً' : 'Click to view or download file locally'}
                             >
                               <div
                                 className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${

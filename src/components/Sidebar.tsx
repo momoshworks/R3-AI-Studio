@@ -524,6 +524,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
 
+      {/* Offline Status Badge */}
+      {!isCollapsed && (
+        <div className="px-3 py-1.5 flex items-center justify-between text-[10px] text-gray-500 font-mono border-t border-white/5">
+          <span className="flex items-center gap-1.5 text-emerald-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>{lang === 'ar' ? 'حفظ محلي فوري (Offline-First)' : 'Offline Auto-Saved'}</span>
+          </span>
+          <span className="text-[9px] opacity-60">SQLite / IDB</span>
+        </div>
+      )}
+
       {/* Footer Settings Button */}
       <div
         className={`p-3 border-t ${
