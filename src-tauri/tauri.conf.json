@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/nicepkg/tauri-schema/main/tauri-v2.schema.json",
-  "productName": "NexusHub",
-  "version": "0.1.0",
+  "productName": "Ra AI Studio",
+  "version": "1.0.0",
   "identifier": "com.nexushub.app",
   "build": {
     "beforeDevCommand": "npm run dev",

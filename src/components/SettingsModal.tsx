@@ -25,6 +25,7 @@ import {
 import { DriveStatus, UserAccount } from '../types';
 import { api } from '../services/api';
 import { Translations, Theme, Language } from '../utils/translations';
+import { ReleaseInfo } from '../services/updateService';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -41,6 +42,8 @@ interface SettingsModalProps {
   onToggleTheme?: (theme: Theme) => void;
   onToggleLang?: (lang: Language) => void;
   t?: Translations;
+  onOpenUpdateModal?: () => void;
+  releaseInfo?: ReleaseInfo | null;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -54,6 +57,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   lang = 'ar',
   onToggleTheme,
   onToggleLang,
+  onOpenUpdateModal,
+  releaseInfo,
 }) => {
   // Active Settings Tab ('api-keys' | 'accounts' | 'appearance')
   const [activeTab, setActiveTab] = useState<'api-keys' | 'accounts' | 'appearance'>('api-keys');
@@ -857,6 +862,56 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </button>
                 </div>
               </div>
+
+              {/* GitHub Releases & Updates Container */}
+              <div className="p-4 rounded-2xl bg-[#171819] border border-purple-500/30 space-y-3 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-gray-200 text-xs flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-purple-400" />
+                    <span>{lang === 'ar' ? 'تحديثات التطبيق (GitHub Releases)' : 'App Updates & Releases'}</span>
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30">
+                      {releaseInfo?.current_version || 'v1.0.0'}
+                    </span>
+                    {releaseInfo?.has_update && (
+                      <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 animate-pulse">
+                        {releaseInfo.tag_name}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <p className="text-gray-400 text-[11px] leading-relaxed">
+                  {lang === 'ar'
+                    ? 'يتم التحقق تلقائياً من أحدث الإصدارات المرفوعة على مستودع GitHub لتحميل التحديثات وملفات الحزم الجديدة بنقرة واحدة.'
+                    : 'Automatically checks GitHub for latest releases and gives you one-click downloads.'}
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onOpenUpdateModal && onOpenUpdateModal();
+                  }}
+                  className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-md ${
+                    releaseInfo?.has_update
+                      ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:opacity-95'
+                      : 'bg-white/10 hover:bg-white/15 text-gray-200 border border-white/10'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4 text-amber-300" />
+                  <span>
+                    {releaseInfo?.has_update
+                      ? lang === 'ar'
+                        ? `تحديث جديد متاح (${releaseInfo.tag_name}) - اضغط للتحميل`
+                        : `New Release Available (${releaseInfo.tag_name}) - Click to Download`
+                      : lang === 'ar'
+                      ? 'فحص التحديثات وسجل الإصدارات'
+                      : 'Check Releases & Changelog'}
+                  </span>
+                </button>
+              </div>
             </div>
           )}
 
@@ -882,9 +937,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         {/* Footer */}
         <div className="px-6 py-3.5 bg-[#171819] border-t border-gemini-border flex items-center justify-between">
-          <span className="text-[11px] text-gray-500">
-            R3 AI Studio v1.0.0 · Google Gemini &amp; ChatGPT &amp; Media Vault
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-gray-500">
+              R3 AI Studio v1.0.0 · Google Gemini &amp; ChatGPT &amp; Media Vault
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onOpenUpdateModal && onOpenUpdateModal();
+              }}
+              className="text-[11px] text-purple-400 hover:text-purple-300 underline font-mono cursor-pointer flex items-center gap-1"
+            >
+              <span>{lang === 'ar' ? 'التحديثات' : 'Updates'}</span>
+              {releaseInfo?.has_update && (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+              )}
+            </button>
+          </div>
           <button
             type="button"
             onClick={onClose}

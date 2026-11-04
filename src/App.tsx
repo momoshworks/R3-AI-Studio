@@ -29,6 +29,8 @@ import { CommandPalette } from './components/CommandPalette';
 import { NotebookStudio } from './components/NotebookStudio';
 import { GlassLoginModal } from './components/GlassLoginModal';
 import { DeveloperModal } from './components/DeveloperModal';
+import { UpdateModal } from './components/UpdateModal';
+import { checkGitHubRelease, ReleaseInfo } from './services/updateService';
 import { api } from './services/api';
 import {
   AttachedFile,
@@ -141,6 +143,17 @@ export const App: React.FC = () => {
     }
   });
   const [showDevModal, setShowDevModal] = useState<boolean>(false);
+  const [releaseInfo, setReleaseInfo] = useState<ReleaseInfo | null>(null);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState<boolean>(false);
+
+  // Check GitHub Releases for updates on startup
+  useEffect(() => {
+    checkGitHubRelease().then((info) => {
+      if (info) {
+        setReleaseInfo(info);
+      }
+    });
+  }, []);
 
   // Global Ultra-Fast Keyboard Shortcuts & Menu Navigation
   useEffect(() => {
@@ -883,6 +896,43 @@ export const App: React.FC = () => {
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
+            {/* GitHub Release Update Button */}
+            <button
+              onClick={() => setIsUpdateModalOpen(true)}
+              className={`flex items-center space-x-1 space-x-reverse px-2.5 py-1.5 rounded-full border text-xs font-semibold transition-all ${
+                releaseInfo?.has_update
+                  ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white border-purple-400 shadow-md shadow-purple-500/25 animate-pulse'
+                  : isDark
+                  ? 'bg-[#1a1b1d] hover:bg-[#252629] border-white/10 text-gray-300'
+                  : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
+              }`}
+              title={
+                releaseInfo?.has_update
+                  ? lang === 'ar'
+                    ? `تحديث جديد متوفر: ${releaseInfo.tag_name}`
+                    : `New Update Available: ${releaseInfo.tag_name}`
+                  : lang === 'ar'
+                  ? 'فحص التحديثات (GitHub)'
+                  : 'Check Updates'
+              }
+            >
+              <Sparkles className={`w-3.5 h-3.5 ${releaseInfo?.has_update ? 'text-amber-300 animate-spin' : 'text-purple-400'}`} />
+              <span className="hidden sm:inline">
+                {releaseInfo?.has_update
+                  ? lang === 'ar'
+                    ? 'تحديث'
+                    : 'Update'
+                  : lang === 'ar'
+                  ? 'تحديثات'
+                  : 'Updates'}
+              </span>
+              {releaseInfo?.has_update && (
+                <span className="text-[10px] font-mono px-1 py-0.2 rounded-full bg-white/20">
+                  {releaseInfo.tag_name}
+                </span>
+              )}
+            </button>
+
             {/* Subtle Divider */}
             <div className="h-4 w-px bg-white/10 mx-0.5" />
 
@@ -1037,6 +1087,30 @@ export const App: React.FC = () => {
                       <button
                         onClick={() => {
                           setIsUserMenuOpen(false);
+                          setIsUpdateModalOpen(true);
+                        }}
+                        className={`w-full py-2 px-3 rounded-xl flex items-center justify-between transition-colors ${
+                          releaseInfo?.has_update
+                            ? 'bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 font-medium'
+                            : isDark
+                            ? 'bg-white/5 hover:bg-white/10 text-gray-200'
+                            : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <Sparkles className={`w-4 h-4 ${releaseInfo?.has_update ? 'text-amber-400 animate-spin' : 'text-purple-400'}`} />
+                          <span>{lang === 'ar' ? 'التحقق من التحديثات (GitHub)' : 'Check for Updates'}</span>
+                        </span>
+                        {releaseInfo?.has_update && (
+                          <span className="text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full font-mono">
+                            {releaseInfo.tag_name}
+                          </span>
+                        )}
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
                           setShowDevModal(true);
                         }}
                         className={`w-full py-2 px-3 rounded-xl flex items-center justify-between transition-colors ${
@@ -1150,6 +1224,18 @@ export const App: React.FC = () => {
         onToggleTheme={setTheme}
         onToggleLang={setLang}
         t={t}
+        onOpenUpdateModal={() => setIsUpdateModalOpen(true)}
+        releaseInfo={releaseInfo}
+      />
+
+      {/* GitHub Release Update Container Modal */}
+      <UpdateModal
+        isOpen={isUpdateModalOpen}
+        onClose={() => setIsUpdateModalOpen(false)}
+        releaseInfo={releaseInfo}
+        onUpdateReleaseInfo={setReleaseInfo}
+        theme={theme}
+        lang={lang}
       />
 
       {/* Google Auth Modal */}
