@@ -214,7 +214,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
     <div className="flex-1 overflow-y-auto px-2.5 sm:px-6 md:px-12 py-3 sm:py-6 space-y-4 sm:space-y-6 max-w-4xl mx-auto w-full">
       {/* Top Action Bar when messages exist (Responsive Single-Line) */}
       {messages.length > 0 && (
-        <div className="flex flex-wrap items-center justify-between gap-1.5 pb-2 border-b border-white/10 select-none text-xs">
+        <div className="hidden sm:flex flex-wrap items-center justify-between gap-1.5 pb-2 border-b border-white/10 select-none text-xs">
           <div className="flex items-center gap-1.5 min-w-0">
             <span className="hidden sm:inline text-gray-400 font-medium">
               {lang === 'ar' ? 'جلسة المحادثة الحالية' : 'Current Chat Session'}
@@ -860,7 +860,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                       <button
                         onClick={() => handleDirectPdfDownload(msg.content, msg.id, 'R3 AI Report')}
                         disabled={downloadingPdfId === msg.id}
-                        className="flex items-center gap-1 px-2 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/20 transition-colors text-[11px] font-medium disabled:opacity-50"
+                        className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/20 transition-colors text-[11px] font-medium disabled:opacity-50"
                         title={t.downloadPdf}
                       >
                         <Download className="w-3 h-3 text-red-400" />
@@ -888,6 +888,19 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                                   : 'bg-white border-slate-200 text-slate-800 shadow-slate-300/80'
                               }`}
                             >
+                              {/* Direct PDF Download (Mobile only) */}
+                              <button
+                                onClick={() => {
+                                  handleDirectPdfDownload(msg.content, msg.id, 'R3 AI Report');
+                                  setOpenMenuMsgId(null);
+                                }}
+                                disabled={downloadingPdfId === msg.id}
+                                className="sm:hidden w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-white/10 text-left transition-colors text-[11px]"
+                              >
+                                <Download className="w-3.5 h-3.5 text-red-400" />
+                                <span>{lang === 'ar' ? 'تحميل كملف PDF' : 'Download PDF'}</span>
+                              </button>
+
                               {/* Export Markdown (.md) */}
                               <button
                                 onClick={() => {

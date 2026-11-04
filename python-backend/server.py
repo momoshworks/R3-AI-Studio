@@ -286,13 +286,25 @@ async def stream_gemini(chat_request: ChatRequest, queue: asyncio.Queue):
         top_p=gen_params["top_p"],
     )
 
-    candidate_models = [
+    import re
+    raw_model = chat_request.model or ""
+    match = re.search(r'\((gemini-[^)]+)\)', raw_model, re.IGNORECASE)
+    requested_slug = match.group(1) if match else None
+    if not requested_slug:
+        match_direct = re.search(r'(gemini-[a-zA-Z0-9.-]+)', raw_model, re.IGNORECASE)
+        requested_slug = match_direct.group(1) if match_direct else None
+
+    candidate_models = []
+    if requested_slug:
+        candidate_models.append(requested_slug)
+    for default_m in [
+        "gemini-3.5-flash",
         "gemini-3.5-flash-lite",
         "gemini-3.1-flash-lite",
-        "gemini-flash-lite-latest",
-        "gemini-3.5-flash",
         "gemini-3.8-flash"
-    ]
+    ]:
+        if default_m not in candidate_models:
+            candidate_models.append(default_m)
     stream_success = False
 
     for model_name in candidate_models:
@@ -1153,10 +1165,9 @@ notebook_engine = NotebookEngine(base_storage_dir=BASE_DIR / "notebooks")
 def generate_gemini_fallback(prompt: str, client: genai.Client) -> Optional[str]:
     """Smart fallback across active Gemini models to bypass 429 quota or 503 load spikes."""
     models_to_try = [
+        "gemini-3.5-flash",
         "gemini-3.5-flash-lite",
         "gemini-3.1-flash-lite",
-        "gemini-flash-lite-latest",
-        "gemini-3.5-flash",
         "gemini-3.8-flash",
         "gemini-3.1-pro-preview"
     ]

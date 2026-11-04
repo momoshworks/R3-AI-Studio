@@ -11,6 +11,8 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/core": "^8.6.0",
     "@tauri-apps/api": "^2.0.0",
     "@tauri-apps/plugin-fs": "^2.7.1",
     "@tauri-apps/plugin-shell": "^2.0.0",
@@ -26,6 +28,7 @@
     "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.6.0",
     "@tauri-apps/cli": "^2.0.0",
     "@types/node": "^22.8.4",
     "@types/react": "^18.3.12",

@@ -6,6 +6,7 @@ export interface AttachedFile {
   saved_path?: string;
   preview_url?: string;
   is_image?: boolean;
+  data?: string;
 }
 
 export interface ChatMessage {

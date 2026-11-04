@@ -20,6 +20,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Sparkles,
+  HardDrive,
 } from 'lucide-react';
 import { DriveStatus, UserAccount } from '../types';
 import { api } from '../services/api';
@@ -76,6 +77,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     message?: string;
     model?: string;
   } | null>(null);
+
+  // Backend Server URL State
+  const [backendUrl, setBackendUrl] = useState(() => api.getBackendUrl());
+  const [backendSaveStatus, setBackendSaveStatus] = useState<string | null>(null);
 
   // Accounts State
   const [accounts, setAccounts] = useState<UserAccount[]>([]);
@@ -347,6 +352,50 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="p-6 space-y-6 overflow-y-auto">
           {activeTab === 'api-keys' && (
             <>
+              {/* R3 Backend Server / Mode Configuration */}
+              <div className="p-4 rounded-2xl bg-[#171819] border border-cyan-500/30 space-y-3 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-gray-200 text-xs flex items-center gap-1.5">
+                    <HardDrive className="w-4 h-4 text-cyan-400" />
+                    <span>{lang === 'ar' ? 'وضع التشغيل وخادم R3 المحلي (اختياري)' : 'R3 Backend Server & Mode (Optional)'}</span>
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-medium">
+                    {backendUrl.trim() ? (lang === 'ar' ? 'خادم مخصص' : 'Custom Server') : (lang === 'ar' ? 'وضع مستقل مباشر على الهاتف' : 'Direct Standalone')}
+                  </span>
+                </div>
+
+                <p className="text-gray-400 text-[11px] leading-relaxed">
+                  {lang === 'ar'
+                    ? 'اتركه فارغاً للعمل بوضع الهاتف المستقل الكامل عبر مفاتيح API مباشرة. أو أدخل عنوان IP لحاسوبك (مثل: http://192.168.1.15:8000) للربط مع خادم R3 على الكمبيوتر واستخدام ميزات NotebookLM المتقدمة.'
+                    : 'Leave empty for direct standalone mode using your API keys. Or enter your PC IP address (e.g. http://192.168.1.15:8000) to connect to R3 local backend.'}
+                </p>
+
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    dir="ltr"
+                    value={backendUrl}
+                    onChange={(e) => {
+                      setBackendUrl(e.target.value);
+                      setBackendSaveStatus(null);
+                    }}
+                    placeholder="http://192.168.1.x:8000"
+                    className="flex-1 bg-[#131314] border border-gemini-border rounded-xl px-3 py-2 text-xs font-mono text-gray-100 placeholder-gray-600 outline-none focus:border-cyan-500 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      api.setBackendUrl(backendUrl);
+                      setBackendSaveStatus(lang === 'ar' ? 'تم الحفظ!' : 'Saved!');
+                      setTimeout(() => setBackendSaveStatus(null), 2500);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-medium text-xs transition-all shadow-md active:scale-95 shrink-0"
+                  >
+                    {backendSaveStatus || (lang === 'ar' ? 'حفظ' : 'Save')}
+                  </button>
+                </div>
+              </div>
+
               {/* 1. ChatGPT (OpenAI) API Key Section */}
               <div className="p-4 rounded-2xl bg-[#171819] border border-emerald-500/30 space-y-3 shadow-sm">
                 <div className="flex items-center justify-between">

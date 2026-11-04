@@ -52,7 +52,7 @@ export const InputBar: React.FC<InputBarProps> = ({
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${Math.min(
         textareaRef.current.scrollHeight,
-        200
+        160
       )}px`;
     }
   }, [text]);
@@ -294,9 +294,9 @@ export const InputBar: React.FC<InputBarProps> = ({
           onKeyDown={handleKeyDown}
           dir="auto"
           style={{ unicodeBidi: 'plaintext' }}
-          placeholder={t.askPlaceholder}
+          placeholder={lang === 'ar' ? 'اسأل R3 أي شيء، أو تحدث صوتياً...' : 'Ask R3 anything or speak...'}
           rows={1}
-          className={`w-full bg-transparent text-xs sm:text-sm md:text-base outline-none resize-none px-2 sm:px-3 py-1 sm:py-2 max-h-32 sm:max-h-48 leading-relaxed font-sans ${
+          className={`w-full bg-transparent text-xs sm:text-sm md:text-base outline-none resize-none px-2 sm:px-3 py-1.5 sm:py-2 min-h-[38px] max-h-28 sm:max-h-48 leading-relaxed font-sans ${
             isDark
               ? 'text-gray-100 placeholder-gray-500'
               : 'text-slate-900 placeholder-slate-400'
@@ -374,7 +374,7 @@ export const InputBar: React.FC<InputBarProps> = ({
       </div>
 
       {/* Footer Info Pill */}
-      <div className="hidden md:flex text-center mt-2 text-[10px] opacity-60 items-center justify-center gap-1.5 font-medium select-none">
+      <div className="hidden lg:flex text-center mt-2 text-[10px] opacity-60 items-center justify-center gap-1.5 font-medium select-none">
         <Sparkles className="w-3 h-3 text-blue-400" />
         <span>
           {lang === 'ar'

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">R3 AI Studio</string>
+    <string name="title_activity_main">R3 AI Studio</string>
+    <string name="package_name">com.r3.aistudio</string>
+    <string name="custom_url_scheme">com.r3.aistudio</string>
+</resources>

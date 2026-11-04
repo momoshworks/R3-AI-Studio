@@ -110,8 +110,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside
-      className={`h-screen border-r flex flex-col transition-all duration-300 select-none z-20 overflow-x-hidden ${
-        isCollapsed ? 'w-12 sm:w-16' : 'w-[260px]'
+      className={`h-screen border-r flex flex-col transition-all duration-300 select-none z-50 overflow-x-hidden safe-pt safe-pb ${
+        isCollapsed ? 'hidden md:flex md:w-16' : 'fixed inset-y-0 start-0 z-50 w-72 max-w-[85vw] shadow-2xl md:static md:w-[260px] md:shadow-none'
       } ${
         isDark
           ? 'bg-gemini-sidebar border-gemini-border text-gray-100'

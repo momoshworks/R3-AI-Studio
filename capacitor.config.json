@@ -1,0 +1,12 @@
+{
+  "appId": "com.r3.aistudio",
+  "appName": "R3 AI Studio",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}
