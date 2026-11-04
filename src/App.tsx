@@ -27,6 +27,8 @@ import { MediaVault } from './components/MediaVault';
 import { BackgroundMediaPlayer } from './components/BackgroundMediaPlayer';
 import { CommandPalette } from './components/CommandPalette';
 import { NotebookStudio } from './components/NotebookStudio';
+import { GlassLoginModal } from './components/GlassLoginModal';
+import { DeveloperModal } from './components/DeveloperModal';
 import { api } from './services/api';
 import {
   AttachedFile,
@@ -131,6 +133,14 @@ export const App: React.FC = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('R3_IS_AUTHENTICATED') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [showDevModal, setShowDevModal] = useState<boolean>(false);
 
   // Global Ctrl+K / Cmd+K Command Palette Shortcut
   useEffect(() => {
@@ -261,9 +271,13 @@ export const App: React.FC = () => {
       setGoogleUser({ authenticated: false });
       setDriveStatus({ authenticated: false });
       setIsUserMenuOpen(false);
+      localStorage.removeItem('R3_IS_AUTHENTICATED');
+      setIsAuthenticated(false);
       refreshUserData();
     } catch (err) {
       console.error(err);
+      localStorage.removeItem('R3_IS_AUTHENTICATED');
+      setIsAuthenticated(false);
     }
   };
 
@@ -524,6 +538,16 @@ export const App: React.FC = () => {
             >
               <Menu className="w-4 h-4" />
             </button>
+
+            {/* Ra Studio Brand Badge */}
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 font-black text-xs sm:text-sm text-white shadow-md shadow-cyan-500/20">
+                Ra
+              </div>
+              <span className="hidden sm:inline-block font-bold tracking-tight text-xs sm:text-sm">
+                Ra Studio
+              </span>
+            </div>
             {/* Model Selector Dropdown Button */}
             <div className="relative">
               <button
@@ -723,6 +747,62 @@ export const App: React.FC = () => {
                 </>
               )}
             </div>
+
+          </div>
+
+          {/* Center Navigation Tabs (Desktop / Tablet) */}
+          <div className="hidden lg:flex items-center gap-1 rounded-xl border border-white/10 bg-white/[0.03] p-1 text-xs">
+            <button
+              onClick={() => setCurrentTab('chats')}
+              className={`rounded-lg px-3 py-1 font-medium transition-all ${
+                currentTab === 'chats'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+              }`}
+            >
+              Smart Chat
+            </button>
+            <button
+              onClick={() => setCurrentTab('notebook')}
+              className={`rounded-lg px-3 py-1 font-medium transition-all ${
+                currentTab === 'notebook'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+              }`}
+            >
+              Notebook & Study
+            </button>
+            <button
+              onClick={() => setCurrentTab('tools')}
+              className={`rounded-lg px-3 py-1 font-medium transition-all ${
+                currentTab === 'tools'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+              }`}
+            >
+              Tools
+            </button>
+          </div>
+
+          {/* Right section: Developer modal button + AI Status + Lang + Theme + User Menu */}
+          <div className="flex items-center space-x-1 sm:space-x-2 shrink-0">
+            {/* Developer Contact Button */}
+            <button
+              onClick={() => setShowDevModal(true)}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full sm:rounded-xl border text-xs font-medium transition-all shadow-sm shrink-0 ${
+                isDark
+                  ? 'bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300'
+                  : 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-700'
+              }`}
+              title="تواصل مع المطور"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+              </span>
+              <span className="hidden sm:inline">تواصل مع المطور</span>
+              <span className="sm:hidden text-[11px] font-semibold">المطور</span>
+            </button>
 
             {/* Smart Minimalist AI Status Pill */}
             {isChatGpt ? (
@@ -935,6 +1015,24 @@ export const App: React.FC = () => {
                       </button>
 
                       <button
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          setShowDevModal(true);
+                        }}
+                        className={`w-full py-2 px-3 rounded-xl flex items-center justify-between transition-colors ${
+                          isDark
+                            ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300'
+                            : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                          <span>تواصل مع المطور (محمد شعبان)</span>
+                        </span>
+                        <span className="text-xs font-mono">MS ↗</span>
+                      </button>
+
+                      <button
                         onClick={handleGoogleLogout}
                         className="w-full py-2 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 flex items-center justify-center space-x-2 space-x-reverse transition-colors font-medium"
                       >
@@ -1040,6 +1138,18 @@ export const App: React.FC = () => {
           setDriveStatus(user);
           refreshUserData();
         }}
+      />
+
+      {/* Glassmorphism Google Login Modal */}
+      <GlassLoginModal
+        isOpen={!isAuthenticated}
+        onLoginSuccess={() => setIsAuthenticated(true)}
+      />
+
+      {/* Developer Profile Modal */}
+      <DeveloperModal
+        isOpen={showDevModal}
+        onClose={() => setShowDevModal(false)}
       />
 
       {/* Universal Command Palette (Ctrl+K) */}
