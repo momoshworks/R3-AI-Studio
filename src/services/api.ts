@@ -37,19 +37,24 @@ function resolveModelInfo(modelName: string): { provider: 'gemini' | 'openai'; m
     return { provider: 'openai', modelId: 'gpt-4o-mini' };
   }
 
-  // Extract explicit model slug in parentheses e.g. (gemini-3.5-flash)
+  // Extract explicit model slug in parentheses e.g. (gemini-2.5-flash)
   const slugMatch = modelName.match(/\((gemini-[^)]+)\)/i);
   if (slugMatch) {
-    const slug = slugMatch[1].toLowerCase();
-    if (!slug.includes('1.5') && !slug.includes('2.0') && !slug.includes('2.5')) {
-      return { provider: 'gemini', modelId: slug };
-    }
+    const slug = slugMatch[1].toLowerCase().replace(/^models\//, '');
+    return { provider: 'gemini', modelId: slug };
   }
 
-  if (m.includes('3.8')) return { provider: 'gemini', modelId: 'gemini-3.8-flash' };
-  if (m.includes('lite') || m.includes('3.5-flash-lite')) return { provider: 'gemini', modelId: 'gemini-3.5-flash-lite' };
-  if (m.includes('3.1')) return { provider: 'gemini', modelId: 'gemini-3.1-flash-lite' };
-  return { provider: 'gemini', modelId: 'gemini-3.5-flash' };
+  const directMatch = modelName.match(/(gemini-[a-zA-Z0-9.-]+)/i);
+  if (directMatch) {
+    const slug = directMatch[1].toLowerCase().replace(/^models\//, '');
+    return { provider: 'gemini', modelId: slug };
+  }
+
+  if (m.includes('pro')) return { provider: 'gemini', modelId: 'gemini-2.5-pro' };
+  if (m.includes('lite')) return { provider: 'gemini', modelId: 'gemini-2.5-flash-lite' };
+  if (m.includes('2.0')) return { provider: 'gemini', modelId: 'gemini-2.0-flash' };
+  if (m.includes('1.5')) return { provider: 'gemini', modelId: 'gemini-1.5-flash-latest' };
+  return { provider: 'gemini', modelId: 'gemini-2.5-flash' };
 }
 
 // Convert file to Base64 locally
@@ -374,15 +379,21 @@ export const api = {
   ) {
     try {
       if (provider === 'gemini') {
-        if (!geminiKey) {
+        if (!geminiKey || !geminiKey.trim()) {
           onChunk('⚠️ **يرجى إدخال مفتاح Google Gemini API:**\n\nافتح الإعدادات ⚙️ وأدخل مفتاح API الخاص بك من [Google AI Studio](https://aistudio.google.com/app/apikey) لبدء المحادثة فوراً وبشكل مجاني تماماً.');
           onDone();
           return;
         }
 
-        const formattedContents = messages.map((m) => {
+        const cleanKey = geminiKey.trim();
+
+        // Prepare properly structured Gemini conversation turns
+        const formattedContents: Array<{ role: 'user' | 'model'; parts: any[] }> = [];
+        for (const m of messages) {
+          const role: 'user' | 'model' = m.role === 'assistant' ? 'model' : 'user';
           const parts: any[] = [];
-          if (m.attachments && m.attachments.length > 0 && m.role === 'user') {
+
+          if (m.attachments && m.attachments.length > 0 && role === 'user') {
             for (const att of m.attachments) {
               if (att.data && att.type?.startsWith('image/')) {
                 const b64 = att.data.includes(',') ? att.data.split(',')[1] : att.data;
@@ -397,31 +408,102 @@ export const api = {
               }
             }
           }
-          if (m.content) {
-            parts.push({ text: m.content });
-          } else if (parts.length === 0) {
-            parts.push({ text: 'مرحباً' });
-          }
-          return {
-            role: m.role === 'assistant' ? 'model' : 'user',
-            parts,
-          };
-        });
 
-        // Try selected model, or fallback across active Gemini models (filter out deprecated 1.5, 2.0, 2.5)
-        const candidateModels = Array.from(new Set([
-          modelId,
+          if (m.content && m.content.trim()) {
+            const cleaned = m.content
+              .replace(/⚠️ \*\*(?:Notice|تنبيه):\*\*[\s\S]*$/gi, '')
+              .trim();
+            if (cleaned) {
+              parts.push({ text: cleaned });
+            }
+          }
+
+          if (parts.length === 0) continue;
+
+          // Merge consecutive turns with the same role to prevent Gemini 400 error
+          if (formattedContents.length > 0 && formattedContents[formattedContents.length - 1].role === role) {
+            formattedContents[formattedContents.length - 1].parts.push(...parts);
+          } else {
+            formattedContents.push({ role, parts });
+          }
+        }
+
+        // Ensure conversation starts with user turn
+        while (formattedContents.length > 0 && formattedContents[0].role !== 'user') {
+          formattedContents.shift();
+        }
+        if (formattedContents.length === 0) {
+          formattedContents.push({ role: 'user', parts: [{ text: 'مرحباً' }] });
+        }
+
+        // Query available models from user's key dynamically
+        const candidateModels: string[] = [];
+        const lastWorking = localStorage.getItem('R3_LAST_WORKING_GEMINI_MODEL') || '';
+
+        if (modelId) candidateModels.push(modelId.replace(/^models\//, ''));
+        if (lastWorking && !candidateModels.includes(lastWorking)) candidateModels.push(lastWorking);
+
+        try {
+          const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${cleanKey}`, { signal });
+          if (listRes.ok) {
+            const listData = await listRes.json();
+            if (Array.isArray(listData.models)) {
+              const supportedModels: string[] = listData.models
+                .filter((m: any) => Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes('generateContent'))
+                .map((m: any) => m.name.replace(/^models\//, ''));
+
+              // Prioritize flash models from supported list
+              const flashModels = supportedModels.filter((m) => m.includes('flash'));
+              const otherModels = supportedModels.filter((m) => !m.includes('flash'));
+
+              for (const m of [...flashModels, ...otherModels]) {
+                if (!candidateModels.includes(m)) {
+                  candidateModels.push(m);
+                }
+              }
+            }
+          } else if (listRes.status === 400 || listRes.status === 403) {
+            const errJson = await listRes.json().catch(() => ({}));
+            const msg = errJson.error?.message || '';
+            if (msg.toLowerCase().includes('api key not valid') || msg.toLowerCase().includes('api_key_invalid')) {
+              throw new Error('مفتاح Google Gemini API غير صالح. يرجى التأكد من نسخه بدقة من Google AI Studio وحفظه في الإعدادات ⚙️.');
+            }
+          }
+        } catch (e: any) {
+          if (e.name === 'AbortError') return;
+          if (e.message && e.message.includes('مفتاح Google Gemini API غير صالح')) {
+            throw e;
+          }
+          console.warn('Could not query dynamic models list:', e);
+        }
+
+        // Add comprehensive static fallback list
+        const staticFallbacks = [
+          'gemini-2.5-flash',
+          'gemini-2.0-flash',
+          'gemini-2.5-flash-lite',
+          'gemini-flash-latest',
           'gemini-3.5-flash',
           'gemini-3.5-flash-lite',
-          'gemini-3.1-flash-lite',
           'gemini-3.8-flash',
-        ])).filter(m => !m.includes('1.5') && !m.includes('2.0') && !m.includes('2.5'));
+          'gemini-1.5-flash-latest',
+          'gemini-1.5-flash',
+          'gemini-2.5-pro',
+          'gemini-1.5-pro-latest',
+          'gemini-pro-latest',
+        ];
+        for (const fb of staticFallbacks) {
+          if (!candidateModels.includes(fb)) {
+            candidateModels.push(fb);
+          }
+        }
 
         let streamResponse: Response | null = null;
         let lastError = '';
 
         for (const mid of candidateModels) {
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/${mid}:streamGenerateContent?alt=sse&key=${geminiKey}`;
+          const cleanModel = mid.replace(/^models\//, '');
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:streamGenerateContent?alt=sse&key=${cleanKey}`;
           try {
             const res = await fetch(url, {
               method: 'POST',
@@ -434,22 +516,35 @@ export const api = {
               }),
               signal,
             });
+
             if (res.ok) {
               streamResponse = res;
+              try {
+                localStorage.setItem('R3_LAST_WORKING_GEMINI_MODEL', cleanModel);
+              } catch {}
               break;
             } else {
               const errJson = await res.json().catch(() => ({}));
               lastError = errJson.error?.message || `HTTP ${res.status}`;
-              console.warn(`[Gemini Direct API] Model ${mid} failed: ${lastError}. Trying next active model...`);
+              console.warn(`[Gemini Direct API] Model ${cleanModel} returned (${res.status}): ${lastError}. Trying next model...`);
+              if (lastError.toLowerCase().includes('api key not valid') || lastError.toLowerCase().includes('api_key_invalid')) {
+                throw new Error('مفتاح Google Gemini API غير صالح أو غير مفعل. يرجى الحصول على مفتاح جديد من Google AI Studio.');
+              }
             }
           } catch (e: any) {
             if (e.name === 'AbortError') return;
+            if (e.message && e.message.includes('مفتاح Google Gemini API غير صالح')) {
+              throw e;
+            }
             lastError = e.message;
           }
         }
 
         if (!streamResponse || !streamResponse.body) {
-          throw new Error(lastError || 'Failed to stream from Gemini API');
+          if (lastError.toLowerCase().includes('quota') || lastError.toLowerCase().includes('resource_exhausted')) {
+            throw new Error('تم تجاوز الحصة المجانية المؤقتة لمفتاح Gemini API (Quota Exceeded). يرجى الانتظار دقيقة أو تجربة مفتاح آخر.');
+          }
+          throw new Error(lastError || 'تعذر الاتصال بخوادم Google Gemini. يرجى التحقق من اتصال الإنترنت وصلاحية مفتاح API.');
         }
 
         const reader = streamResponse.body.getReader();

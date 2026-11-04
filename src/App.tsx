@@ -56,9 +56,11 @@ const AVAILABLE_MODELS = [
   {
     category: 'Google Gemini',
     models: [
-      { id: 'Google Gemini (gemini-3.5-flash)', name: 'Gemini 3.5 Flash', desc: 'الأفضل في السرعة والتحليل (موصى به)', tag: 'افتراضي' },
-      { id: 'Google Gemini Flash Lite (gemini-3.5-flash-lite)', name: 'Gemini Flash Lite', desc: 'فائق الخفة وسريع جداً', tag: 'خفيف' },
-      { id: 'Google Gemini 3.8 Flash (gemini-3.8-flash)', name: 'Gemini 3.8 Flash', desc: 'النسخة المتقدمة للترميز', tag: 'قوي' },
+      { id: 'Google Gemini (gemini-2.5-flash)', name: 'Gemini 2.5 Flash', desc: 'الأفضل في الذكاء والسرعة والاستدلال (موصى به)', tag: 'افتراضي' },
+      { id: 'Google Gemini 2.0 Flash (gemini-2.0-flash)', name: 'Gemini 2.0 Flash', desc: 'فائق السرعة والاستجابة اللحظية', tag: 'سريع' },
+      { id: 'Google Gemini Flash Lite (gemini-2.5-flash-lite)', name: 'Gemini Flash Lite', desc: 'فائق الخفة واقتصادي للمهام السريعة', tag: 'خفيف' },
+      { id: 'Google Gemini 2.5 Pro (gemini-2.5-pro)', name: 'Gemini 2.5 Pro', desc: 'القدرات الأقوى في التحليل والبرمجة', tag: 'شامل' },
+      { id: 'Google Gemini 1.5 Flash (gemini-1.5-flash-latest)', name: 'Gemini 1.5 Flash', desc: 'النموذج الكلاسيكي الموثوق', tag: 'كلاسيك' },
     ],
   },
   {
@@ -161,7 +163,7 @@ export const App: React.FC = () => {
   const [activeSessionId, setActiveSessionId] = useState<string>('session-1');
 
   // Execution & Models
-  const [selectedModel, setSelectedModel] = useState<string>('Google Gemini (gemini-3.5-flash)');
+  const [selectedModel, setSelectedModel] = useState<string>('Google Gemini (gemini-2.5-flash)');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const stopGenerationRef = useRef<(() => void) | null>(null);
 
@@ -422,8 +424,7 @@ export const App: React.FC = () => {
                     ? {
                         ...m,
                         content:
-                          m.content +
-                          `\n\n⚠️ **${lang === 'ar' ? 'تنبيه' : 'Notice'}:** ${error.message || (lang === 'ar' ? 'يرجى التحقق من إدخال مفتاح API في الإعدادات.' : 'Please check API key settings.')}`,
+                          m.content ? `${m.content}\n\n⚠️ **${lang === 'ar' ? 'تنبيه' : 'Notice'}:** ${error.message || (lang === 'ar' ? 'يرجى التحقق من إدخال مفتاح API في الإعدادات.' : 'Please check API key settings.')}` : `⚠️ **${lang === 'ar' ? 'تنبيه' : 'Notice'}:** ${error.message || (lang === 'ar' ? 'يرجى التحقق من إدخال مفتاح API في الإعدادات.' : 'Please check API key settings.')}`,
                       }
                     : m
                 ),

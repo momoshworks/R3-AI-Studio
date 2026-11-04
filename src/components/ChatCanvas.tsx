@@ -69,7 +69,7 @@ const cleanFileName = (name: string): string => {
 
 export const ChatCanvas: React.FC<ChatCanvasProps> = ({
   messages,
-  selectedModel = 'Google Gemini (gemini-3.5-flash)',
+  selectedModel = 'Google Gemini (gemini-2.5-flash)',
   onSwitchModel,
   onPromptSelect,
   t,
@@ -793,7 +793,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             💡 <strong>نصيحة:</strong> رصيد ChatGPT منتهٍ، يمكنك المتابعة فوراً مع <strong>Google Gemini</strong> مجاناً وبأعلى سرعة.
                           </div>
                           <button
-                            onClick={() => onSwitchModel('Google Gemini (gemini-3.5-flash)')}
+                            onClick={() => onSwitchModel('Google Gemini (gemini-2.5-flash)')}
                             className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/30 transition-all shrink-0 active:scale-95"
                           >
                             التبديل إلى Google Gemini الآن
