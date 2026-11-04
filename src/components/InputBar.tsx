@@ -378,8 +378,8 @@ export const InputBar: React.FC<InputBarProps> = ({
         <Sparkles className="w-3 h-3 text-blue-400" />
         <span>
           {lang === 'ar'
-            ? 'R3 AI Workstation · مدعوم بأحدث نماذج Gemini و ChatGPT وتوليد PDF الاحترافي'
-            : 'R3 AI Workstation · Powered by Gemini, ChatGPT & Direct PDF Engine'}
+            ? 'Nerdo AI Workstation · مدعوم بأحدث نماذج Gemini و ChatGPT وتوليد PDF الاحترافي'
+            : 'Nerdo AI Workstation · Powered by Gemini, ChatGPT & Direct PDF Engine'}
         </span>
       </div>
     </div>

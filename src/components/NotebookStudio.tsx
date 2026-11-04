@@ -348,7 +348,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
         >
           <div className="flex items-center gap-2 font-bold text-sm">
             <HelpCircle className="w-4 h-4 text-purple-400" />
-            <span>{lang === 'ar' ? 'طريقة الاستخدام السلسة داخل Ra AI Studio' : 'How it works inside Ra AI Studio'}</span>
+            <span>{lang === 'ar' ? 'طريقة الاستخدام السلسة داخل Nerdo AI Studio' : 'How it works inside Nerdo AI Studio'}</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">

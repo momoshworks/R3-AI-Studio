@@ -268,7 +268,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
               <span
                 className="text-4xl md:text-6xl font-semibold font-claude-serif text-claude-gradient tracking-tight mt-1 select-none"
               >
-                R3 AI Studio
+                Nerdo AI Studio
               </span>
             </h2>
             <p

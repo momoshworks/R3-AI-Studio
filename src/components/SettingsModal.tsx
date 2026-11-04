@@ -939,7 +939,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="px-6 py-3.5 bg-[#171819] border-t border-gemini-border flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-[11px] text-gray-500">
-              R3 AI Studio v1.0.0 · Google Gemini &amp; ChatGPT &amp; Media Vault
+              Nerdo AI Studio v1.0.0 · Google Gemini &amp; ChatGPT &amp; Media Vault
             </span>
             <button
               type="button"

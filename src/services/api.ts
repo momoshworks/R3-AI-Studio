@@ -44,7 +44,7 @@ export async function openOfficialNotebookLM(): Promise<{ success: boolean; meth
       // Create new window if not preheated
       win = new WebviewWindow('notebooklm', {
         url: 'https://notebooklm.google.com',
-        title: 'Google NotebookLM — Ra AI Studio',
+        title: 'Google NotebookLM — Nerdo AI Studio',
         width: 1300,
         height: 850,
         minWidth: 850,
@@ -571,7 +571,7 @@ export const api = {
               body: JSON.stringify({
                 contents: formattedContents,
                 systemInstruction: {
-                  parts: [{ text: 'You are R3 AI, a brilliant, helpful, multilingual AI workstation assistant with native Arabic and English fluency.' }],
+                  parts: [{ text: 'You are Nerdo AI, a brilliant, helpful, multilingual AI workstation assistant with native Arabic and English fluency.' }],
                 },
               }),
               signal,
@@ -659,7 +659,7 @@ export const api = {
           body: JSON.stringify({
             model: modelId,
             messages: [
-              { role: 'system', content: 'You are R3 AI, an intelligent, helpful AI workstation assistant.' },
+              { role: 'system', content: 'You are Nerdo AI, an intelligent, helpful AI workstation assistant.' },
               ...openaiMessages,
             ],
             stream: true,

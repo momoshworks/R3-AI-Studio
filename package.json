@@ -1,8 +1,8 @@
 {
-  "name": "r3-ai-studio",
+  "name": "nerdo",
   "private": true,
   "version": "1.0.0",
-  "description": "R3 - Intelligent AI Workstation & Media Studio",
+  "description": "Nerdo - Intelligent AI Workstation & Media Studio",
   "type": "module",
   "scripts": {
     "dev": "vite",

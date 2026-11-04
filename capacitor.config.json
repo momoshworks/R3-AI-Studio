@@ -1,6 +1,6 @@
 {
   "appId": "com.r3.aistudio",
-  "appName": "R3 AI Studio",
+  "appName": "Nerdo",
   "webDir": "dist",
   "server": {
     "androidScheme": "https",

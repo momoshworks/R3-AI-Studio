@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/nicepkg/tauri-schema/main/tauri-v2.schema.json",
-  "productName": "Ra AI Studio",
+  "productName": "Nerdo",
   "version": "1.0.0",
   "identifier": "com.nexushub.app",
   "build": {
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Ra AI Studio",
+        "title": "Nerdo AI Studio",
         "width": 1400,
         "height": 900,
         "minWidth": 900,
@@ -24,7 +24,7 @@
       },
       {
         "label": "notebooklm",
-        "title": "Google NotebookLM — Ra AI Studio",
+        "title": "Google NotebookLM — Nerdo AI Studio",
         "url": "https://notebooklm.google.com",
         "width": 1300,
         "height": 850,
