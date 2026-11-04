@@ -439,7 +439,9 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             return (
                               <p
                                 dir={isAr ? 'rtl' : 'ltr'}
-                                className={`my-2 leading-[1.68] text-slate-300 font-normal text-[13px] md:text-[14px] ${isAr ? 'text-right' : 'text-left'}`}
+                                className={`my-2 leading-[1.68] font-normal text-[13px] md:text-[14px] ${
+                                  isDark ? 'text-slate-200' : 'text-slate-800'
+                                } ${isAr ? 'text-right' : 'text-left'}`}
                                 style={{ unicodeBidi: 'plaintext' }}
                               >
                                 {children}
@@ -452,7 +454,11 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             return (
                               <strong
                                 dir={isEnglishOnly ? 'ltr' : undefined}
-                                className="font-bold text-amber-300 bg-amber-500/15 px-1.5 py-0.5 rounded border border-amber-500/25 shadow-sm inline-block my-0.5"
+                                className={`font-bold px-1.5 py-0.5 rounded shadow-sm inline-block my-0.5 ${
+                                  isDark
+                                    ? 'text-amber-300 bg-amber-500/20 border border-amber-500/30'
+                                    : 'text-[#92400E] bg-[#FEF3C7] border border-[#FDE68A]'
+                                }`}
                                 style={{ unicodeBidi: 'isolate' }}
                               >
                                 {children}
@@ -475,7 +481,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             const text = getTextFromChildren(children);
                             const isAr = hasArabic(text);
                             let icon = '📌';
-                            let cardClass = 'border-s-4 border-s-blue-500 bg-[#0e131f]/80';
+                            let cardClass = isDark ? 'border-s-4 border-s-blue-500 bg-[#0e131f]/80' : 'border-s-4 border-s-blue-600 bg-blue-50/70 border border-blue-200/60';
 
                             if (text.includes('الفكرة') || text.toLowerCase().includes('core idea')) {
                               icon = '🎯';
@@ -546,10 +552,26 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             );
                           },
                           ul({ children }) {
-                            return <ul className="list-disc ps-5 my-2 space-y-1.5 leading-[1.68] text-slate-300 text-[13px] md:text-[14px]">{children}</ul>;
+                            return (
+                              <ul
+                                className={`list-disc ps-5 my-2 space-y-1.5 leading-[1.68] text-[13px] md:text-[14px] ${
+                                  isDark ? 'text-slate-200' : 'text-slate-800'
+                                }`}
+                              >
+                                {children}
+                              </ul>
+                            );
                           },
                           ol({ children }) {
-                            return <ol className="list-decimal ps-5 my-2 space-y-1.5 leading-[1.68] text-slate-300 text-[13px] md:text-[14px]">{children}</ol>;
+                            return (
+                              <ol
+                                className={`list-decimal ps-5 my-2 space-y-1.5 leading-[1.68] text-[13px] md:text-[14px] ${
+                                  isDark ? 'text-slate-200' : 'text-slate-800'
+                                }`}
+                              >
+                                {children}
+                              </ol>
+                            );
                           },
                           li({ children }) {
                             const text = getTextFromChildren(children);
@@ -557,7 +579,9 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             return (
                               <li
                                 dir={isAr ? 'rtl' : 'ltr'}
-                                className="my-0.5 leading-[1.68] text-slate-300"
+                                className={`my-0.5 leading-[1.68] ${
+                                  isDark ? 'text-slate-200' : 'text-slate-800'
+                                }`}
                                 style={{ unicodeBidi: 'plaintext' }}
                               >
                                 {children}
@@ -570,10 +594,20 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             return (
                               <blockquote
                                 dir={isAr ? 'rtl' : 'ltr'}
-                                className="my-2.5 border-s-4 border-amber-400 bg-amber-950/20 p-3 rounded-e-xl text-xs md:text-[13px] leading-[1.68] text-amber-200 shadow-md backdrop-blur-md"
+                                className={`my-2.5 border-s-4 p-3 rounded-e-xl text-xs md:text-[13px] leading-[1.68] shadow-md backdrop-blur-md ${
+                                  isDark
+                                    ? 'border-amber-400 bg-amber-950/20 text-amber-200'
+                                    : 'border-amber-500 bg-amber-50/90 text-amber-950 border border-amber-200/60'
+                                }`}
                                 style={{ unicodeBidi: 'plaintext' }}
                               >
-                                <span className="block font-bold text-amber-400 text-xs mb-1">💡 فكرة جوهرية:</span>
+                                <span
+                                  className={`block font-bold text-xs mb-1 ${
+                                    isDark ? 'text-amber-400' : 'text-amber-800'
+                                  }`}
+                                >
+                                  💡 فكرة جوهرية:
+                                </span>
                                 {children}
                               </blockquote>
                             );
@@ -635,7 +669,11 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             return (
                               <code
                                 dir="ltr"
-                                className="bg-[#2a2b2e] px-1.5 py-0.5 rounded text-blue-300 text-xs font-mono inline-block"
+                                className={`px-1.5 py-0.5 rounded text-xs font-mono inline-block border ${
+                                  isDark
+                                    ? 'bg-[#2a2b2e] text-blue-300 border-white/10'
+                                    : 'bg-slate-100 text-blue-700 border-slate-300'
+                                }`}
                                 {...props}
                               >
                                 {children}
