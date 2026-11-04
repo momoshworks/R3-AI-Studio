@@ -295,7 +295,7 @@ async def stream_gemini(chat_request: ChatRequest, queue: asyncio.Queue):
         requested_slug = match_direct.group(1) if match_direct else None
 
     candidate_models = []
-    if requested_slug:
+    if requested_slug and not any(dep in requested_slug for dep in ["1.5", "2.0", "2.5"]):
         candidate_models.append(requested_slug)
     for default_m in [
         "gemini-3.5-flash",
@@ -591,8 +591,8 @@ async def verify_and_save_api_key(payload: Dict[str, Any] = Body(...)):
             if resp.status_code == 200:
                 data = resp.json()
                 models = [m.get("name", "").replace("models/", "") for m in data.get("models", [])]
-                flash_models = [m for m in models if "flash" in m]
-                detected_model = flash_models[0] if flash_models else (models[0] if models else "gemini-3.5-flash")
+                active_flash = [m for m in models if "flash" in m and not any(dep in m for dep in ["1.5", "2.0", "2.5"])]
+                detected_model = active_flash[0] if active_flash else ("gemini-3.5-flash" if "gemini-3.5-flash" in models else (models[0] if models else "gemini-3.5-flash"))
 
                 save_persisted_config({"api_key": raw_key})
                 os.environ["GEMINI_API_KEY"] = raw_key

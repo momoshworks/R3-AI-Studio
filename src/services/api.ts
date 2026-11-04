@@ -36,16 +36,19 @@ function resolveModelInfo(modelName: string): { provider: 'gemini' | 'openai'; m
     if (m.includes('4o')) return { provider: 'openai', modelId: 'gpt-4o' };
     return { provider: 'openai', modelId: 'gpt-4o-mini' };
   }
-  const match = modelName.match(/\((gemini-[^)]+)\)/i);
-  if (match) {
-    return { provider: 'gemini', modelId: match[1] };
+
+  // Extract explicit model slug in parentheses e.g. (gemini-3.5-flash)
+  const slugMatch = modelName.match(/\((gemini-[^)]+)\)/i);
+  if (slugMatch) {
+    const slug = slugMatch[1].toLowerCase();
+    if (!slug.includes('1.5') && !slug.includes('2.0') && !slug.includes('2.5')) {
+      return { provider: 'gemini', modelId: slug };
+    }
   }
-  const directMatch = modelName.match(/(gemini-[a-zA-Z0-9.-]+)/i);
-  if (directMatch) {
-    return { provider: 'gemini', modelId: directMatch[1] };
-  }
-  if (m.includes('lite')) return { provider: 'gemini', modelId: 'gemini-3.5-flash-lite' };
+
   if (m.includes('3.8')) return { provider: 'gemini', modelId: 'gemini-3.8-flash' };
+  if (m.includes('lite') || m.includes('3.5-flash-lite')) return { provider: 'gemini', modelId: 'gemini-3.5-flash-lite' };
+  if (m.includes('3.1')) return { provider: 'gemini', modelId: 'gemini-3.1-flash-lite' };
   return { provider: 'gemini', modelId: 'gemini-3.5-flash' };
 }
 
@@ -405,18 +408,19 @@ export const api = {
           };
         });
 
-        // Try selected model, or fallback to stable models if 404
-        const modelsToTry = [
+        // Try selected model, or fallback across active Gemini models (filter out deprecated 1.5, 2.0, 2.5)
+        const candidateModels = Array.from(new Set([
           modelId,
           'gemini-3.5-flash',
           'gemini-3.5-flash-lite',
           'gemini-3.1-flash-lite',
           'gemini-3.8-flash',
-        ].filter((v, i, a) => Boolean(v) && a.indexOf(v) === i);
+        ])).filter(m => !m.includes('1.5') && !m.includes('2.0') && !m.includes('2.5'));
+
         let streamResponse: Response | null = null;
         let lastError = '';
 
-        for (const mid of modelsToTry) {
+        for (const mid of candidateModels) {
           const url = `https://generativelanguage.googleapis.com/v1beta/models/${mid}:streamGenerateContent?alt=sse&key=${geminiKey}`;
           try {
             const res = await fetch(url, {
@@ -436,6 +440,7 @@ export const api = {
             } else {
               const errJson = await res.json().catch(() => ({}));
               lastError = errJson.error?.message || `HTTP ${res.status}`;
+              console.warn(`[Gemini Direct API] Model ${mid} failed: ${lastError}. Trying next active model...`);
             }
           } catch (e: any) {
             if (e.name === 'AbortError') return;
