@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {
@@ -115,10 +115,10 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
           window.location.reload();
         }, 800);
       } else {
-        setInlineKeyStatus(res.message || 'ط§ظ„ظ…ظپطھط§ط­ ط؛ظٹط± طµط§ظ„ط­ ط£ظˆ ظ„ظ… ظٹطھظ… طھظپط¹ظٹظ„ Gemini API ظ„ظ‡');
+        setInlineKeyStatus(res.message || (lang === 'ar' ? 'المفتاح غير صالح أو لم يتم تفعيل Gemini API له' : 'Invalid API key or Gemini API not enabled'));
       }
     } catch (e: any) {
-      setInlineKeyStatus(e.message || 'طھط¹ط°ط± ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ط§ظ„ظ…ظپطھط§ط­');
+      setInlineKeyStatus(e.message || (lang === 'ar' ? 'تعذر التحقق من المفتاح' : 'Failed to verify key'));
     } finally {
       setIsSavingInlineKey(false);
     }
@@ -153,7 +153,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
 
   const toggleSpeech = (text: string, id: string) => {
     if (!('speechSynthesis' in window)) {
-      alert(lang === 'ar' ? 'ط§ظ„ظ…طھطµظپط­ ظ„ط§ ظٹط¯ط¹ظ… ط§ظ„ظ‚ط±ط§ط،ط© ط§ظ„طµظˆطھظٹط©' : 'Speech synthesis not supported in this browser');
+      alert(lang === 'ar' ? 'المتصفح لا يدعم القراءة الصوتية' : 'Speech synthesis not supported in this browser');
       return;
     }
 
@@ -215,9 +215,9 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
         const isU = m.role === 'user';
         const sender = isU
           ? lang === 'ar'
-            ? 'ط§ظ„ظ…ط³طھط®ط¯ظ…'
+            ? 'المستخدم'
             : 'User'
-          : `Nerdo AI (${selectedModel})`;
+          : `R3 AI (${selectedModel})`;
         return `
           <div style="margin-bottom: 20px; padding: 14px; border-radius: 8px; background: ${isU ? '#f8fafc' : '#ffffff'}; border: 1px solid #e2e8f0;">
             <div style="font-weight: bold; font-size: 12px; color: ${isU ? '#2563eb' : '#d97706'}; margin-bottom: 8px;">
@@ -235,7 +235,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
   const exportFullChatPDF = () => {
     if (messages.length === 0) return;
     exportTextOrHtmlToPDF(getFullChatHtml(), {
-      title: lang === 'ar' ? 'طھظ‚ط±ظٹط± ظ…ط­ط§ط¯ط«ط© Nerdo AI ط§ظ„ظƒط§ظ…ظ„' : 'Nerdo AI Full Session Report',
+      title: lang === 'ar' ? 'تقرير محادثة R3 AI الكامل' : 'R3 AI Full Session Report',
       modelName: selectedModel,
     });
   };
@@ -245,7 +245,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
     await handleDirectPdfDownload(
       getFullChatHtml(),
       'full-chat',
-      lang === 'ar' ? 'ط³ط¬ظ„ ظ…ط­ط§ط¯ط«ط© Nerdo AI' : 'Nerdo AI Chat Log'
+      lang === 'ar' ? 'سجل محادثة R3 AI' : 'R3 AI Chat Log'
     );
   };
 
@@ -256,7 +256,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
         <div className="hidden sm:flex flex-wrap items-center justify-between gap-1.5 pb-2 border-b border-white/10 select-none text-xs">
           <div className="flex items-center gap-1.5 min-w-0">
             <span className="hidden sm:inline text-gray-400 font-medium">
-              {lang === 'ar' ? 'ط¬ظ„ط³ط© ط§ظ„ظ…ط­ط§ط¯ط«ط© ط§ظ„ط­ط§ظ„ظٹط©' : 'Current Chat Session'}
+              {lang === 'ar' ? 'جلسة المحادثة الحالية' : 'Current Chat Session'}
             </span>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 font-mono text-blue-400 truncate max-w-[130px] sm:max-w-[200px]">
               {selectedModel.replace(/^Google\s+/i, '').replace(/^OpenAI\s+/i, '').replace(/\(.*\)/, '').trim()}
@@ -265,16 +265,16 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
           <div className="flex items-center gap-1 shrink-0">
             <button
               onClick={downloadFullChatPDF}
-              title={lang === 'ar' ? 'طھط­ظ…ظٹظ„ ط³ط¬ظ„ ط§ظ„ط¬ظ„ط³ط© ط¨ط§ظ„ظƒط§ظ…ظ„ PDF' : 'Download full chat PDF'}
+              title={lang === 'ar' ? 'تحميل سجل الجلسة بالكامل PDF' : 'Download full chat PDF'}
               className="px-2 py-1 rounded-lg text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 transition-colors text-[11px] flex items-center gap-1 border border-white/10"
             >
               <Download className="w-3 h-3 text-blue-400" />
-              <span className="hidden sm:inline">{lang === 'ar' ? 'طھط­ظ…ظٹظ„ ط§ظ„ط¬ظ„ط³ط© PDF' : 'Export PDF'}</span>
+              <span className="hidden sm:inline">{lang === 'ar' ? 'تحميل الجلسة PDF' : 'Export PDF'}</span>
               <span className="sm:hidden font-mono text-[10px]">PDF</span>
             </button>
             <button
               onClick={exportFullChatPDF}
-              title={lang === 'ar' ? 'ط·ط¨ط§ط¹ط© / طھطµط¯ظٹط± ط§ظ„ط¬ظ„ط³ط©' : 'Print / Export Session'}
+              title={lang === 'ar' ? 'طباعة / تصدير الجلسة' : 'Print / Export Session'}
               className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors border border-white/10"
             >
               <Printer className="w-3 h-3" />
@@ -293,7 +293,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
 
           {/* App Logo Badge with Refined Glow */}
           <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-xl shadow-purple-900/20 ring-1 ring-white/20 relative z-10 transition-transform hover:scale-105 duration-300">
-            <img src="/app-icon.png" alt="Nerdo" className="w-full h-full object-cover" />
+            <img src="/app-icon.png" alt="R3" className="w-full h-full object-cover" />
           </div>
 
           {/* Claude AI Editorial Greeting Title */}
@@ -302,7 +302,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
               <span
                 className="text-lg md:text-xl font-medium tracking-wide text-amber-200/90 font-serif"
               >
-                {lang === 'ar' ? 'ظ…ط±ط­ط¨ط§ظ‹ ط¨ظƒ ظپظٹ' : 'Welcome to'}
+                {lang === 'ar' ? 'مرحباً بك في' : 'Welcome to'}
               </span>
               <span
                 className="text-4xl md:text-6xl font-semibold font-claude-serif text-claude-gradient tracking-tight mt-1 select-none"
@@ -333,34 +333,34 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
               {[
                 {
                   text: t.chipReport,
-                  icon: 'ًں“‌',
+                  icon: '📝',
                   prompt:
                     lang === 'ar'
-                      ? 'ط§ظƒطھط¨ طھظ‚ط±ظٹط±ط§ظ‹ طھط­ظ„ظٹظ„ظٹط§ظ‹ ظ…ظپطµظ„ط§ظ‹ ظˆظ…ظ†ط³ظ‚ط§ظ‹ ط¨طµظٹط؛ط© طھظ‚ط±ظٹط± ط§ط­طھط±ط§ظپظٹ ط¬ط§ظ‡ط² ظ„ظ„طھط­ظ…ظٹظ„ ظƒظ€ PDF ط¹ظ†: '
+                      ? 'اكتب تقريراً تحليلياً مفصلاً ومنسقاً بصيغة تقرير احترافي جاهز للتحميل كـ PDF عن: '
                       : 'Write a comprehensive analytical report formatted for PDF export about: ',
                 },
                 {
                   text: t.chipCode,
-                  icon: 'ًں’»',
+                  icon: '💻',
                   prompt:
                     lang === 'ar'
-                      ? 'ظ‚ظ… ط¨ظپط­طµ ظˆطھط­ط³ظٹظ† ط§ظ„ظƒظˆط¯ ط§ظ„ط¨ط±ظ…ط¬ظٹ ط§ظ„طھط§ظ„ظٹ ظˆط´ط±ط­ ط£ظپط¶ظ„ ط§ظ„ظ…ظ…ط§ط±ط³ط§طھ: '
+                      ? 'قم بفحص وتحسين الكود البرمجي التالي وشرح أفضل الممارسات: '
                       : 'Review and optimize this code snippet with best practices: ',
                 },
                 {
                   text: t.chipDesign,
-                  icon: 'ًںژ¨',
+                  icon: '🎨',
                   prompt:
                     lang === 'ar'
-                      ? 'ط§ظ‚طھط±ط­ طھط®ط·ظٹط·ط§ظ‹ ظˆطھظˆط²ظٹط¹ ط¹ظ†ط§طµط± ظ„ظˆط§ط¬ظ‡ط© ظ…ط³طھط®ط¯ظ… (UI/UX) ط­ط¯ظٹط«ط© ظ…ط¹ ط£ظ„ظˆط§ظ† ط¹طµط±ظٹط©: '
+                      ? 'اقترح تخطيطاً وتوزيع عناصر لواجهة مستخدم (UI/UX) حديثة مع ألوان عصرية: '
                       : 'Suggest a modern UI/UX layout concept with color palettes for: ',
                 },
                 {
                   text: t.chipPdf,
-                  icon: 'ًں“ٹ',
+                  icon: '📊',
                   prompt:
                     lang === 'ar'
-                      ? 'ظ„ط®طµ ط§ظ„ظ†ظ‚ط§ط· ط§ظ„ط¬ظˆظ‡ط±ظٹط© ظˆط§ظ„ظ‚ط±ط§ط±ط§طھ ط§ظ„ط£ط³ط§ط³ظٹط© ظپظٹ ظ…ظˆط¶ظˆط¹: '
+                      ? 'لخص النقاط الجوهرية والقرارات الأساسية في موضوع: '
                       : 'Summarize the core takeaways and action items regarding: ',
                 },
               ].map((chip, idx) => (
@@ -448,9 +448,9 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                                 </div>
                                 <div className="text-[10px] text-gray-400 flex items-center gap-1.5 font-mono mt-0.5">
                                   <span>{formatBytes(att.size)}</span>
-                                  <span>â€¢</span>
+                                  <span>•</span>
                                   <span className="text-emerald-400 font-medium">
-                                    {lang === 'ar' ? 'طھظ…طھ ط§ظ„ظ‚ط±ط§ط،ط© ط¨ظ†ط¬ط§ط­ âœ“' : 'Indexed âœ“'}
+                                    {lang === 'ar' ? 'تمت القراءة بنجاح ✓' : 'Indexed ✓'}
                                   </span>
                                 </div>
                               </div>
@@ -519,23 +519,23 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                           h2({ children }) {
                             const text = getTextFromChildren(children);
                             const isAr = hasArabic(text);
-                            let icon = 'ًں“Œ';
+                            let icon = '📌';
                             let cardClass = isDark ? 'border-s-4 border-s-blue-500 bg-[#0e131f]/80' : 'border-s-4 border-s-blue-600 bg-blue-50/70 border border-blue-200/60';
 
-                            if (text.includes('ط§ظ„ظپظƒط±ط©') || text.toLowerCase().includes('core idea')) {
-                              icon = 'ًںژ¯';
+                            if (text.includes('الفكرة') || text.toLowerCase().includes('core idea')) {
+                              icon = '🎯';
                               cardClass = 'border-s-4 border-s-sky-400 bg-sky-950/20';
-                            } else if (text.includes('طھط´ط¨ظٹظ‡') || text.toLowerCase().includes('analogy')) {
-                              icon = 'ًں’،';
+                            } else if (text.includes('تشبيه') || text.toLowerCase().includes('analogy')) {
+                              icon = '💡';
                               cardClass = 'border-s-4 border-s-amber-400 bg-amber-950/20';
-                            } else if (text.includes('ظ„ظ…ط§ط°ط§') || text.toLowerCase().includes('the why')) {
-                              icon = 'ًںڑ€';
+                            } else if (text.includes('لماذا') || text.toLowerCase().includes('the why')) {
+                              icon = '🚀';
                               cardClass = 'border-s-4 border-s-purple-400 bg-purple-950/20';
-                            } else if (text.includes('ظ…ط«ط§ظ„') || text.toLowerCase().includes('working example') || text.includes('ظƒظˆط¯')) {
-                              icon = 'ًں’»';
+                            } else if (text.includes('مثال') || text.toLowerCase().includes('working example') || text.includes('كود')) {
+                              icon = '💻';
                               cardClass = 'border-s-4 border-s-indigo-400 bg-indigo-950/20';
-                            } else if (text.includes('ط®ط·ط£') || text.toLowerCase().includes('pitfall') || text.includes('طھط­ط°ظٹط±')) {
-                              icon = 'âڑ ï¸ڈ';
+                            } else if (text.includes('خطأ') || text.toLowerCase().includes('pitfall') || text.includes('تحذير')) {
+                              icon = '⚠️';
                               cardClass = 'border-s-4 border-s-rose-400 bg-rose-950/20';
                             }
 
@@ -556,23 +556,23 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                           h3({ children }) {
                             const text = getTextFromChildren(children);
                             const isAr = hasArabic(text);
-                            let icon = 'ًں”¹';
+                            let icon = '🔹';
                             let cardClass = 'border-s-4 border-s-blue-400 bg-[#0e131f]/70';
 
-                            if (text.includes('ط§ظ„ظپظƒط±ط©') || text.toLowerCase().includes('core idea')) {
-                              icon = 'ًںژ¯';
+                            if (text.includes('الفكرة') || text.toLowerCase().includes('core idea')) {
+                              icon = '🎯';
                               cardClass = 'border-s-4 border-s-sky-400 bg-sky-950/20';
-                            } else if (text.includes('طھط´ط¨ظٹظ‡') || text.toLowerCase().includes('analogy')) {
-                              icon = 'ًں’،';
+                            } else if (text.includes('تشبيه') || text.toLowerCase().includes('analogy')) {
+                              icon = '💡';
                               cardClass = 'border-s-4 border-s-amber-400 bg-amber-950/20';
-                            } else if (text.includes('ظ„ظ…ط§ط°ط§') || text.toLowerCase().includes('the why')) {
-                              icon = 'ًںڑ€';
+                            } else if (text.includes('لماذا') || text.toLowerCase().includes('the why')) {
+                              icon = '🚀';
                               cardClass = 'border-s-4 border-s-purple-400 bg-purple-950/20';
-                            } else if (text.includes('ظ…ط«ط§ظ„') || text.toLowerCase().includes('working example') || text.includes('ظƒظˆط¯')) {
-                              icon = 'ًں’»';
+                            } else if (text.includes('مثال') || text.toLowerCase().includes('working example') || text.includes('كود')) {
+                              icon = '💻';
                               cardClass = 'border-s-4 border-s-indigo-400 bg-indigo-950/20';
-                            } else if (text.includes('ط®ط·ط£') || text.toLowerCase().includes('pitfall') || text.includes('طھط­ط°ظٹط±')) {
-                              icon = 'âڑ ï¸ڈ';
+                            } else if (text.includes('خطأ') || text.toLowerCase().includes('pitfall') || text.includes('تحذير')) {
+                              icon = '⚠️';
                               cardClass = 'border-s-4 border-s-rose-400 bg-rose-950/20';
                             }
 
@@ -645,7 +645,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                                     isDark ? 'text-amber-400' : 'text-amber-800'
                                   }`}
                                 >
-                                  ًں’، ظپظƒط±ط© ط¬ظˆظ‡ط±ظٹط©:
+                                  💡 فكرة جوهرية:
                                 </span>
                                 {children}
                               </blockquote>
@@ -736,7 +736,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                                   <button
                                     onClick={() => setLightboxUrl(src)}
                                     className="p-1 rounded-lg hover:bg-white/20 text-white transition-colors"
-                                    title={lang === 'ar' ? 'ظ…ط¹ط§ظٹظ†ط© ظˆطھظƒط¨ظٹط±' : 'Full Preview'}
+                                    title={lang === 'ar' ? 'معاينة وتكبير' : 'Full Preview'}
                                   >
                                     <Maximize2 className="w-3.5 h-3.5" />
                                   </button>
@@ -748,7 +748,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                                         ? 'text-emerald-400 bg-emerald-500/20'
                                         : 'hover:bg-white/20 text-purple-300'
                                     }`}
-                                    title={lang === 'ar' ? 'ط­ظپط¸ ظپظٹ ط§ط³طھظˆط¯ظٹظˆ ط§ظ„ظˆط³ط§ط¦ط·' : 'Save to Media Vault'}
+                                    title={lang === 'ar' ? 'حفظ في استوديو الوسائط' : 'Save to Media Vault'}
                                   >
                                     {isSaving ? (
                                       <span className="text-[10px] animate-pulse">...</span>
@@ -764,7 +764,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                                     target="_blank"
                                     rel="noreferrer"
                                     className="p-1 rounded-lg hover:bg-white/20 text-blue-400 transition-colors"
-                                    title={lang === 'ar' ? 'طھط­ظ…ظٹظ„ ظ…ط¨ط§ط´ط±' : 'Download'}
+                                    title={lang === 'ar' ? 'تحميل مباشر' : 'Download'}
                                   >
                                     <Download className="w-3.5 h-3.5" />
                                   </a>
@@ -793,7 +793,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                                       className="text-blue-400 hover:underline flex items-center gap-1"
                                     >
                                       <Download className="w-3 h-3" />
-                                      {lang === 'ar' ? 'طھط­ظ…ظٹظ„' : 'Download'}
+                                      {lang === 'ar' ? 'تحميل' : 'Download'}
                                     </a>
                                   </div>
                                 </div>
@@ -858,36 +858,29 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
 
                     {/* Quota Exhaustion Helper Card */}
                     {onSwitchModel &&
-                      (msg.content.includes('ط±طµظٹط¯ ط­ط³ط§ط¨ OpenAI ظ…ظ†طھظ‡ظٹ') ||
+                      (msg.content.includes('رصيد حساب OpenAI منتهي') ||
                         msg.content.includes('credits remaining') ||
                         msg.content.includes('Insufficient Quota') ||
-                        msg.content.includes('ظ†ظپط§ط¯ ط±طµظٹط¯')) && (
+                        msg.content.includes('نفاد رصيد')) && (
                         <div
                           className="mt-3 p-3.5 rounded-2xl bg-gradient-to-r from-blue-950/40 to-indigo-950/40 border border-blue-500/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-right"
                           dir="rtl"
                         >
                           <div className="text-xs text-blue-200">
-                            ًں’، <strong>ظ†طµظٹط­ط©:</strong> ط±طµظٹط¯ ChatGPT ظ…ظ†طھظ‡ظچطŒ ظٹظ…ظƒظ†ظƒ ط§ظ„ظ…طھط§ط¨ط¹ط© ظپظˆط±ط§ظ‹ ظ…ط¹ <strong>Google Gemini</strong> ظ…ط¬ط§ظ†ط§ظ‹ ظˆط¨ط£ط¹ظ„ظ‰ ط³ط±ط¹ط©.
+                            💡 <strong>نصيحة:</strong> رصيد ChatGPT منتهٍ، يمكنك المتابعة فوراً مع <strong>Google Gemini</strong> مجاناً وبأعلى سرعة.
                           </div>
                           <button
                             onClick={() => onSwitchModel('Google Gemini (gemini-3.5-flash)')}
                             className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/30 transition-all shrink-0 active:scale-95"
                           >
-                            ط§ظ„طھط¨ط¯ظٹظ„ ط¥ظ„ظ‰ Google Gemini ط§ظ„ط¢ظ†
+                            التبديل إلى Google Gemini الآن
                           </button>
                         </div>
                       )}
 
-                    {/* Interactive 10-Second API Key Setup Card */}
-                    {msg.content.includes('ظٹط±ط¬ظ‰ ط¥ط¯ط®ط§ظ„ ظ…ظپطھط§ط­') && (
-                      <div
-                        className={`mt-3 p-4 rounded-2xl border space-y-3 text-right shadow-lg transition-all ${
-                          isDark
-                            ? 'bg-gradient-to-br from-purple-950/40 via-black/40 to-blue-950/40 border-purple-500/40 text-gray-200'
-                            : 'bg-purple-50/90 border-purple-300 text-slate-800'
-                        }`}
-                        dir="rtl"
-                      >
+                    {/* Inline API Key Activator when Gemini key is missing */}
+                    {msg.content.includes('Google Gemini API') && (
+                      <div className="mt-3 p-3.5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-purple-500/10 to-blue-500/10 border border-amber-500/30 space-y-3">
                         <div className="flex items-center justify-between pb-2 border-b border-purple-500/20">
                           <div className="flex items-center gap-2">
                             <div className="w-7 h-7 rounded-lg bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400">
@@ -895,22 +888,22 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             </div>
                             <div>
                               <div className="font-bold text-xs text-purple-300">
-                                {lang === 'ar' ? 'طھظپط¹ظٹظ„ ظ…ظپطھط§ط­ Google Gemini ظپظٹ 10 ط«ظˆط§ظ†ظچ' : 'Activate Google Gemini API in 10 Seconds'}
+                                {lang === 'ar' ? 'تفعيل مفتاح Google Gemini في 10 ثوانٍ' : 'Activate Google Gemini API in 10 Seconds'}
                               </div>
                               <div className="text-[10px] text-gray-400">
-                                {lang === 'ar' ? 'ظ…ط¬ط§ظ†ظٹ 100% ظˆط¨ط¯ظˆظ† ط£ظٹ ط¨ط·ط§ظ‚ط© ط¨ظ†ظƒظٹط©' : '100% Free, no credit card required'}
+                                {lang === 'ar' ? 'مجاني 100% وبدون أي بطاقة بنكية' : '100% Free, no credit card required'}
                               </div>
                             </div>
                           </div>
                           <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-medium flex items-center gap-1">
                             <ShieldCheck className="w-3 h-3 text-emerald-400" />
-                            <span>{lang === 'ar' ? 'ظ…ط­ظپظˆط¸ ط¹ظ„ظ‰ ط¬ظ‡ط§ط²ظƒ ظپظ‚ط·' : 'Local Storage Only'}</span>
+                            <span>{lang === 'ar' ? 'محفوظ على جهازك فقط' : 'Local Storage Only'}</span>
                           </span>
                         </div>
 
                         {/* Privacy Guarantee Note */}
                         <div className="text-[11px] text-gray-300 bg-white/5 p-2 rounded-xl border border-white/5 leading-relaxed">
-                          ًں›،ï¸ڈ <strong>ط­ظ…ط§ظٹط© ظˆط£ظ…ط§ظ† ظƒط§ظ…ظ„:</strong> ظ…ظپطھط§ط­ظƒ ظٹطھظ… ط­ظپط¸ظ‡ ظ…ط­ظ„ظٹط§ظ‹ ط¹ظ„ظ‰ ط¬ظ‡ط§ط²ظƒ ط§ظ„ط­ط§ظ„ظٹ ظپظ‚ط· ط¯ط§ط®ظ„ ط§ظ„ظ€ Local Storage ظˆظ„ط§ ظٹظ…ظƒظ† ظ„ط£ظٹ ط®ط§ط¯ظ… ط£ظˆ ط£ظٹ ط´ط®طµ ط¢ط®ط± ط±ط¤ظٹطھظ‡ ط£ظˆ ط§ط³طھط®ط¯ط§ظ…ظ‡.
+                          🛡️ <strong>{lang === 'ar' ? 'حماية وأمان كامل:' : 'Complete Privacy:'}</strong> {lang === 'ar' ? 'مفتاحك يتم حفظه محلياً على جهازك الحالي فقط داخل الـ Local Storage ولا يمكن لأي خادم أو أي شخص آخر رؤيته أو استخدامه.' : 'Your key is saved locally in your browser/device storage only and is never shared.'}
                         </div>
 
                         {/* Step 1: Link to Google AI Studio */}
@@ -922,7 +915,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                         >
                           <span className="flex items-center gap-2">
                             <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                            <span>1. ط§ط¶ط؛ط· ظ‡ظ†ط§ ظ„ظپطھط­ طµظپط­ط© ط¥ظ†ط´ط§ط، ط§ظ„ظ…ظپطھط§ط­ ط§ظ„ظ…ط¬ط§ظ†ظٹ (Google AI Studio)</span>
+                            <span>1. {lang === 'ar' ? 'اضغط هنا لفتح صفحة إنشاء المفتاح المجاني (Google AI Studio)' : 'Open Free Google AI Studio API Keys'}</span>
                           </span>
                           <ExternalLink className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
                         </a>
@@ -930,7 +923,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                         {/* Step 2: Paste and Activate */}
                         <div className="space-y-1.5 pt-1">
                           <div className="text-[11px] text-gray-400 font-medium">
-                            2. ط§ظ†ط³ط® ط§ظ„ظ…ظپطھط§ط­ ظˆط§ظ„طµظ‚ظ‡ ظ‡ظ†ط§ ظ„طھظپط¹ظٹظ„ظ‡ ظپظˆط±ط§ظ‹:
+                            2. {lang === 'ar' ? 'انسخ المفتاح والصقه هنا لتفعيله فوراً:' : 'Paste your key here and activate:'}
                           </div>
                           <div className="flex items-center gap-1.5">
                             <input
@@ -948,10 +941,10 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                               type="button"
                               onClick={handlePasteInlineKey}
                               className="px-2.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-gray-200 border border-white/10 text-xs flex items-center gap-1 transition-colors shrink-0"
-                              title="ظ„طµظ‚ ظ…ظ† ط§ظ„ط­ط§ظپط¸ط©"
+                              title={lang === 'ar' ? 'لصق من الحافظة' : 'Paste from clipboard'}
                             >
                               <ClipboardPaste className="w-3.5 h-3.5" />
-                              <span>ظ„طµظ‚</span>
+                              <span>{lang === 'ar' ? 'لصق' : 'Paste'}</span>
                             </button>
                             <button
                               type="button"
@@ -964,7 +957,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                               ) : (
                                 <CheckCircle2 className="w-3.5 h-3.5 text-amber-300" />
                               )}
-                              <span>طھظپط¹ظٹظ„ ظپظˆط±ط§ظ‹</span>
+                              <span>{lang === 'ar' ? 'تفعيل فوراً' : 'Activate'}</span>
                             </button>
                           </div>
                         </div>
@@ -981,7 +974,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             {inlineKeyStatus === 'success' ? (
                               <>
                                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                                <span>طھظ… ط§ظ„طھط­ظ‚ظ‚ ظˆطھظپط¹ظٹظ„ ط§ظ„ظ…ظپطھط§ط­ ط¨ظ†ط¬ط§ط­! ط¬ط§ط±ظٹ ط§ظ„طھط­ط¯ظٹط«...</span>
+                                <span>{lang === 'ar' ? 'تم التحقق وتفعيل المفتاح بنجاح! جاري التحديث...' : 'Key verified & saved! Reloading...'}</span>
                               </>
                             ) : (
                               <>
@@ -1015,20 +1008,20 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                         )}
                       </button>
 
-                      {/* Explain Like I'm 10 / ط¨ط³ظ‘ط·ظ‡ط§ظ„ظٹ */}
+                      {/* Explain Like I'm 10 / بسّطهالي */}
                       <button
                         onClick={() => {
                           onPromptSelect?.(
                             lang === 'ar'
-                              ? 'ط£ط¹ط¯ ط´ط±ط­ ط§ظ„ط±ط¯ ط§ظ„ط³ط§ط¨ظ‚ ط¨ط£ط³ظ„ظˆط¨ ظ…ط¨ط³ط· ط¬ط¯ط§ظ‹ ظ„ط´ط®طµ ظ„ظٹط³ ظ„ط¯ظٹظ‡ ط£ظٹ ط®ظ„ظپظٹط© طھظ‚ظ†ظٹط©طŒ ظˆط§ط³طھط®ط¯ظ… طھط´ط¨ظٹظ‡ط§ظ‹ ظ…ظ† ط§ظ„ط­ظٹط§ط© ط§ظ„ظٹظˆظ…ظٹط© ظˆظ…ط«ط§ظ„ط§ظ‹ ط¨ط³ظٹط·ط§ظ‹ ظ…ظ† ط³ط·ط±ظٹظ† ظپظ‚ط·.'
+                              ? 'أعد شرح الرد السابق بأسلوب مبسط جداً لشخص ليس لديه أي خلفية تقنية، واستخدم تشبيهاً من الحياة اليومية ومثالاً بسيطاً من سطرين فقط.'
                               : 'Please re-explain the previous response in very simple terms for someone with no technical background, using a daily-life analogy and a minimal 2-line example.'
                           );
                         }}
                         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 transition-all text-[11px] font-medium shadow-sm active:scale-95"
-                        title={lang === 'ar' ? 'ط´ط±ط­ ظ…ط¨ط³ط· ظ„ظ„ط£ط·ظپط§ظ„ ظˆط§ظ„ظ…ط¨طھط¯ط¦ظٹظ† ط¨ظ…ط«ط§ظ„ ظˆط§ظ‚ط¹ظٹ' : "Explain Like I'm 10"}
+                        title={lang === 'ar' ? 'شرح مبسط للأطفال والمبتدئين بمثال واقعي' : "Explain Like I'm 10"}
                       >
                         <Sparkles className="w-3 h-3 text-amber-400" />
-                        <span>{lang === 'ar' ? 'ط¨ط³ظ‘ط·ظ‡ط§ظ„ظٹ' : 'ELI5'}</span>
+                        <span>{lang === 'ar' ? 'بسّطهالي' : 'ELI5'}</span>
                       </button>
 
                       {/* Text-to-Speech (TTS Read Aloud) */}
@@ -1065,7 +1058,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                         <button
                           onClick={() => setOpenMenuMsgId(openMenuMsgId === msg.id ? null : msg.id)}
                           className="p-1.5 rounded-xl hover:bg-white/15 text-gray-400 hover:text-gray-100 transition-all text-[11px] border border-white/10 bg-white/[0.04] shadow-sm active:scale-95"
-                          title={lang === 'ar' ? 'ط§ظ„ظ…ط²ظٹط¯ ظ…ظ† ط§ظ„ط®ظٹط§ط±ط§طھ' : 'More Options'}
+                          title={lang === 'ar' ? 'المزيد من الخيارات' : 'More Options'}
                         >
                           <MoreHorizontal className="w-3.5 h-3.5" />
                         </button>
@@ -1091,7 +1084,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                                 className="sm:hidden w-full flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all active:scale-[0.98] hover:bg-white/10 text-left transition-colors text-[11px]"
                               >
                                 <Download className="w-3.5 h-3.5 text-red-400" />
-                                <span>{lang === 'ar' ? 'طھط­ظ…ظٹظ„ ظƒظ…ظ„ظپ PDF' : 'Download PDF'}</span>
+                                <span>{lang === 'ar' ? 'تحميل كملف PDF' : 'Download PDF'}</span>
                               </button>
 
                               {/* Export Markdown (.md) */}

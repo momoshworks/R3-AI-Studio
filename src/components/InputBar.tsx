@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   ArrowUp,
   Square,
@@ -103,7 +103,7 @@ export const InputBar: React.FC<InputBarProps> = ({
     if (!recognitionRef.current) {
       alert(
         lang === 'ar'
-          ? 'ط§ظ„ظ…طھطµظپط­ ط§ظ„ط­ط§ظ„ظٹ ظ„ط§ ظٹط¯ط¹ظ… ط§ظ„ط¥ط¯ط®ط§ظ„ ط§ظ„طµظˆطھظٹ ط§ظ„ظ…ط¨ط§ط´ط±. ظٹط±ط¬ظ‰ ط§ط³طھط®ط¯ط§ظ… ظ…طھطµظپط­ ظٹط¯ط¹ظ… Web Speech API ظ…ط«ظ„ Chrome ط£ظˆ Edge.'
+          ? 'المتصفح الحالي لا يدعم الإدخال الصوتي المباشر. يرجى استخدام متصفح يدعم Web Speech API مثل Chrome أو Edge.'
           : 'Your browser does not support Speech Recognition. Please use Chrome or Edge.'
       );
       return;
@@ -263,7 +263,7 @@ export const InputBar: React.FC<InputBarProps> = ({
         {isUploading && (
           <div className="flex items-center space-x-2 px-3 py-1 text-xs text-blue-400 animate-pulse">
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            <span>{lang === 'ar' ? 'ط¬ط§ط±ظٹ ط±ظپط¹ ط§ظ„ظ…ظ„ظپ ظˆطھط­ظ„ظٹظ„ظ‡...' : 'Uploading & processing file...'}</span>
+            <span>{lang === 'ar' ? 'جاري رفع الملف وتحليله...' : 'Uploading & processing file...'}</span>
           </div>
         )}
 
@@ -281,7 +281,7 @@ export const InputBar: React.FC<InputBarProps> = ({
               onClick={toggleVoiceRecording}
               className="text-[11px] underline hover:text-red-300 font-medium"
             >
-              {lang === 'ar' ? 'ط¥ظ†ظ‡ط§ط، ط§ظ„طھط­ط¯ط«' : 'Stop'}
+              {lang === 'ar' ? 'إنهاء التحدث' : 'Stop'}
             </button>
           </div>
         )}
@@ -294,7 +294,7 @@ export const InputBar: React.FC<InputBarProps> = ({
           onKeyDown={handleKeyDown}
           dir="auto"
           style={{ unicodeBidi: 'plaintext' }}
-          placeholder={lang === 'ar' ? 'ط§ط³ط£ظ„ R3 ط£ظٹ ط´ظٹط،طŒ ط£ظˆ طھط­ط¯ط« طµظˆطھظٹط§ظ‹...' : 'Ask Nerdo anything or speak...'}
+          placeholder={lang === 'ar' ? 'اسأل Nerdo أي شيء، أو تحدث صوتياً...' : 'Ask Nerdo anything or speak...'}
           rows={1}
           className={`w-full bg-transparent text-xs sm:text-sm md:text-base outline-none resize-none px-2 sm:px-3 py-1.5 sm:py-2 min-h-[38px] max-h-28 sm:max-h-48 leading-relaxed font-sans ${
             isDark
@@ -321,7 +321,7 @@ export const InputBar: React.FC<InputBarProps> = ({
               className={`p-2 rounded-full transition-colors ${
                 isDark ? 'text-gray-400 hover:text-white hover:bg-white/5' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
               }`}
-              title={lang === 'ar' ? 'ط¥ط±ظپط§ظ‚ ظ…ظ„ظپط§طھ ط£ظˆ طµظˆط± ظ„ظ„طھط­ظ„ظٹظ„' : 'Attach files or images for analysis'}
+              title={lang === 'ar' ? 'إرفاق ملفات أو صور للتحليل' : 'Attach files or images for analysis'}
             >
               <Paperclip className="w-4 h-4" />
             </button>
@@ -378,8 +378,8 @@ export const InputBar: React.FC<InputBarProps> = ({
         <Sparkles className="w-3 h-3 text-blue-400" />
         <span>
           {lang === 'ar'
-            ? 'Nerdo AI Workstation آ· ظ…ط¯ط¹ظˆظ… ط¨ط£ط­ط¯ط« ظ†ظ…ط§ط°ط¬ Gemini ظˆ ChatGPT ظˆطھظˆظ„ظٹط¯ PDF ط§ظ„ط§ط­طھط±ط§ظپظٹ'
-            : 'Nerdo AI Workstation آ· Powered by Gemini, ChatGPT & Direct PDF Engine'}
+            ? 'Nerdo AI Workstation · مدعوم بأحدث نماذج Gemini و ChatGPT وتوليد PDF الاحترافي'
+            : 'Nerdo AI Workstation · Powered by Gemini, ChatGPT & Direct PDF Engine'}
         </span>
       </div>
     </div>

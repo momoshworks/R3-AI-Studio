@@ -1,4 +1,4 @@
-﻿import { AttachedFile, ChatMessage, DriveStatus, SystemMetrics, Notebook, NotebookChunk, Citation, StudyGuideData } from '../types';
+import { AttachedFile, ChatMessage, DriveStatus, SystemMetrics, Notebook, NotebookChunk, Citation, StudyGuideData } from '../types';
 
 export const getApiBase = (): string => {
   try {
@@ -44,7 +44,7 @@ export async function openOfficialNotebookLM(): Promise<{ success: boolean; meth
       // Create new window if not preheated
       win = new WebviewWindow('notebooklm', {
         url: 'https://notebooklm.google.com',
-        title: 'Google NotebookLM â€” Nerdo AI Studio',
+        title: 'Google NotebookLM — Nerdo AI Studio',
         width: 1300,
         height: 850,
         minWidth: 850,
@@ -443,7 +443,7 @@ export const api = {
     try {
       if (provider === 'gemini') {
         if (!geminiKey || !geminiKey.trim()) {
-          onChunk('âڑ ï¸ڈ **ظٹط±ط¬ظ‰ ط¥ط¯ط®ط§ظ„ ظ…ظپطھط§ط­ Google Gemini API:**\n\nط§ظپطھط­ ط§ظ„ط¥ط¹ط¯ط§ط¯ط§طھ âڑ™ï¸ڈ ظˆط£ط¯ط®ظ„ ظ…ظپطھط§ط­ API ط§ظ„ط®ط§طµ ط¨ظƒ ظ…ظ† [Google AI Studio](https://aistudio.google.com/app/apikey) ظ„ط¨ط¯ط، ط§ظ„ظ…ط­ط§ط¯ط«ط© ظپظˆط±ط§ظ‹ ظˆط¨ط´ظƒظ„ ظ…ط¬ط§ظ†ظٹ طھظ…ط§ظ…ط§ظ‹.');
+          onChunk('⚠️ **يرجى إدخال مفتاح Google Gemini API:**\n\nافتح الإعدادات ⚙️ وأدخل مفتاح API الخاص بك من [Google AI Studio](https://aistudio.google.com/app/apikey) لبدء المحادثة فوراً وبشكل مجاني تماماً.');
           onDone();
           return;
         }
@@ -467,14 +467,14 @@ export const api = {
                   },
                 });
               } else if (att.data) {
-                parts.push({ text: `[ظ…ظ„ظپ ظ…ط±ظپظ‚: ${att.name}]\n` });
+                parts.push({ text: `[ملف مرفق: ${att.name}]\n` });
               }
             }
           }
 
           if (m.content && m.content.trim()) {
             const cleaned = m.content
-              .replace(/âڑ ï¸ڈ \*\*(?:Notice|طھظ†ط¨ظٹظ‡):\*\*[\s\S]*$/gi, '')
+              .replace(/⚠️ \*\*(?:Notice|تنبيه):\*\*[\s\S]*$/gi, '')
               .trim();
             if (cleaned) {
               parts.push({ text: cleaned });
@@ -496,7 +496,7 @@ export const api = {
           formattedContents.shift();
         }
         if (formattedContents.length === 0) {
-          formattedContents.push({ role: 'user', parts: [{ text: 'ظ…ط±ط­ط¨ط§ظ‹' }] });
+          formattedContents.push({ role: 'user', parts: [{ text: 'مرحباً' }] });
         }
 
         // Query available models from user's key dynamically
@@ -529,26 +529,31 @@ export const api = {
             const errJson = await listRes.json().catch(() => ({}));
             const msg = errJson.error?.message || '';
             if (msg.toLowerCase().includes('api key not valid') || msg.toLowerCase().includes('api_key_invalid')) {
-              throw new Error('ظ…ظپطھط§ط­ Google Gemini API ط؛ظٹط± طµط§ظ„ط­. ظٹط±ط¬ظ‰ ط§ظ„طھط£ظƒط¯ ظ…ظ† ظ†ط³ط®ظ‡ ط¨ط¯ظ‚ط© ظ…ظ† Google AI Studio ظˆط­ظپط¸ظ‡ ظپظٹ ط§ظ„ط¥ط¹ط¯ط§ط¯ط§طھ âڑ™ï¸ڈ.');
+              throw new Error('مفتاح Google Gemini API غير صالح. يرجى التأكد من نسخه بدقة من Google AI Studio وحفظه في الإعدادات ⚙️.');
             }
           }
         } catch (e: any) {
           if (e.name === 'AbortError') return;
-          if (e.message && e.message.includes('ظ…ظپطھط§ط­ Google Gemini API ط؛ظٹط± طµط§ظ„ط­')) {
+          if (e.message && e.message.includes('مفتاح Google Gemini API غير صالح')) {
             throw e;
           }
           console.warn('Could not query dynamic models list:', e);
         }
 
-        // Add comprehensive static fallback list prioritizing active working models
+        // Add comprehensive static fallback list
         const staticFallbacks = [
-          'gemini-3.5-flash',
-          'gemini-3.8-flash',
-          'gemini-3.5-flash-lite',
-          'gemini-flash-latest',
           'gemini-2.5-flash',
           'gemini-2.0-flash',
+          'gemini-2.5-flash-lite',
+          'gemini-flash-latest',
+          'gemini-3.5-flash',
+          'gemini-3.5-flash-lite',
+          'gemini-3.8-flash',
+          'gemini-1.5-flash-latest',
+          'gemini-1.5-flash',
           'gemini-2.5-pro',
+          'gemini-1.5-pro-latest',
+          'gemini-pro-latest',
         ];
         for (const fb of staticFallbacks) {
           if (!candidateModels.includes(fb)) {
@@ -586,12 +591,12 @@ export const api = {
               lastError = errJson.error?.message || `HTTP ${res.status}`;
               console.warn(`[Gemini Direct API] Model ${cleanModel} returned (${res.status}): ${lastError}. Trying next model...`);
               if (lastError.toLowerCase().includes('api key not valid') || lastError.toLowerCase().includes('api_key_invalid')) {
-                throw new Error('ظ…ظپطھط§ط­ Google Gemini API ط؛ظٹط± طµط§ظ„ط­ ط£ظˆ ط؛ظٹط± ظ…ظپط¹ظ„. ظٹط±ط¬ظ‰ ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ظ…ظپطھط§ط­ ط¬ط¯ظٹط¯ ظ…ظ† Google AI Studio.');
+                throw new Error('مفتاح Google Gemini API غير صالح أو غير مفعل. يرجى الحصول على مفتاح جديد من Google AI Studio.');
               }
             }
           } catch (e: any) {
             if (e.name === 'AbortError') return;
-            if (e.message && e.message.includes('ظ…ظپطھط§ط­ Google Gemini API ط؛ظٹط± طµط§ظ„ط­')) {
+            if (e.message && e.message.includes('مفتاح Google Gemini API غير صالح')) {
               throw e;
             }
             lastError = e.message;
@@ -600,9 +605,9 @@ export const api = {
 
         if (!streamResponse || !streamResponse.body) {
           if (lastError.toLowerCase().includes('quota') || lastError.toLowerCase().includes('resource_exhausted')) {
-            throw new Error('طھظ… طھط¬ط§ظˆط² ط§ظ„ط­طµط© ط§ظ„ظ…ط¬ط§ظ†ظٹط© ط§ظ„ظ…ط¤ظ‚طھط© ظ„ظ…ظپطھط§ط­ Gemini API (Quota Exceeded). ظٹط±ط¬ظ‰ ط§ظ„ط§ظ†طھط¸ط§ط± ط¯ظ‚ظٹظ‚ط© ط£ظˆ طھط¬ط±ط¨ط© ظ…ظپطھط§ط­ ط¢ط®ط±.');
+            throw new Error('تم تجاوز الحصة المجانية المؤقتة لمفتاح Gemini API (Quota Exceeded). يرجى الانتظار دقيقة أو تجربة مفتاح آخر.');
           }
-          throw new Error(lastError || 'طھط¹ط°ط± ط§ظ„ط§طھطµط§ظ„ ط¨ط®ظˆط§ط¯ظ… Google Gemini. ظٹط±ط¬ظ‰ ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ط§طھطµط§ظ„ ط§ظ„ط¥ظ†طھط±ظ†طھ ظˆطµظ„ط§ط­ظٹط© ظ…ظپطھط§ط­ API.');
+          throw new Error(lastError || 'تعذر الاتصال بخوادم Google Gemini. يرجى التحقق من اتصال الإنترنت وصلاحية مفتاح API.');
         }
 
         const reader = streamResponse.body.getReader();
@@ -638,7 +643,7 @@ export const api = {
       } else {
         // OpenAI Direct Streaming
         if (!openaiKey) {
-          onChunk('âڑ ï¸ڈ **ظٹط±ط¬ظ‰ ط¥ط¯ط®ط§ظ„ ظ…ظپطھط§ط­ ChatGPT (OpenAI) API:**\n\nط§ظپطھط­ ط§ظ„ط¥ط¹ط¯ط§ط¯ط§طھ âڑ™ï¸ڈ ظˆط£ط¯ط®ظ„ ظ…ظپطھط§ط­ API ط§ظ„ط®ط§طµ ط¨ظƒ ظ…ظ† OpenAI ظ„ط¨ط¯ط، ط§ظ„ظ…ط­ط§ط¯ط«ط©.');
+          onChunk('⚠️ **يرجى إدخال مفتاح ChatGPT (OpenAI) API:**\n\nافتح الإعدادات ⚙️ وأدخل مفتاح API الخاص بك من OpenAI لبدء المحادثة.');
           onDone();
           return;
         }
@@ -781,19 +786,19 @@ export const api = {
         localStorage.setItem('NEXUSHUB_GEMINI_API_KEY', apiKey.trim());
         return {
           valid: true,
-          message: 'طھظ… ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ظ…ظپطھط§ط­ Gemini ط¨ظ†ط¬ط§ط­ ظˆطھظپط¹ظٹظ„ظ‡ ط¹ظ„ظ‰ ط§ظ„طھط·ط¨ظٹظ‚!',
+          message: 'تم التحقق من مفتاح Gemini بنجاح وتفعيله على التطبيق!',
           detected_model: 'gemini-3.5-flash',
         };
       }
       const data = await res.json().catch(() => ({}));
       return {
         valid: false,
-        message: data.error?.message || 'ط§ظ„ظ…ظپطھط§ط­ ط؛ظٹط± طµط§ظ„ط­ ط£ظˆ ظ„ظ… ظٹطھظ… طھظپط¹ظٹظ„ Gemini API ظ„ظ‡.',
+        message: data.error?.message || 'المفتاح غير صالح أو لم يتم تفعيل Gemini API له.',
       };
     } catch (e: any) {
       return {
         valid: false,
-        message: e.message || 'طھط¹ط°ط± ط§ظ„ط§طھطµط§ظ„ ط¨ظ€ Google Gemini. طھط­ظ‚ظ‚ ظ…ظ† ط§طھطµط§ظ„ ط§ظ„ط¥ظ†طھط±ظ†طھ.',
+        message: e.message || 'تعذر الاتصال بـ Google Gemini. تحقق من اتصال الإنترنت.',
       };
     }
   },
@@ -821,19 +826,19 @@ export const api = {
         localStorage.setItem('NEXUSHUB_OPENAI_API_KEY', apiKey.trim());
         return {
           valid: true,
-          message: 'طھظ… ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ظ…ظپطھط§ط­ ChatGPT (OpenAI) ط¨ظ†ط¬ط§ط­ ظˆطھظپط¹ظٹظ„ظ‡!',
+          message: 'تم التحقق من مفتاح ChatGPT (OpenAI) بنجاح وتفعيله!',
           detected_model: 'gpt-4o-mini',
         };
       }
       const data = await res.json().catch(() => ({}));
       return {
         valid: false,
-        message: data.error?.message || 'ظ…ظپطھط§ط­ OpenAI ط؛ظٹط± طµط§ظ„ط­ ط£ظˆ ظ„ظٹط³ ظ„ط¯ظٹظ‡ ط±طµظٹط¯ ظƒط§ظپظچ.',
+        message: data.error?.message || 'مفتاح OpenAI غير صالح أو ليس لديه رصيد كافٍ.',
       };
     } catch (e: any) {
       return {
         valid: false,
-        message: e.message || 'ظپط´ظ„ ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ظ…ظپطھط§ط­ OpenAI.',
+        message: e.message || 'فشل التحقق من مفتاح OpenAI.',
       };
     }
   },
@@ -1080,7 +1085,7 @@ export const api = {
       });
       return await res.json();
     }
-    return { answer: 'طھطھط·ظ„ط¨ ظ…ظٹط²ط© RAG Notebook Studio ط§ظ„ط§طھطµط§ظ„ ط¨ط®ط§ط¯ظ… R3 ط§ظ„ظ…ط­ظ„ظٹ.', citations: [] };
+    return { answer: 'تتطلب ميزة RAG Notebook Studio الاتصال بخادم Nerdo المحلي.', citations: [] };
   },
 
   async generateStudyTools(
@@ -1098,7 +1103,7 @@ export const api = {
       return await res.json();
     }
     return {
-      summary: 'ط§ظ„ط¯ط±ط§ط³ط© ط§ظ„ط°ظƒظٹط©',
+      summary: 'الدراسة الذكية',
       key_points: [],
       flashcards: [],
       quiz: [],
