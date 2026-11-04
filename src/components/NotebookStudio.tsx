@@ -1022,7 +1022,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
 
               <button
                 onClick={() => handleSendChat(lang === 'ar' ? 'اشرح لي محتوى المستندات المرفوعة بالتفصيل مع تبسيط المفاهيم الصعبة والقوانين الرياضية' : 'Explain the core material step-by-step with analogies and principles', 'explain')}
-                className="px-2.5 py-1 rounded-xl text-[11px] font-medium bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 shrink-0 transition-all flex items-center gap-1"
+                className="px-2.5 py-1 rounded-xl text-[11px] font-medium bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 shrink-0 transition-all flex items-center gap-1 active:scale-95 shadow-sm"
               >
                 <Brain className="w-3 h-3" />
                 <span>{lang === 'ar' ? 'شرح وتبسيط' : 'Explain Concepts'}</span>
@@ -1030,7 +1030,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
 
               <button
                 onClick={() => handleSendChat(lang === 'ar' ? 'حل ووضح المسائل والتمارين الموجودة في المستندات مع خطوات الحل والقوانين المستخدمة' : 'Solve and walk through the problems in the sources step-by-step', 'solve')}
-                className="px-2.5 py-1 rounded-xl text-[11px] font-medium bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0 transition-all flex items-center gap-1"
+                className="px-2.5 py-1 rounded-xl text-[11px] font-medium bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0 transition-all flex items-center gap-1 active:scale-95 shadow-sm"
               >
                 <Lightbulb className="w-3 h-3" />
                 <span>{lang === 'ar' ? 'حل المسائل' : 'Solve Problems'}</span>
@@ -1042,7 +1042,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                   setStudySubTab('summary');
                   handleGenerateStudyTools(true);
                 }}
-                className="px-2.5 py-1 rounded-xl text-[11px] font-medium bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 shrink-0 transition-all flex items-center gap-1"
+                className="px-2.5 py-1 rounded-xl text-[11px] font-medium bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 shrink-0 transition-all flex items-center gap-1 active:scale-95 shadow-sm"
               >
                 <GraduationCap className="w-3 h-3" />
                 <span>{lang === 'ar' ? 'ملخص شامل' : 'Deep Summary'}</span>
@@ -1054,7 +1054,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                   setStudySubTab('quiz');
                   handleGenerateStudyTools(true);
                 }}
-                className="px-2.5 py-1 rounded-xl text-[11px] font-medium bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 shrink-0 transition-all flex items-center gap-1"
+                className="px-2.5 py-1 rounded-xl text-[11px] font-medium bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 shrink-0 transition-all flex items-center gap-1 active:scale-95 shadow-sm"
               >
                 <HelpCircle className="w-3 h-3" />
                 <span>{lang === 'ar' ? 'اختبار تدريبي' : 'Exam Quiz'}</span>
@@ -1209,7 +1209,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
                 <div className="flex items-center space-x-2 space-x-reverse overflow-x-auto no-scrollbar py-0.5 max-w-full">
                   <button
                     onClick={() => setStudySubTab('summary')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all active:scale-95 shadow-sm ${
                       studySubTab === 'summary'
                         ? 'bg-purple-600 text-white shadow'
                         : isDark
@@ -1222,7 +1222,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
 
                   <button
                     onClick={() => setStudySubTab('flashcards')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all active:scale-95 shadow-sm ${
                       studySubTab === 'flashcards'
                         ? 'bg-blue-600 text-white shadow'
                         : isDark
@@ -1235,7 +1235,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
 
                   <button
                     onClick={() => setStudySubTab('quiz')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all active:scale-95 shadow-sm ${
                       studySubTab === 'quiz'
                         ? 'bg-emerald-600 text-white shadow'
                         : isDark
@@ -1248,7 +1248,7 @@ export const NotebookStudio: React.FC<NotebookStudioProps> = ({
 
                   <button
                     onClick={() => setStudySubTab('concepts')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all active:scale-95 shadow-sm ${
                       studySubTab === 'concepts'
                         ? 'bg-amber-600 text-white shadow'
                         : isDark

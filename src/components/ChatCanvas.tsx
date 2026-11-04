@@ -831,7 +831,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             💡 <strong>نصيحة:</strong> رصيد ChatGPT منتهٍ، يمكنك المتابعة فوراً مع <strong>Google Gemini</strong> مجاناً وبأعلى سرعة.
                           </div>
                           <button
-                            onClick={() => onSwitchModel('Google Gemini (gemini-2.5-flash)')}
+                            onClick={() => onSwitchModel('Google Gemini (gemini-3.5-flash)')}
                             className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/30 transition-all shrink-0 active:scale-95"
                           >
                             التبديل إلى Google Gemini الآن
@@ -844,7 +844,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                       {/* Copy Text */}
                       <button
                         onClick={() => copyMessageContent(msg.content, msg.id)}
-                        className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-white/5 text-gray-300 hover:text-white transition-colors text-[11px] bg-white/[0.03] border border-white/5"
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl hover:bg-white/10 text-gray-300 hover:text-white transition-all text-[11px] bg-white/[0.04] border border-white/10 shadow-sm active:scale-95"
                         title={t.copy}
                       >
                         {copiedMsgId === msg.id ? (
@@ -869,7 +869,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                               : 'Please re-explain the previous response in very simple terms for someone with no technical background, using a daily-life analogy and a minimal 2-line example.'
                           );
                         }}
-                        className="flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/25 transition-all text-[11px] font-medium active:scale-95"
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 transition-all text-[11px] font-medium shadow-sm active:scale-95"
                         title={lang === 'ar' ? 'شرح مبسط للأطفال والمبتدئين بمثال واقعي' : "Explain Like I'm 10"}
                       >
                         <Sparkles className="w-3 h-3 text-amber-400" />
@@ -879,7 +879,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                       {/* Text-to-Speech (TTS Read Aloud) */}
                       <button
                         onClick={() => toggleSpeech(msg.content, msg.id)}
-                        className={`flex items-center gap-1 px-2 py-1 rounded-lg transition-colors text-[11px] border ${
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all text-[11px] border shadow-sm active:scale-95 ${
                           speakingMsgId === msg.id
                             ? 'bg-purple-500/20 text-purple-300 border-purple-500/40 animate-pulse'
                             : 'hover:bg-white/5 text-gray-300 hover:text-white bg-white/[0.03] border-white/5'
@@ -898,7 +898,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                       <button
                         onClick={() => handleDirectPdfDownload(msg.content, msg.id, 'R3 AI Report')}
                         disabled={downloadingPdfId === msg.id}
-                        className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/20 transition-colors text-[11px] font-medium disabled:opacity-50"
+                        className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 transition-all text-[11px] font-medium disabled:opacity-50 shadow-sm active:scale-95"
                         title={t.downloadPdf}
                       >
                         <Download className="w-3 h-3 text-red-400" />
@@ -909,7 +909,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                       <div className="relative">
                         <button
                           onClick={() => setOpenMenuMsgId(openMenuMsgId === msg.id ? null : msg.id)}
-                          className="p-1 rounded-lg hover:bg-white/10 text-gray-400 hover:text-gray-200 transition-colors text-[11px] border border-white/5 bg-white/[0.02]"
+                          className="p-1.5 rounded-xl hover:bg-white/15 text-gray-400 hover:text-gray-100 transition-all text-[11px] border border-white/10 bg-white/[0.04] shadow-sm active:scale-95"
                           title={lang === 'ar' ? 'المزيد من الخيارات' : 'More Options'}
                         >
                           <MoreHorizontal className="w-3.5 h-3.5" />
@@ -920,7 +920,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             <div className="fixed inset-0 z-30" onClick={() => setOpenMenuMsgId(null)} />
                             <div
                               dir={lang === 'ar' ? 'rtl' : 'ltr'}
-                              className={`absolute bottom-full mb-1 end-0 z-40 w-44 rounded-xl shadow-2xl p-1 text-xs space-y-0.5 border animate-in fade-in zoom-in-95 duration-100 ${
+                              className={`absolute bottom-full mb-1.5 end-0 z-40 w-48 rounded-2xl shadow-2xl p-1.5 text-xs space-y-1 border animate-in fade-in zoom-in-95 duration-150 backdrop-blur-xl ${
                                 isDark
                                   ? 'bg-[#1e1f20] border-gemini-border text-gray-200 shadow-black/80'
                                   : 'bg-white border-slate-200 text-slate-800 shadow-slate-300/80'
@@ -933,7 +933,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                                   setOpenMenuMsgId(null);
                                 }}
                                 disabled={downloadingPdfId === msg.id}
-                                className="sm:hidden w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-white/10 text-left transition-colors text-[11px]"
+                                className="sm:hidden w-full flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all active:scale-[0.98] hover:bg-white/10 text-left transition-colors text-[11px]"
                               >
                                 <Download className="w-3.5 h-3.5 text-red-400" />
                                 <span>{lang === 'ar' ? 'تحميل كملف PDF' : 'Download PDF'}</span>
@@ -945,7 +945,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                                   exportAsFile(msg.content, `R3_Response_${Date.now()}.md`, 'text/markdown');
                                   setOpenMenuMsgId(null);
                                 }}
-                                className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-white/10 text-left transition-colors text-[11px]"
+                                className="w-full flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all active:scale-[0.98] hover:bg-white/10 text-left transition-colors text-[11px]"
                               >
                                 <FileDown className="w-3.5 h-3.5 text-blue-400" />
                                 <span>{t.exportMarkdown} (.md)</span>
@@ -960,7 +960,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                                   });
                                   setOpenMenuMsgId(null);
                                 }}
-                                className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-white/10 text-left transition-colors text-[11px]"
+                                className="w-full flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all active:scale-[0.98] hover:bg-white/10 text-left transition-colors text-[11px]"
                               >
                                 <Printer className="w-3.5 h-3.5 text-purple-400" />
                                 <span>{t.printPdf}</span>

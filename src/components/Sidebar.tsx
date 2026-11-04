@@ -127,7 +127,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         <button
           onClick={onToggleCollapse}
-          className={`p-2 rounded-xl transition-all duration-200 flex items-center justify-center ${
+          className={`p-2 rounded-xl transition-all active:scale-95 duration-200 flex items-center justify-center ${
             isDark
               ? 'text-gray-300 hover:text-white hover:bg-white/10'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
@@ -361,7 +361,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       className={`group flex items-center cursor-pointer text-xs transition-colors ${
                         isCollapsed
                           ? 'justify-center w-10 h-10 rounded-xl mx-auto'
-                          : 'justify-between px-3 py-2 rounded-xl'
+                          : 'justify-between px-3 py-2 rounded-xl active:scale-[0.98]'
                       } ${
                         activeSessionId === s.id
                           ? isDark
@@ -532,7 +532,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         <button
           onClick={onOpenSettings}
-          className={`w-full py-2 px-3 rounded-xl flex items-center transition-colors text-xs font-medium ${
+          className={`w-full py-2 px-3 rounded-xl flex items-center transition-all active:scale-95 text-xs font-medium ${
             isCollapsed ? 'justify-center' : 'justify-between'
           } ${
             isDark

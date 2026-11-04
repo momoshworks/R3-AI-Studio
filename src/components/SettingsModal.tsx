@@ -607,7 +607,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         placeholder="مثال: Mohamed Shabaan (Work)"
                         value={newAccName}
                         onChange={(e) => setNewAccName(e.target.value)}
-                        className="w-full bg-[#1c1d1f] border border-gemini-border rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-blue-500"
+                        className="w-full bg-[#1c1d1f] border border-gemini-border rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-blue-500"
                       />
                     </div>
                     <div>
@@ -619,7 +619,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         placeholder="user@example.com"
                         value={newAccEmail}
                         onChange={(e) => setNewAccEmail(e.target.value)}
-                        className="w-full bg-[#1c1d1f] border border-gemini-border rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-blue-500"
+                        className="w-full bg-[#1c1d1f] border border-gemini-border rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-blue-500"
                       />
                     </div>
                   </div>
@@ -634,7 +634,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       placeholder="مفتاح API اختياري..."
                       value={newAccKey}
                       onChange={(e) => setNewAccKey(e.target.value)}
-                      className="w-full bg-[#1c1d1f] border border-gemini-border rounded-lg px-2.5 py-1.5 text-xs font-mono text-white outline-none focus:border-blue-500"
+                      className="w-full bg-[#1c1d1f] border border-gemini-border rounded-xl px-3 py-2 text-xs font-mono text-white outline-none focus:border-blue-500"
                     />
                   </div>
 
@@ -642,7 +642,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setIsAddingAccount(false)}
-                      className="px-3 py-1.5 rounded-lg text-gray-400 hover:text-white"
+                      className="px-3 py-1.5 rounded-xl text-gray-400 active:scale-95 hover:text-white"
                     >
                       إلغاء
                     </button>

@@ -273,10 +273,10 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
       {/* Filter and Search Bar */}
       <div className="px-6 py-3 border-b border-gemini-border/50 bg-[#131314]/90 flex flex-wrap items-center justify-between gap-3">
         {/* Category Tabs */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#1e1f20] border border-gemini-border/60">
+        <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-[#1e1f20] border border-gemini-border/60">
           <button
             onClick={() => setActiveCategory('all')}
-            className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all active:scale-95 ${
               activeCategory === 'all'
                 ? 'bg-blue-600 text-white shadow-sm'
                 : 'text-gray-400 hover:text-white'
@@ -286,7 +286,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
           </button>
           <button
             onClick={() => setActiveCategory('video')}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all active:scale-95 ${
               activeCategory === 'video'
                 ? 'bg-blue-600 text-white shadow-sm'
                 : 'text-gray-400 hover:text-white'
@@ -297,7 +297,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
           </button>
           <button
             onClick={() => setActiveCategory('audio')}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all active:scale-95 ${
               activeCategory === 'audio'
                 ? 'bg-blue-600 text-white shadow-sm'
                 : 'text-gray-400 hover:text-white'
@@ -308,7 +308,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
           </button>
           <button
             onClick={() => setActiveCategory('image')}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all active:scale-95 ${
               activeCategory === 'image'
                 ? 'bg-blue-600 text-white shadow-sm'
                 : 'text-gray-400 hover:text-white'

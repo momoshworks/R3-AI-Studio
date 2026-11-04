@@ -142,12 +142,32 @@ export const App: React.FC = () => {
   });
   const [showDevModal, setShowDevModal] = useState<boolean>(false);
 
-  // Global Ctrl+K / Cmd+K Command Palette Shortcut
+  // Global Ultra-Fast Keyboard Shortcuts & Menu Navigation
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Command Palette (Ctrl+K / Cmd+K)
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setIsCommandPaletteOpen((prev) => !prev);
+      }
+      // New Chat (Ctrl+N / Cmd+N)
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        handleNewChat();
+        setCurrentTab('chats');
+      }
+      // Settings (Ctrl+, / Cmd+,)
+      if ((e.ctrlKey || e.metaKey) && e.key === ',') {
+        e.preventDefault();
+        setIsSettingsOpen(true);
+      }
+      // Instant Tab Navigation (Alt+1 to Alt+5)
+      if (e.altKey && !e.ctrlKey && !e.metaKey) {
+        if (e.key === '1') { e.preventDefault(); setCurrentTab('chats'); }
+        if (e.key === '2') { e.preventDefault(); setCurrentTab('notebook'); }
+        if (e.key === '3') { e.preventDefault(); setCurrentTab('tools'); }
+        if (e.key === '4') { e.preventDefault(); setCurrentTab('media'); }
+        if (e.key === '5') { e.preventDefault(); setCurrentTab('drive'); }
       }
     };
     window.addEventListener('keydown', handleGlobalKeyDown);
@@ -1047,7 +1067,8 @@ export const App: React.FC = () => {
           </div>
         </header>
 
-        {/* Workspace Body: Useful Tools Hub vs Media Vault vs Notebook Studio vs AI Chat */}
+        {/* Workspace Body: Fluid GPU Tab Navigation & Ultra-Fast Switching */}
+        <div key={currentTab} className="flex-1 flex flex-col h-full overflow-hidden relative tab-enter transform-gpu">
         {currentTab === 'tools' ? (
           <UsefulToolsHub theme={theme} lang={lang} />
         ) : currentTab === 'media' ? (
@@ -1093,6 +1114,8 @@ export const App: React.FC = () => {
             />
           </>
         )}
+
+        </div>
 
         {/* Global Background Media Player (Plays across all tabs & in background!) */}
         <BackgroundMediaPlayer
