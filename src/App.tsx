@@ -557,35 +557,28 @@ export const App: React.FC = () => {
               : 'bg-white/90 backdrop-blur-md border-slate-200 text-slate-800'
           }`}
         >
-          {/* Left section of Topbar */}
-          <div className="flex items-center space-x-1.5 sm:space-x-2.5 min-w-0">
-            {/* Mobile Hamburger Drawer Trigger */}
+          {/* Left section: Sidebar toggle + Model Selector + Search */}
+          <div className="flex items-center gap-2 min-w-0">
+            {/* Sidebar Drawer Toggle (mobile or when sidebar is collapsed) */}
             <button
-              onClick={() => setIsSidebarCollapsed(false)}
-              className={`p-1.5 rounded-xl border transition-all md:hidden shrink-0 ${
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              className={`p-1.5 sm:p-2 rounded-xl border transition-all shrink-0 ${
+                isSidebarCollapsed ? 'flex' : 'flex md:hidden'
+              } ${
                 isDark
-                  ? 'text-gray-300 hover:text-white bg-[#1a1b1d] border-white/10'
-                  : 'text-slate-600 hover:text-slate-900 bg-slate-100 border-slate-200'
+                  ? 'text-gray-300 hover:text-white bg-[#1a1b1d] hover:bg-[#252628] border-white/10'
+                  : 'text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border-slate-200'
               }`}
               title={t.toggleSidebar}
             >
               <Menu className="w-4 h-4" />
             </button>
 
-            {/* Ra Studio Brand Badge */}
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-              <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 font-black text-xs sm:text-sm text-white shadow-md shadow-cyan-500/20">
-                Ra
-              </div>
-              <span className="hidden sm:inline-block font-bold tracking-tight text-xs sm:text-sm">
-                Ra Studio
-              </span>
-            </div>
             {/* Model Selector Dropdown Button */}
-            <div className="relative">
+            <div className="relative shrink-0">
               <button
                 onClick={() => setIsModelMenuOpen(!isModelMenuOpen)}
-                className={`flex items-center space-x-2 px-3 py-1.5 rounded-full border text-xs font-medium transition-all shadow-sm ${
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium transition-all shadow-sm whitespace-nowrap ${
                   isChatGpt
                     ? isDark
                       ? 'bg-emerald-950/30 hover:bg-emerald-900/40 border-emerald-500/40 text-emerald-300'
@@ -596,12 +589,22 @@ export const App: React.FC = () => {
                 }`}
               >
                 {isChatGpt ? (
-                  <Bot className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <Bot className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                 ) : (
-                  <Sparkles className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                  <Sparkles className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                 )}
-                <span className="truncate max-w-[100px] sm:hidden font-semibold">{getShortModelName(selectedModel)}</span>
-                <span className="truncate hidden sm:inline max-w-[160px] md:max-w-xs font-semibold">{getDisplayModelName(selectedModel)}</span>
+                <span className="font-semibold truncate sm:hidden max-w-[100px]">
+                  {getShortModelName(selectedModel)}
+                </span>
+                <span className="font-semibold truncate hidden sm:inline max-w-[180px]">
+                  {getDisplayModelName(selectedModel)}
+                </span>
+                {((isChatGpt && !hasOpenaiKey) || (!isChatGpt && !hasApiKey)) && (
+                  <span
+                    className="w-2 h-2 rounded-full bg-amber-400 animate-ping shrink-0"
+                    title={lang === 'ar' ? 'مفتاح API غير متوفر' : 'API Key missing'}
+                  />
+                )}
                 <ChevronDown className="w-3 h-3 opacity-60 shrink-0" />
               </button>
 
@@ -673,7 +676,7 @@ export const App: React.FC = () => {
             {/* Quick Command Palette Spotlight Trigger */}
             <button
               onClick={() => setIsCommandPaletteOpen(true)}
-              className={`hidden md:flex items-center space-x-2 space-x-reverse px-3 py-1.5 rounded-full border text-xs font-medium transition-all ${
+              className={`hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-full border text-xs font-medium transition-all shrink-0 whitespace-nowrap ${
                 isDark
                   ? 'bg-[#1a1b1d] hover:bg-[#222325] border-white/10 text-gray-400 hover:text-gray-200'
                   : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-600 hover:text-slate-900'
@@ -681,20 +684,22 @@ export const App: React.FC = () => {
               title={t.commandPalette}
             >
               <Search className="w-3.5 h-3.5 opacity-60 shrink-0" />
-              <span className="truncate max-w-[120px]">{lang === 'ar' ? 'بحث أو أوامر...' : 'Search or actions...'}</span>
-              <kbd className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-black/30 text-gray-400 border border-white/5">
+              <span className="hidden md:inline text-[11px] opacity-80">
+                {lang === 'ar' ? 'بحث أو أوامر' : 'Search or actions'}
+              </span>
+              <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/30 text-gray-400 border border-white/5">
                 Ctrl+K
               </kbd>
             </button>
           </div>
 
-          {/* Right section of Topbar */}
-          <div className="flex items-center space-x-2 space-x-reverse">
-            {/* Unified System Health Pulse Widget (بسيط ومفيد جداً) */}
-            <div className="relative hidden lg:block">
+          {/* Right section: System pulse + Update pill (when available) + Lang + Theme + User Menu */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* System Performance Pulse Widget */}
+            <div className="relative hidden md:block shrink-0">
               <button
                 onClick={() => setIsMetricsMenuOpen(!isMetricsMenuOpen)}
-                className={`flex items-center space-x-2 space-x-reverse px-2.5 py-1.5 rounded-full border text-xs font-mono transition-all hover:border-blue-500/40 shadow-sm ${
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs font-mono transition-all hover:border-blue-500/40 shadow-sm whitespace-nowrap ${
                   isDark
                     ? 'bg-[#1a1b1d] border-white/10 text-gray-300'
                     : 'bg-slate-100 border-slate-200 text-slate-700'
@@ -702,7 +707,7 @@ export const App: React.FC = () => {
                 title={lang === 'ar' ? 'اضغط لعرض تفاصيل استهلاك وموارد الجهاز' : 'System Performance & Resources'}
               >
                 <span
-                  className={`w-2 h-2 rounded-full ${
+                  className={`w-2 h-2 rounded-full shrink-0 ${
                     metrics.cpu_usage > 85
                       ? 'bg-rose-500 animate-ping'
                       : metrics.cpu_usage > 60
@@ -710,10 +715,10 @@ export const App: React.FC = () => {
                       : 'bg-emerald-400 animate-pulse'
                   }`}
                 />
-                <span dir="ltr" className="font-semibold text-[11px] tracking-tight text-gray-300">
+                <span dir="ltr" className="font-semibold text-[11px] tracking-tight">
                   CPU {metrics.cpu_usage.toFixed(0)}% • RAM {metrics.memory_percentage.toFixed(0)}%
                 </span>
-                <ChevronDown className="w-2.5 h-2.5 opacity-50" />
+                <ChevronDown className="w-2.5 h-2.5 opacity-50 shrink-0" />
               </button>
 
               {/* System Performance Details Popover */}
@@ -781,112 +786,39 @@ export const App: React.FC = () => {
               )}
             </div>
 
-          </div>
-
-          {/* Center Navigation Tabs (Desktop / Tablet) */}
-          <div className="hidden lg:flex items-center gap-1 rounded-xl border border-white/10 bg-white/[0.03] p-1 text-xs">
-            <button
-              onClick={() => setCurrentTab('chats')}
-              className={`rounded-lg px-3 py-1 font-medium transition-all ${
-                currentTab === 'chats'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
-              }`}
-            >
-              Smart Chat
-            </button>
-            <button
-              onClick={() => setCurrentTab('notebook')}
-              className={`rounded-lg px-3 py-1 font-medium transition-all ${
-                currentTab === 'notebook'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
-              }`}
-            >
-              Notebook & Study
-            </button>
-            <button
-              onClick={() => setCurrentTab('tools')}
-              className={`rounded-lg px-3 py-1 font-medium transition-all ${
-                currentTab === 'tools'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
-              }`}
-            >
-              Tools
-            </button>
-          </div>
-
-          {/* Right section: Developer modal button + AI Status + Lang + Theme + User Menu */}
-          <div className="flex items-center space-x-1 sm:space-x-2 shrink-0">
-            {/* Developer Contact Button */}
-            <button
-              onClick={() => setShowDevModal(true)}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full sm:rounded-xl border text-xs font-medium transition-all shadow-sm shrink-0 ${
-                isDark
-                  ? 'bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300'
-                  : 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-700'
-              }`}
-              title="تواصل مع المطور"
-            >
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
-              </span>
-              <span className="hidden sm:inline">تواصل مع المطور</span>
-              <span className="sm:hidden text-[11px] font-semibold">المطور</span>
-            </button>
-
-            {/* Smart Minimalist AI Status Pill */}
-            {isChatGpt ? (
+            {/* GitHub Release Update Button - ONLY shown if an update is available! */}
+            {releaseInfo?.has_update && (
               <button
-                onClick={() => setIsSettingsOpen(true)}
-                className={`hidden sm:flex items-center space-x-1.5 space-x-reverse px-2.5 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                  hasOpenaiKey
-                    ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                    : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/30 animate-pulse'
-                }`}
-                title={hasOpenaiKey ? t.chatGptActive : t.addApiKey}
+                onClick={() => setIsUpdateModalOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md shadow-purple-500/25 animate-pulse hover:opacity-90 transition-all shrink-0 whitespace-nowrap"
+                title={lang === 'ar' ? `تحديث جديد متوفر: ${releaseInfo.tag_name}` : `New Update: ${releaseInfo.tag_name}`}
               >
-                <Bot className="w-3.5 h-3.5 text-emerald-400" />
-                <span>{hasOpenaiKey ? 'ChatGPT' : t.addApiKey}</span>
-              </button>
-            ) : (
-              <button
-                onClick={() => setIsSettingsOpen(true)}
-                className={`hidden sm:flex items-center space-x-1.5 space-x-reverse px-2.5 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                  hasApiKey
-                    ? 'bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border-purple-500/30'
-                    : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/30 animate-pulse'
-                }`}
-                title={hasApiKey ? t.geminiNotice : t.addApiKey}
-              >
-                <span className={`w-1.5 h-1.5 rounded-full ${hasApiKey ? 'bg-purple-400' : 'bg-amber-400 animate-ping'}`} />
-                <span>{hasApiKey ? 'Gemini' : t.addApiKey}</span>
+                <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin" />
+                <span className="hidden sm:inline">{lang === 'ar' ? 'تحديث متاح' : 'Update'}</span>
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-white/20">
+                  {releaseInfo.tag_name}
+                </span>
               </button>
             )}
-
-            {/* Subtle Divider */}
-            <div className="h-4 w-px bg-white/10 hidden sm:block mx-0.5" />
 
             {/* Language Switch Button */}
             <button
               onClick={toggleLanguage}
-              className={`flex items-center space-x-1 space-x-reverse px-2.5 py-1.5 rounded-full border text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs font-semibold transition-all shrink-0 whitespace-nowrap ${
                 isDark
                   ? 'bg-[#1a1b1d] hover:bg-[#252629] border-white/10 text-gray-200'
                   : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-800'
               }`}
               title={lang === 'ar' ? 'Switch to English' : 'التحويل إلى العربية'}
             >
-              <Globe className="w-3.5 h-3.5 text-blue-400" />
+              <Globe className="w-3.5 h-3.5 text-blue-400 shrink-0" />
               <span>{lang === 'ar' ? 'EN' : 'عربي'}</span>
             </button>
 
             {/* Theme Switch Button */}
             <button
               onClick={toggleTheme}
-              className={`p-1.5 rounded-full border transition-all ${
+              className={`p-1.5 rounded-full border transition-all shrink-0 ${
                 isDark
                   ? 'bg-[#1a1b1d] hover:bg-[#252629] border-white/10 text-amber-400'
                   : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-purple-600'
@@ -896,51 +828,11 @@ export const App: React.FC = () => {
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
-            {/* GitHub Release Update Button */}
-            <button
-              onClick={() => setIsUpdateModalOpen(true)}
-              className={`flex items-center space-x-1 space-x-reverse px-2.5 py-1.5 rounded-full border text-xs font-semibold transition-all ${
-                releaseInfo?.has_update
-                  ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white border-purple-400 shadow-md shadow-purple-500/25 animate-pulse'
-                  : isDark
-                  ? 'bg-[#1a1b1d] hover:bg-[#252629] border-white/10 text-gray-300'
-                  : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
-              }`}
-              title={
-                releaseInfo?.has_update
-                  ? lang === 'ar'
-                    ? `تحديث جديد متوفر: ${releaseInfo.tag_name}`
-                    : `New Update Available: ${releaseInfo.tag_name}`
-                  : lang === 'ar'
-                  ? 'فحص التحديثات (GitHub)'
-                  : 'Check Updates'
-              }
-            >
-              <Sparkles className={`w-3.5 h-3.5 ${releaseInfo?.has_update ? 'text-amber-300 animate-spin' : 'text-purple-400'}`} />
-              <span className="hidden sm:inline">
-                {releaseInfo?.has_update
-                  ? lang === 'ar'
-                    ? 'تحديث'
-                    : 'Update'
-                  : lang === 'ar'
-                  ? 'تحديثات'
-                  : 'Updates'}
-              </span>
-              {releaseInfo?.has_update && (
-                <span className="text-[10px] font-mono px-1 py-0.2 rounded-full bg-white/20">
-                  {releaseInfo.tag_name}
-                </span>
-              )}
-            </button>
-
-            {/* Subtle Divider */}
-            <div className="h-4 w-px bg-white/10 mx-0.5" />
-
             {/* User Account Avatar Trigger & Dropdown Menu */}
-            <div className="relative">
+            <div className="relative shrink-0">
               <button
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className={`flex items-center space-x-2 pl-2 pr-2.5 py-1 rounded-full border transition-colors text-xs ${
+                className={`flex items-center gap-1.5 pl-2 pr-2.5 py-1 rounded-full border transition-colors text-xs shrink-0 whitespace-nowrap ${
                   isDark
                     ? 'bg-[#1e1f20] hover:bg-[#282a2c] border-gemini-border'
                     : 'bg-slate-100 hover:bg-slate-200 border-slate-300'
