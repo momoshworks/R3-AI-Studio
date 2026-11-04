@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import {
   Film,
   Music,
@@ -118,7 +118,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
   };
 
   const handleDelete = async (filename: string) => {
-    if (!window.confirm(`هل أنت متأكد من حذف الملف "${filename}" من مخزن الوسائط؟`)) return;
+    if (!window.confirm(`ظ‡ظ„ ط£ظ†طھ ظ…طھط£ظƒط¯ ظ…ظ† ط­ط°ظپ ط§ظ„ظ…ظ„ظپ "${filename}" ظ…ظ† ظ…ط®ط²ظ† ط§ظ„ظˆط³ط§ط¦ط·طں`)) return;
 
     try {
       const res = await fetch(`/api/media/${encodeURIComponent(filename)}`, {
@@ -213,7 +213,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
             <h1 className={`text-base font-bold flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
               <span>{t.mediaVaultTitle}</span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/30 font-mono">
-                R3 Studio
+                Nerdo Studio
               </span>
             </h1>
             <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>
@@ -227,7 +227,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
           <button
             onClick={fetchMedia}
             className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 border border-gemini-border transition-colors"
-            title="تحديث قائمة الوسائط"
+            title="طھط­ط¯ظٹط« ظ‚ط§ط¦ظ…ط© ط§ظ„ظˆط³ط§ط¦ط·"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
@@ -253,17 +253,17 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
             {uploadSuccess ? (
               <>
                 <Check className="w-4 h-4" />
-                <span>تم الرفع بنجاح!</span>
+                <span>طھظ… ط§ظ„ط±ظپط¹ ط¨ظ†ط¬ط§ط­!</span>
               </>
             ) : isUploading ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin" />
-                <span>جاري استيراد الوسائط...</span>
+                <span>ط¬ط§ط±ظٹ ط§ط³طھظٹط±ط§ط¯ ط§ظ„ظˆط³ط§ط¦ط·...</span>
               </>
             ) : (
               <>
                 <Upload className="w-4 h-4" />
-                <span>استيراد وسائط جديدة</span>
+                <span>ط§ط³طھظٹط±ط§ط¯ ظˆط³ط§ط¦ط· ط¬ط¯ظٹط¯ط©</span>
               </>
             )}
           </button>
@@ -282,7 +282,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
                 : 'text-gray-400 hover:text-white'
             }`}
           >
-            الكل ({items.length})
+            ط§ظ„ظƒظ„ ({items.length})
           </button>
           <button
             onClick={() => setActiveCategory('video')}
@@ -293,7 +293,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
             }`}
           >
             <Film className="w-3.5 h-3.5 text-cyan-400" />
-            <span>فيديو ({items.filter((i) => i.category === 'video').length})</span>
+            <span>ظپظٹط¯ظٹظˆ ({items.filter((i) => i.category === 'video').length})</span>
           </button>
           <button
             onClick={() => setActiveCategory('audio')}
@@ -304,7 +304,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
             }`}
           >
             <Music className="w-3.5 h-3.5 text-pink-400" />
-            <span>صوتيات ({items.filter((i) => i.category === 'audio').length})</span>
+            <span>طµظˆطھظٹط§طھ ({items.filter((i) => i.category === 'audio').length})</span>
           </button>
           <button
             onClick={() => setActiveCategory('image')}
@@ -315,7 +315,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
             }`}
           >
             <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
-            <span>صور ({items.filter((i) => i.category === 'image').length})</span>
+            <span>طµظˆط± ({items.filter((i) => i.category === 'image').length})</span>
           </button>
         </div>
 
@@ -325,7 +325,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
             <Search className="w-3.5 h-3.5 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="ابحث بالاسم أو الامتداد..."
+              placeholder="ط§ط¨ط­ط« ط¨ط§ظ„ط§ط³ظ… ط£ظˆ ط§ظ„ط§ظ…طھط¯ط§ط¯..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-[#1e1f20] border border-gemini-border rounded-xl pr-9 pl-3 py-1.5 text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
@@ -334,7 +334,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
 
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-gemini-border text-[11px] text-gray-400 font-mono">
             <HardDrive className="w-3.5 h-3.5 text-cyan-400" />
-            <span>الحجم الإجمالي: {totalHuman}</span>
+            <span>ط§ظ„ط­ط¬ظ… ط§ظ„ط¥ط¬ظ…ط§ظ„ظٹ: {totalHuman}</span>
           </div>
         </div>
       </div>
@@ -344,24 +344,24 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
         {loading ? (
           <div className="h-64 flex flex-col items-center justify-center text-gray-400 gap-2">
             <RefreshCw className="w-6 h-6 animate-spin text-blue-400" />
-            <span className="text-xs">جاري فحص مخزن الوسائط...</span>
+            <span className="text-xs">ط¬ط§ط±ظٹ ظپط­طµ ظ…ط®ط²ظ† ط§ظ„ظˆط³ط§ط¦ط·...</span>
           </div>
         ) : filteredItems.length === 0 ? (
           <div className="h-[55vh] flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-gemini-border/70 rounded-3xl bg-[#17181a]/50">
             <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-gray-400">
               <FolderOpen className="w-8 h-8 text-blue-400" />
             </div>
-            <h3 className="text-base font-bold text-gray-200 mb-1">المخزن خالي من الوسائط حالياً</h3>
+            <h3 className="text-base font-bold text-gray-200 mb-1">ط§ظ„ظ…ط®ط²ظ† ط®ط§ظ„ظٹ ظ…ظ† ط§ظ„ظˆط³ط§ط¦ط· ط­ط§ظ„ظٹط§ظ‹</h3>
             <p className="text-xs text-gray-400 max-w-md mb-6 leading-relaxed">
-              يمكنك استيراد مقاطع الفيديو، التسجيلات الصوتية، أو ألبومات الصور بسهولة. يدعم DOQ&amp;S كافة صيغ
-              MP4, WEBM, MKV, MP3, WAV, PNG, JPG وغيرها مع مشغل فائق الأداء.
+              ظٹظ…ظƒظ†ظƒ ط§ط³طھظٹط±ط§ط¯ ظ…ظ‚ط§ط·ط¹ ط§ظ„ظپظٹط¯ظٹظˆطŒ ط§ظ„طھط³ط¬ظٹظ„ط§طھ ط§ظ„طµظˆطھظٹط©طŒ ط£ظˆ ط£ظ„ط¨ظˆظ…ط§طھ ط§ظ„طµظˆط± ط¨ط³ظ‡ظˆظ„ط©. ظٹط¯ط¹ظ… DOQ&amp;S ظƒط§ظپط© طµظٹط؛
+              MP4, WEBM, MKV, MP3, WAV, PNG, JPG ظˆط؛ظٹط±ظ‡ط§ ظ…ط¹ ظ…ط´ط؛ظ„ ظپط§ط¦ظ‚ ط§ظ„ط£ط¯ط§ط،.
             </p>
             <button
               onClick={() => fileInputRef.current?.click()}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition-colors shadow-lg shadow-blue-600/30"
             >
               <Upload className="w-4 h-4" />
-              <span>استيراد ملفات الآن</span>
+              <span>ط§ط³طھظٹط±ط§ط¯ ظ…ظ„ظپط§طھ ط§ظ„ط¢ظ†</span>
             </button>
           </div>
         ) : (
@@ -450,7 +450,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
                           <button
                             onClick={() => onPlayMedia(item)}
                             className="p-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 text-xs transition-colors"
-                            title="تشغيل في الخلفية والمشغل العائم"
+                            title="طھط´ط؛ظٹظ„ ظپظٹ ط§ظ„ط®ظ„ظپظٹط© ظˆط§ظ„ظ…ط´ط؛ظ„ ط§ظ„ط¹ط§ط¦ظ…"
                           >
                             <Play className="w-3.5 h-3.5 fill-current" />
                           </button>
@@ -459,7 +459,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
                           <button
                             onClick={() => onPlayMedia(item)}
                             className="p-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 text-xs transition-colors"
-                            title="تشغيل مستمر في الخلفية"
+                            title="طھط´ط؛ظٹظ„ ظ…ط³طھظ…ط± ظپظٹ ط§ظ„ط®ظ„ظپظٹط©"
                           >
                             <Play className="w-3.5 h-3.5 fill-current" />
                           </button>
@@ -468,7 +468,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
                           <button
                             onClick={() => setActiveImage(item)}
                             className="p-1.5 rounded-lg bg-amber-600/20 hover:bg-amber-600/40 text-amber-400 text-xs transition-colors"
-                            title="تكبير ومعاينة الصورة"
+                            title="طھظƒط¨ظٹط± ظˆظ…ط¹ط§ظٹظ†ط© ط§ظ„طµظˆط±ط©"
                           >
                             <Maximize2 className="w-3.5 h-3.5" />
                           </button>
@@ -484,7 +484,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
                               })
                             }
                             className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-purple-300 transition-colors"
-                            title="إرسال هذا الملف إلى محادثة الذكاء الاصطناعي لتحليله"
+                            title="ط¥ط±ط³ط§ظ„ ظ‡ط°ط§ ط§ظ„ظ…ظ„ظپ ط¥ظ„ظ‰ ظ…ط­ط§ط¯ط«ط© ط§ظ„ط°ظƒط§ط، ط§ظ„ط§طµط·ظ†ط§ط¹ظٹ ظ„طھط­ظ„ظٹظ„ظ‡"
                           >
                             <Sparkles className="w-3.5 h-3.5" />
                           </button>
@@ -494,7 +494,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
                           href={item.url}
                           download={item.filename}
                           className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-gray-200 transition-colors"
-                          title="تحميل الملف على جهازك"
+                          title="طھط­ظ…ظٹظ„ ط§ظ„ظ…ظ„ظپ ط¹ظ„ظ‰ ط¬ظ‡ط§ط²ظƒ"
                         >
                           <Download className="w-3.5 h-3.5" />
                         </a>
@@ -503,7 +503,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
                       <button
                         onClick={() => handleDelete(item.filename)}
                         className="p-1.5 rounded-lg hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-colors"
-                        title="حذف الملف من المخزن"
+                        title="ط­ط°ظپ ط§ظ„ظ…ظ„ظپ ظ…ظ† ط§ظ„ظ…ط®ط²ظ†"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -537,14 +537,14 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
                   href={activeVideo.url}
                   download={activeVideo.filename}
                   className="p-2 rounded-xl hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
-                  title="تحميل المقطع"
+                  title="طھط­ظ…ظٹظ„ ط§ظ„ظ…ظ‚ط·ط¹"
                 >
                   <Download className="w-4 h-4" />
                 </a>
                 <button
                   onClick={() => setActiveVideo(null)}
                   className="p-2 rounded-xl hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
-                  title="إغلاق المشغل"
+                  title="ط¥ط؛ظ„ط§ظ‚ ط§ظ„ظ…ط´ط؛ظ„"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -583,7 +583,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
             </div>
             <div className="truncate">
               <div className="text-xs font-bold text-gray-100 truncate">{activeAudio.name}</div>
-              <div className="text-[10px] text-pink-300 font-mono">مشغل الصوتيات الذكي</div>
+              <div className="text-[10px] text-pink-300 font-mono">ظ…ط´ط؛ظ„ ط§ظ„طµظˆطھظٹط§طھ ط§ظ„ط°ظƒظٹ</div>
             </div>
           </div>
 
@@ -655,7 +655,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
                 setIsPlayingAudio(false);
               }}
               className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white"
-              title="إغلاق المشغل"
+              title="ط¥ط؛ظ„ط§ظ‚ ط§ظ„ظ…ط´ط؛ظ„"
             >
               <X className="w-4 h-4" />
             </button>
@@ -675,21 +675,21 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
               <button
                 onClick={() => setImageZoom((z) => Math.min(z + 0.25, 3))}
                 className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
-                title="تكبير"
+                title="طھظƒط¨ظٹط±"
               >
                 <ZoomIn className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setImageZoom((z) => Math.max(z - 0.25, 0.5))}
                 className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
-                title="تصغير"
+                title="طھطµط؛ظٹط±"
               >
                 <ZoomOut className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setImageRotation((r) => (r + 90) % 360)}
                 className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
-                title="تدوير 90 درجة"
+                title="طھط¯ظˆظٹط± 90 ط¯ط±ط¬ط©"
               >
                 <RotateCw className="w-4 h-4" />
               </button>
@@ -697,7 +697,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
                 href={activeImage.url}
                 download={activeImage.filename}
                 className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
-                title="تحميل الصورة"
+                title="طھط­ظ…ظٹظ„ ط§ظ„طµظˆط±ط©"
               >
                 <Download className="w-4 h-4" />
               </a>
@@ -708,7 +708,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
                   setImageRotation(0);
                 }}
                 className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
-                title="إغلاق"
+                title="ط¥ط؛ظ„ط§ظ‚"
               >
                 <X className="w-5 h-5" />
               </button>

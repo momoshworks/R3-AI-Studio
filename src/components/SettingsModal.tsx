@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   X,
   Key,
@@ -21,6 +21,7 @@ import {
   AlertCircle,
   Sparkles,
   HardDrive,
+  ClipboardPaste,
 } from 'lucide-react';
 import { DriveStatus, UserAccount } from '../types';
 import { api } from '../services/api';
@@ -111,14 +112,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         setGeminiKey(s.raw_key);
         setGeminiStatus({
           success: true,
-          message: 'مفتاح Google Gemini محفوظ ومفعل حالياً',
+          message: 'ظ…ظپطھط§ط­ Google Gemini ظ…ط­ظپظˆط¸ ظˆظ…ظپط¹ظ„ ط­ط§ظ„ظٹط§ظ‹',
         });
       }
       if (s.raw_openai_key) {
         setOpenaiKey(s.raw_openai_key);
         setOpenaiStatus({
           success: true,
-          message: 'مفتاح ChatGPT (OpenAI) محفوظ ومفعل حالياً',
+          message: 'ظ…ظپطھط§ط­ ChatGPT (OpenAI) ظ…ط­ظپظˆط¸ ظˆظ…ظپط¹ظ„ ط­ط§ظ„ظٹط§ظ‹',
         });
       }
     } catch (e) {
@@ -143,7 +144,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     if (!geminiKey.trim()) {
       setGeminiStatus({
         success: false,
-        message: 'يرجى إدخال مفتاح Gemini API أولاً',
+        message: 'ظٹط±ط¬ظ‰ ط¥ط¯ط®ط§ظ„ ظ…ظپطھط§ط­ Gemini API ط£ظˆظ„ط§ظ‹',
       });
       return;
     }
@@ -156,20 +157,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       if (result.valid) {
         setGeminiStatus({
           success: true,
-          message: result.message || 'تم التحقق من مفتاح Gemini وتفعيله فوراً!',
+          message: result.message || 'طھظ… ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ظ…ظپطھط§ط­ Gemini ظˆطھظپط¹ظٹظ„ظ‡ ظپظˆط±ط§ظ‹!',
           model: result.detected_model,
         });
         loadAccounts();
       } else {
         setGeminiStatus({
           success: false,
-          message: result.message || 'المفتاح غير صالح أو لم يتم تفعيل Gemini API له.',
+          message: result.message || 'ط§ظ„ظ…ظپطھط§ط­ ط؛ظٹط± طµط§ظ„ط­ ط£ظˆ ظ„ظ… ظٹطھظ… طھظپط¹ظٹظ„ Gemini API ظ„ظ‡.',
         });
       }
     } catch (err: any) {
       setGeminiStatus({
         success: false,
-        message: err.message || 'فشل التحقق من المفتاح. تأكد من اتصال الإنترنت.',
+        message: err.message || 'ظپط´ظ„ ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ط§ظ„ظ…ظپطھط§ط­. طھط£ظƒط¯ ظ…ظ† ط§طھطµط§ظ„ ط§ظ„ط¥ظ†طھط±ظ†طھ.',
       });
     } finally {
       setIsVerifyingGemini(false);
@@ -181,7 +182,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     if (!openaiKey.trim()) {
       setOpenaiStatus({
         success: false,
-        message: 'يرجى إدخال مفتاح OpenAI API أولاً',
+        message: 'ظٹط±ط¬ظ‰ ط¥ط¯ط®ط§ظ„ ظ…ظپطھط§ط­ OpenAI API ط£ظˆظ„ط§ظ‹',
       });
       return;
     }
@@ -194,7 +195,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       if (result.valid) {
         setOpenaiStatus({
           success: true,
-          message: result.message || 'تم التحقق من مفتاح ChatGPT (OpenAI) بنجاح وتفعيله فوراً!',
+          message: result.message || 'طھظ… ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ظ…ظپطھط§ط­ ChatGPT (OpenAI) ط¨ظ†ط¬ط§ط­ ظˆطھظپط¹ظٹظ„ظ‡ ظپظˆط±ط§ظ‹!',
           model: result.detected_model,
         });
         // Auto select ChatGPT model if currently not chosen
@@ -204,13 +205,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       } else {
         setOpenaiStatus({
           success: false,
-          message: result.message || 'المفتاح غير صالح أو ليس لديه رصيد كافٍ.',
+          message: result.message || 'ط§ظ„ظ…ظپطھط§ط­ ط؛ظٹط± طµط§ظ„ط­ ط£ظˆ ظ„ظٹط³ ظ„ط¯ظٹظ‡ ط±طµظٹط¯ ظƒط§ظپظچ.',
         });
       }
     } catch (err: any) {
       setOpenaiStatus({
         success: false,
-        message: err.message || 'فشل التحقق من مفتاح OpenAI.',
+        message: err.message || 'ظپط´ظ„ ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ظ…ظپطھط§ط­ OpenAI.',
       });
     } finally {
       setIsVerifyingOpenai(false);
@@ -304,7 +305,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="px-6 py-4 border-b border-gemini-border flex items-center justify-between bg-[#171819]">
           <div className="flex items-center space-x-2.5 space-x-reverse">
             <ShieldCheck className="w-5 h-5 text-emerald-400" />
-            <span className="font-semibold text-sm text-white">إعدادات النماذج والذكاء الاصطناعي والحسابات</span>
+            <span className="font-semibold text-sm text-white">ط¥ط¹ط¯ط§ط¯ط§طھ ط§ظ„ظ†ظ…ط§ط°ط¬ ظˆط§ظ„ط°ظƒط§ط، ط§ظ„ط§طµط·ظ†ط§ط¹ظٹ ظˆط§ظ„ط­ط³ط§ط¨ط§طھ</span>
           </div>
           <button
             onClick={onClose}
@@ -325,7 +326,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             }`}
           >
             <Key className="w-3.5 h-3.5" />
-            <span>{lang === 'ar' ? 'مفاتيح AI (Gemini & ChatGPT)' : 'AI Keys (Gemini & GPT)'}</span>
+            <span>{lang === 'ar' ? 'ظ…ظپط§طھظٹط­ AI (Gemini & ChatGPT)' : 'AI Keys (Gemini & GPT)'}</span>
           </button>
 
           <button
@@ -337,7 +338,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             }`}
           >
             <Users className="w-3.5 h-3.5" />
-            <span>{lang === 'ar' ? `الحسابات والتبديل (${accounts.length})` : `Accounts (${accounts.length})`}</span>
+            <span>{lang === 'ar' ? `ط§ظ„ط­ط³ط§ط¨ط§طھ ظˆط§ظ„طھط¨ط¯ظٹظ„ (${accounts.length})` : `Accounts (${accounts.length})`}</span>
           </button>
 
           <button
@@ -349,7 +350,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             }`}
           >
             <Palette className="w-3.5 h-3.5" />
-            <span>{lang === 'ar' ? 'المظهر واللغة' : 'Theme & Language'}</span>
+            <span>{lang === 'ar' ? 'ط§ظ„ظ…ط¸ظ‡ط± ظˆط§ظ„ظ„ط؛ط©' : 'Theme & Language'}</span>
           </button>
         </div>
 
@@ -357,22 +358,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="p-6 space-y-6 overflow-y-auto">
           {activeTab === 'api-keys' && (
             <>
-              {/* R3 Backend Server / Mode Configuration */}
+              {/* Nerdo Backend Server / Mode Configuration */}
               <div className="p-4 rounded-2xl bg-[#171819] border border-cyan-500/30 space-y-3 shadow-sm">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-gray-200 text-xs flex items-center gap-1.5">
                     <HardDrive className="w-4 h-4 text-cyan-400" />
-                    <span>{lang === 'ar' ? 'وضع التشغيل وخادم R3 المحلي (اختياري)' : 'R3 Backend Server & Mode (Optional)'}</span>
+                    <span>{lang === 'ar' ? 'ظˆط¶ط¹ ط§ظ„طھط´ط؛ظٹظ„ ظˆط®ط§ط¯ظ… R3 ط§ظ„ظ…ط­ظ„ظٹ (ط§ط®طھظٹط§ط±ظٹ)' : 'Nerdo Backend Server & Mode (Optional)'}</span>
                   </span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-medium">
-                    {backendUrl.trim() ? (lang === 'ar' ? 'خادم مخصص' : 'Custom Server') : (lang === 'ar' ? 'وضع مستقل مباشر على الهاتف' : 'Direct Standalone')}
+                    {backendUrl.trim() ? (lang === 'ar' ? 'ط®ط§ط¯ظ… ظ…ط®طµطµ' : 'Custom Server') : (lang === 'ar' ? 'ظˆط¶ط¹ ظ…ط³طھظ‚ظ„ ظ…ط¨ط§ط´ط± ط¹ظ„ظ‰ ط§ظ„ظ‡ط§طھظپ' : 'Direct Standalone')}
                   </span>
                 </div>
 
                 <p className="text-gray-400 text-[11px] leading-relaxed">
                   {lang === 'ar'
-                    ? 'اتركه فارغاً للعمل بوضع الهاتف المستقل الكامل عبر مفاتيح API مباشرة. أو أدخل عنوان IP لحاسوبك (مثل: http://192.168.1.15:8000) للربط مع خادم R3 على الكمبيوتر واستخدام ميزات NotebookLM المتقدمة.'
-                    : 'Leave empty for direct standalone mode using your API keys. Or enter your PC IP address (e.g. http://192.168.1.15:8000) to connect to R3 local backend.'}
+                    ? 'ط§طھط±ظƒظ‡ ظپط§ط±ط؛ط§ظ‹ ظ„ظ„ط¹ظ…ظ„ ط¨ظˆط¶ط¹ ط§ظ„ظ‡ط§طھظپ ط§ظ„ظ…ط³طھظ‚ظ„ ط§ظ„ظƒط§ظ…ظ„ ط¹ط¨ط± ظ…ظپط§طھظٹط­ API ظ…ط¨ط§ط´ط±ط©. ط£ظˆ ط£ط¯ط®ظ„ ط¹ظ†ظˆط§ظ† IP ظ„ط­ط§ط³ظˆط¨ظƒ (ظ…ط«ظ„: http://192.168.1.15:8000) ظ„ظ„ط±ط¨ط· ظ…ط¹ ط®ط§ط¯ظ… R3 ط¹ظ„ظ‰ ط§ظ„ظƒظ…ط¨ظٹظˆطھط± ظˆط§ط³طھط®ط¯ط§ظ… ظ…ظٹط²ط§طھ NotebookLM ط§ظ„ظ…طھظ‚ط¯ظ…ط©.'
+                    : 'Leave empty for direct standalone mode using your API keys. Or enter your PC IP address (e.g. http://192.168.1.15:8000) to connect to Nerdo local backend.'}
                 </p>
 
                 <div className="flex gap-2">
@@ -391,12 +392,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     type="button"
                     onClick={() => {
                       api.setBackendUrl(backendUrl);
-                      setBackendSaveStatus(lang === 'ar' ? 'تم الحفظ!' : 'Saved!');
+                      setBackendSaveStatus(lang === 'ar' ? 'طھظ… ط§ظ„ط­ظپط¸!' : 'Saved!');
                       setTimeout(() => setBackendSaveStatus(null), 2500);
                     }}
                     className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-medium text-xs transition-all shadow-md active:scale-95 shrink-0"
                   >
-                    {backendSaveStatus || (lang === 'ar' ? 'حفظ' : 'Save')}
+                    {backendSaveStatus || (lang === 'ar' ? 'ط­ظپط¸' : 'Save')}
                   </button>
                 </div>
               </div>
@@ -406,7 +407,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-gray-200 text-xs flex items-center gap-1.5">
                     <Bot className="w-4 h-4 text-emerald-400" />
-                    <span>مفتاح ChatGPT (OpenAI API)</span>
+                    <span>ظ…ظپطھط§ط­ ChatGPT (OpenAI API)</span>
                   </span>
                   <a
                     href="https://platform.openai.com/api-keys"
@@ -414,13 +415,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     rel="noopener noreferrer"
                     className="text-[11px] text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-medium transition-colors"
                   >
-                    <span>لوحة مفاتيح OpenAI</span>
+                    <span>ظ„ظˆط­ط© ظ…ظپط§طھظٹط­ OpenAI</span>
                     <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
 
                 <p className="text-gray-400 text-[11px] leading-relaxed">
-                  أدخل مفتاحك السري (يبدأ بـ <code className="text-emerald-300">sk-...</code>) للتحدث مع نماذج ChatGPT 4o و 4o-mini و o3-mini.
+                  ط£ط¯ط®ظ„ ظ…ظپطھط§ط­ظƒ ط§ظ„ط³ط±ظٹ (ظٹط¨ط¯ط£ ط¨ظ€ <code className="text-emerald-300">sk-...</code>) ظ„ظ„طھط­ط¯ط« ظ…ط¹ ظ†ظ…ط§ط°ط¬ ChatGPT 4o ظˆ 4o-mini ظˆ o3-mini.
                 </p>
 
                 {/* Input & Verify */}
@@ -455,12 +456,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     {isVerifyingOpenai ? (
                       <>
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        <span>جاري الفحص...</span>
+                        <span>ط¬ط§ط±ظٹ ط§ظ„ظپط­طµ...</span>
                       </>
                     ) : (
                       <>
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>تفعيل وتحقق فوري</span>
+                        <span>طھظپط¹ظٹظ„ ظˆطھط­ظ‚ظ‚ ظپظˆط±ظٹ</span>
                       </>
                     )}
                   </button>
@@ -496,64 +497,97 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-gray-200 text-xs flex items-center gap-1.5">
                     <Sparkles className="w-4 h-4 text-purple-400" />
-                    <span>مفتاح Google Gemini API</span>
+                    <span>ظ…ظپطھط§ط­ Google Gemini API</span>
                   </span>
-                  <a
-                    href="https://aistudio.google.com/app/apikey"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[11px] text-purple-400 hover:text-purple-300 flex items-center gap-1 font-medium transition-colors"
-                  >
-                    <span>Google AI Studio (مجاناً)</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-medium flex items-center gap-1">
+                    <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                    <span>ظ…ط­ظ„ظٹ 100% ظˆظ…ط­ظ…ظٹ</span>
+                  </span>
                 </div>
 
-                <p className="text-gray-400 text-[11px] leading-relaxed">
-                  أدخل مفتاح Gemini للتحدث وتحليل الصور والملفات عبر نماذج Gemini 3.5 Flash و Flash-Lite.
-                </p>
+                {/* Privacy Guarantee Banner */}
+                <div className="text-[11px] text-gray-300 bg-purple-950/20 p-2.5 rounded-xl border border-purple-500/20 leading-relaxed">
+                  ًں”’ <strong>ط­ظ…ط§ظٹط© ظˆط£ظ…ط§ظ† ظƒط§ظ…ظ„:</strong> ظ…ظپطھط§ط­ظƒ ظٹظڈط­ظپط¸ ظ…ط­ظ„ظٹط§ظ‹ ط¹ظ„ظ‰ ط¬ظ‡ط§ط²ظƒ ظ‡ط°ط§ ظپظ‚ط· (Local Storage). ظ„ط§ ظٹظ…ظ„ظƒ ط£ظٹ ط´ط®طµ ط¢ط®ط± ط£ظˆ ط®ط§ط¯ظ… ط­ظ‚ ط§ظ„ظˆطµظˆظ„ ط¥ظ„ظٹظ‡ ط£ظˆ ط§ط³طھط®ط¯ط§ظ…ظ‡.
+                </div>
+
+                {/* Step 1 Quick Link */}
+                <a
+                  href="https://aistudio.google.com/app/apikey"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2 px-3 rounded-xl bg-purple-600/15 hover:bg-purple-600/25 text-purple-200 border border-purple-500/30 flex items-center justify-between transition-all text-xs font-medium group"
+                >
+                  <span className="flex items-center gap-2">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                    <span>1. ط§ط¶ط؛ط· ظ‡ظ†ط§ ظ„ظپطھط­ Google AI Studio ظˆط¥ظ†ط´ط§ط، ظ…ظپطھط§ط­ ظ…ط¬ط§ظ†ط§ظ‹</span>
+                  </span>
+                  <ExternalLink className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
+                </a>
 
                 {/* Input & Verify */}
-                <div className="flex items-center gap-2 pt-1">
-                  <div className="relative flex-1">
-                    <input
-                      type={showGeminiKey ? 'text' : 'password'}
-                      dir="ltr"
-                      value={geminiKey}
-                      onChange={(e) => {
-                        setGeminiKey(e.target.value);
-                        setGeminiStatus(null);
-                      }}
-                      placeholder="AIzaSy..."
-                      className="w-full bg-[#131314] border border-gemini-border rounded-xl px-3 py-2 text-xs font-mono text-gray-100 placeholder-gray-600 outline-none focus:border-purple-500 transition-colors"
-                    />
+                <div className="space-y-1.5 pt-1">
+                  <div className="text-[11px] text-gray-400 font-medium">
+                    2. ط§ظ„طµظ‚ ط§ظ„ظ…ظپطھط§ط­ ظˆط§ط¶ط؛ط· طھظپط¹ظٹظ„ ظپظˆط±ظٹ:
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="relative flex-1">
+                      <input
+                        type={showGeminiKey ? 'text' : 'password'}
+                        dir="ltr"
+                        value={geminiKey}
+                        onChange={(e) => {
+                          setGeminiKey(e.target.value);
+                          setGeminiStatus(null);
+                        }}
+                        placeholder="AIzaSy..."
+                        className="w-full bg-[#131314] border border-gemini-border rounded-xl px-3 py-2 text-xs font-mono text-gray-100 placeholder-gray-600 outline-none focus:border-purple-500 transition-colors"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowGeminiKey(!showGeminiKey)}
+                        className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                      >
+                        {showGeminiKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+
                     <button
                       type="button"
-                      onClick={() => setShowGeminiKey(!showGeminiKey)}
-                      className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                      onClick={async () => {
+                        try {
+                          const text = await navigator.clipboard.readText();
+                          if (text) {
+                            setGeminiKey(text.trim());
+                            setGeminiStatus(null);
+                          }
+                        } catch {}
+                      }}
+                      className="px-2.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-gray-200 border border-white/10 text-xs flex items-center gap-1 transition-colors shrink-0"
+                      title="ظ„طµظ‚ ظ…ظ† ط§ظ„ط­ط§ظپط¸ط©"
                     >
-                      {showGeminiKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      <ClipboardPaste className="w-3.5 h-3.5" />
+                      <span>ظ„طµظ‚</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleVerifyGeminiKey}
+                      disabled={isVerifyingGemini || !geminiKey.trim()}
+                      className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-medium text-xs flex items-center gap-1.5 transition-all shadow-md active:scale-95 disabled:opacity-50 shrink-0"
+                    >
+                      {isVerifyingGemini ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>ط¬ط§ط±ظٹ ط§ظ„ظپط­طµ...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span>طھظپط¹ظٹظ„ ظˆطھط­ظ‚ظ‚ ظپظˆط±ظٹ</span>
+                        </>
+                      )}
                     </button>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={handleVerifyGeminiKey}
-                    disabled={isVerifyingGemini || !geminiKey.trim()}
-                    className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-medium text-xs flex items-center gap-1.5 transition-all shadow-md active:scale-95 disabled:opacity-50 shrink-0"
-                  >
-                    {isVerifyingGemini ? (
-                      <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        <span>جاري الفحص...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-3.5 h-3.5" />
-                        <span>تفعيل وتحقق فوري</span>
-                      </>
-                    )}
-                  </button>
                 </div>
 
                 {geminiStatus && (
@@ -586,14 +620,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {activeTab === 'accounts' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-gray-200 text-xs">الحسابات المسجلة للتبديل:</span>
+                <span className="font-semibold text-gray-200 text-xs">ط§ظ„ط­ط³ط§ط¨ط§طھ ط§ظ„ظ…ط³ط¬ظ„ط© ظ„ظ„طھط¨ط¯ظٹظ„:</span>
                 <button
                   type="button"
                   onClick={() => setIsAddingAccount(!isAddingAccount)}
                   className="text-[11px] text-blue-400 hover:text-blue-300 flex items-center gap-1 font-medium transition-colors"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>إضافة حساب جديد</span>
+                  <span>ط¥ط¶ط§ظپط© ط­ط³ط§ط¨ ط¬ط¯ظٹط¯</span>
                 </button>
               </div>
 
@@ -603,20 +637,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   onSubmit={handleAddAccount}
                   className="p-3.5 rounded-xl bg-[#131314] border border-blue-500/40 space-y-3"
                 >
-                  <div className="text-xs font-semibold text-blue-300">إضافة حساب جديد إلى DOQ&amp;S</div>
+                  <div className="text-xs font-semibold text-blue-300">ط¥ط¶ط§ظپط© ط­ط³ط§ط¨ ط¬ط¯ظٹط¯ ط¥ظ„ظ‰ DOQ&amp;S</div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                     <div>
-                      <label className="block text-[10px] text-gray-400 mb-1">اسم المستخدم / الحساب</label>
+                      <label className="block text-[10px] text-gray-400 mb-1">ط§ط³ظ… ط§ظ„ظ…ط³طھط®ط¯ظ… / ط§ظ„ط­ط³ط§ط¨</label>
                       <input
                         type="text"
-                        placeholder="مثال: Mohamed Shabaan (Work)"
+                        placeholder="ظ…ط«ط§ظ„: Mohamed Shabaan (Work)"
                         value={newAccName}
                         onChange={(e) => setNewAccName(e.target.value)}
                         className="w-full bg-[#1c1d1f] border border-gemini-border rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-blue-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] text-gray-400 mb-1">البريد الإلكتروني *</label>
+                      <label className="block text-[10px] text-gray-400 mb-1">ط§ظ„ط¨ط±ظٹط¯ ط§ظ„ط¥ظ„ظƒطھط±ظˆظ†ظٹ *</label>
                       <input
                         type="email"
                         dir="ltr"
@@ -631,12 +665,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                   <div>
                     <label className="block text-[10px] text-gray-400 mb-1">
-                      مفتاح API اختياري مخصص لهذا الحساب
+                      ظ…ظپطھط§ط­ API ط§ط®طھظٹط§ط±ظٹ ظ…ط®طµطµ ظ„ظ‡ط°ط§ ط§ظ„ط­ط³ط§ط¨
                     </label>
                     <input
                       type="password"
                       dir="ltr"
-                      placeholder="مفتاح API اختياري..."
+                      placeholder="ظ…ظپطھط§ط­ API ط§ط®طھظٹط§ط±ظٹ..."
                       value={newAccKey}
                       onChange={(e) => setNewAccKey(e.target.value)}
                       className="w-full bg-[#1c1d1f] border border-gemini-border rounded-xl px-3 py-2 text-xs font-mono text-white outline-none focus:border-blue-500"
@@ -649,7 +683,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       onClick={() => setIsAddingAccount(false)}
                       className="px-3 py-1.5 rounded-xl text-gray-400 active:scale-95 hover:text-white"
                     >
-                      إلغاء
+                      ط¥ظ„ط؛ط§ط،
                     </button>
                     <button
                       type="submit"
@@ -657,7 +691,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs flex items-center gap-1.5 transition-all disabled:opacity-50"
                     >
                       {accountActionLoading && <Loader2 className="w-3 h-3 animate-spin" />}
-                      <span>حفظ الحساب</span>
+                      <span>ط­ظپط¸ ط§ظ„ط­ط³ط§ط¨</span>
                     </button>
                   </div>
                 </form>
@@ -696,7 +730,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             <span>{acc.name}</span>
                             {isActive && (
                               <span className="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full font-medium border border-blue-500/30">
-                                الحالي
+                                ط§ظ„ط­ط§ظ„ظٹ
                               </span>
                             )}
                           </div>
@@ -710,7 +744,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         {isActive ? (
                           <span className="text-emerald-400 flex items-center gap-1 text-[11px] font-medium">
                             <CheckCircle2 className="w-4 h-4" />
-                            <span>نشط ومفعل</span>
+                            <span>ظ†ط´ط· ظˆظ…ظپط¹ظ„</span>
                           </span>
                         ) : (
                           <button
@@ -721,7 +755,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             }}
                             className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-gray-200 text-[11px] transition-colors"
                           >
-                            تبديل
+                            طھط¨ط¯ظٹظ„
                           </button>
                         )}
 
@@ -730,7 +764,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             type="button"
                             onClick={(e) => handleDeleteAccount(acc.id, e)}
                             className="p-1.5 text-gray-500 hover:text-red-400 rounded-lg hover:bg-white/5 transition-colors"
-                            title="حذف هذا الحساب"
+                            title="ط­ط°ظپ ظ‡ط°ط§ ط§ظ„ط­ط³ط§ط¨"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -750,16 +784,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-gray-200 text-xs flex items-center gap-1.5">
                     <Sun className="w-4 h-4 text-amber-400" />
-                    <span>{lang === 'ar' ? 'المظهر (Theme)' : 'Theme Mode'}</span>
+                    <span>{lang === 'ar' ? 'ط§ظ„ظ…ط¸ظ‡ط± (Theme)' : 'Theme Mode'}</span>
                   </span>
                   <span className="text-[11px] text-amber-300 font-medium">
-                    {theme === 'dark' ? (lang === 'ar' ? 'الوضع الداكن' : 'Dark Mode') : (lang === 'ar' ? 'الوضع الفاتح' : 'Light Mode')}
+                    {theme === 'dark' ? (lang === 'ar' ? 'ط§ظ„ظˆط¶ط¹ ط§ظ„ط¯ط§ظƒظ†' : 'Dark Mode') : (lang === 'ar' ? 'ط§ظ„ظˆط¶ط¹ ط§ظ„ظپط§طھط­' : 'Light Mode')}
                   </span>
                 </div>
 
                 <p className="text-gray-400 text-[11px] leading-relaxed">
                   {lang === 'ar'
-                    ? 'اختر بين المظهر الداكن الهادئ والمريح للعين أو المظهر الفاتح الناصع عالي الوضوح.'
+                    ? 'ط§ط®طھط± ط¨ظٹظ† ط§ظ„ظ…ط¸ظ‡ط± ط§ظ„ط¯ط§ظƒظ† ط§ظ„ظ‡ط§ط¯ط¦ ظˆط§ظ„ظ…ط±ظٹط­ ظ„ظ„ط¹ظٹظ† ط£ظˆ ط§ظ„ظ…ط¸ظ‡ط± ط§ظ„ظپط§طھط­ ط§ظ„ظ†ط§طµط¹ ط¹ط§ظ„ظٹ ط§ظ„ظˆط¶ظˆط­.'
                     : 'Choose between the sleek dark mode or the bright crisp light theme.'}
                 </p>
 
@@ -776,8 +810,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <div className="flex items-center gap-2.5">
                       <Moon className="w-4 h-4 text-purple-400" />
                       <div className="text-right">
-                        <div className="font-medium text-xs">{lang === 'ar' ? 'داكن (Dark)' : 'Dark'}</div>
-                        <div className="text-[10px] text-gray-500">{lang === 'ar' ? 'مريح للعينين' : 'Sleek Obsidian'}</div>
+                        <div className="font-medium text-xs">{lang === 'ar' ? 'ط¯ط§ظƒظ† (Dark)' : 'Dark'}</div>
+                        <div className="text-[10px] text-gray-500">{lang === 'ar' ? 'ظ…ط±ظٹط­ ظ„ظ„ط¹ظٹظ†ظٹظ†' : 'Sleek Obsidian'}</div>
                       </div>
                     </div>
                     {theme === 'dark' && <Check className="w-4 h-4 text-amber-400 shrink-0" />}
@@ -795,8 +829,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <div className="flex items-center gap-2.5">
                       <Sun className="w-4 h-4 text-amber-400" />
                       <div className="text-right">
-                        <div className="font-medium text-xs">{lang === 'ar' ? 'فاتح (Light)' : 'Light'}</div>
-                        <div className="text-[10px] text-gray-500">{lang === 'ar' ? 'تباين ساطع' : 'Crisp White'}</div>
+                        <div className="font-medium text-xs">{lang === 'ar' ? 'ظپط§طھط­ (Light)' : 'Light'}</div>
+                        <div className="text-[10px] text-gray-500">{lang === 'ar' ? 'طھط¨ط§ظٹظ† ط³ط§ط·ط¹' : 'Crisp White'}</div>
                       </div>
                     </div>
                     {theme === 'light' && <Check className="w-4 h-4 text-amber-400 shrink-0" />}
@@ -809,16 +843,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-gray-200 text-xs flex items-center gap-1.5">
                     <Globe className="w-4 h-4 text-blue-400" />
-                    <span>{lang === 'ar' ? 'لغة الواجهة (Language)' : 'Interface Language'}</span>
+                    <span>{lang === 'ar' ? 'ظ„ط؛ط© ط§ظ„ظˆط§ط¬ظ‡ط© (Language)' : 'Interface Language'}</span>
                   </span>
                   <span className="text-[11px] text-blue-300 font-medium">
-                    {lang === 'ar' ? 'العربية' : 'English'}
+                    {lang === 'ar' ? 'ط§ظ„ط¹ط±ط¨ظٹط©' : 'English'}
                   </span>
                 </div>
 
                 <p className="text-gray-400 text-[11px] leading-relaxed">
                   {lang === 'ar'
-                    ? 'اختر لغة عرض الواجهة بالكامل: إما العربية بالكامل أو الإنجليزية بالكامل.'
+                    ? 'ط§ط®طھط± ظ„ط؛ط© ط¹ط±ط¶ ط§ظ„ظˆط§ط¬ظ‡ط© ط¨ط§ظ„ظƒط§ظ…ظ„: ط¥ظ…ط§ ط§ظ„ط¹ط±ط¨ظٹط© ط¨ط§ظ„ظƒط§ظ…ظ„ ط£ظˆ ط§ظ„ط¥ظ†ط¬ظ„ظٹط²ظٹط© ط¨ط§ظ„ظƒط§ظ…ظ„.'
                     : 'Select the full interface language: either completely Arabic or English.'}
                 </p>
 
@@ -833,10 +867,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <span className="text-base font-bold">ع</span>
+                      <span className="text-base font-bold">ط¹</span>
                       <div className="text-right">
-                        <div className="font-medium text-xs">العربية (Arabic)</div>
-                        <div className="text-[10px] text-gray-500">واجهة عربية متكاملة</div>
+                        <div className="font-medium text-xs">ط§ظ„ط¹ط±ط¨ظٹط© (Arabic)</div>
+                        <div className="text-[10px] text-gray-500">ظˆط§ط¬ظ‡ط© ط¹ط±ط¨ظٹط© ظ…طھظƒط§ظ…ظ„ط©</div>
                       </div>
                     </div>
                     {lang === 'ar' && <Check className="w-4 h-4 text-blue-400 shrink-0" />}
@@ -868,7 +902,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-gray-200 text-xs flex items-center gap-1.5">
                     <Sparkles className="w-4 h-4 text-purple-400" />
-                    <span>{lang === 'ar' ? 'تحديثات التطبيق (GitHub Releases)' : 'App Updates & Releases'}</span>
+                    <span>{lang === 'ar' ? 'طھط­ط¯ظٹط«ط§طھ ط§ظ„طھط·ط¨ظٹظ‚ (GitHub Releases)' : 'App Updates & Releases'}</span>
                   </span>
                   <div className="flex items-center gap-2">
                     <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30">
@@ -884,7 +918,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                 <p className="text-gray-400 text-[11px] leading-relaxed">
                   {lang === 'ar'
-                    ? 'يتم التحقق تلقائياً من أحدث الإصدارات المرفوعة على مستودع GitHub لتحميل التحديثات وملفات الحزم الجديدة بنقرة واحدة.'
+                    ? 'ظٹطھظ… ط§ظ„طھط­ظ‚ظ‚ طھظ„ظ‚ط§ط¦ظٹط§ظ‹ ظ…ظ† ط£ط­ط¯ط« ط§ظ„ط¥طµط¯ط§ط±ط§طھ ط§ظ„ظ…ط±ظپظˆط¹ط© ط¹ظ„ظ‰ ظ…ط³طھظˆط¯ط¹ GitHub ظ„طھط­ظ…ظٹظ„ ط§ظ„طھط­ط¯ظٹط«ط§طھ ظˆظ…ظ„ظپط§طھ ط§ظ„ط­ط²ظ… ط§ظ„ط¬ط¯ظٹط¯ط© ط¨ظ†ظ‚ط±ط© ظˆط§ط­ط¯ط©.'
                     : 'Automatically checks GitHub for latest releases and gives you one-click downloads.'}
                 </p>
 
@@ -904,10 +938,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <span>
                     {releaseInfo?.has_update
                       ? lang === 'ar'
-                        ? `تحديث جديد متاح (${releaseInfo.tag_name}) - اضغط للتحميل`
+                        ? `طھط­ط¯ظٹط« ط¬ط¯ظٹط¯ ظ…طھط§ط­ (${releaseInfo.tag_name}) - ط§ط¶ط؛ط· ظ„ظ„طھط­ظ…ظٹظ„`
                         : `New Release Available (${releaseInfo.tag_name}) - Click to Download`
                       : lang === 'ar'
-                      ? 'فحص التحديثات وسجل الإصدارات'
+                      ? 'ظپط­طµ ط§ظ„طھط­ط¯ظٹط«ط§طھ ظˆط³ط¬ظ„ ط§ظ„ط¥طµط¯ط§ط±ط§طھ'
                       : 'Check Releases & Changelog'}
                   </span>
                 </button>
@@ -920,7 +954,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <div>
               <div className="font-semibold text-gray-200">Google Drive Cloud Status</div>
               <div className="text-[11px] text-gray-400 mt-0.5">
-                {lang === 'ar' ? 'مزامنة مجلد MyHub_Automation/ متصل ومفعل للحساب النشط.' : 'Sync folder MyHub_Automation/ active for current account.'}
+                {lang === 'ar' ? 'ظ…ط²ط§ظ…ظ†ط© ظ…ط¬ظ„ط¯ MyHub_Automation/ ظ…طھطµظ„ ظˆظ…ظپط¹ظ„ ظ„ظ„ط­ط³ط§ط¨ ط§ظ„ظ†ط´ط·.' : 'Sync folder MyHub_Automation/ active for current account.'}
               </div>
             </div>
             <span
@@ -930,7 +964,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
               }`}
             >
-              {driveStatus.authenticated ? (lang === 'ar' ? 'متصل سحابياً' : 'Connected') : (lang === 'ar' ? 'جاهز للربط' : 'Ready to Connect')}
+              {driveStatus.authenticated ? (lang === 'ar' ? 'ظ…طھطµظ„ ط³ط­ط§ط¨ظٹط§ظ‹' : 'Connected') : (lang === 'ar' ? 'ط¬ط§ظ‡ط² ظ„ظ„ط±ط¨ط·' : 'Ready to Connect')}
             </span>
           </div>
         </div>
@@ -939,7 +973,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="px-6 py-3.5 bg-[#171819] border-t border-gemini-border flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-[11px] text-gray-500">
-              Nerdo AI Studio v1.0.0 · Google Gemini &amp; ChatGPT &amp; Media Vault
+              Nerdo AI Studio v1.0.0 آ· Google Gemini &amp; ChatGPT &amp; Media Vault
             </span>
             <button
               type="button"
@@ -949,7 +983,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               }}
               className="text-[11px] text-purple-400 hover:text-purple-300 underline font-mono cursor-pointer flex items-center gap-1"
             >
-              <span>{lang === 'ar' ? 'التحديثات' : 'Updates'}</span>
+              <span>{lang === 'ar' ? 'ط§ظ„طھط­ط¯ظٹط«ط§طھ' : 'Updates'}</span>
               {releaseInfo?.has_update && (
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
               )}
@@ -960,7 +994,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             onClick={onClose}
             className="px-5 py-2 rounded-xl text-xs bg-white text-black font-semibold hover:bg-gray-200 transition-colors shadow-md"
           >
-            {lang === 'ar' ? 'إغلاق' : 'Close'}
+            {lang === 'ar' ? 'ط¥ط؛ظ„ط§ظ‚' : 'Close'}
           </button>
         </div>
       </div>

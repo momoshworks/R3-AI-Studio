@@ -1,4 +1,4 @@
-import { AttachedFile, ChatMessage, DriveStatus, SystemMetrics, Notebook, NotebookChunk, Citation, StudyGuideData } from '../types';
+﻿import { AttachedFile, ChatMessage, DriveStatus, SystemMetrics, Notebook, NotebookChunk, Citation, StudyGuideData } from '../types';
 
 export const getApiBase = (): string => {
   try {
@@ -44,7 +44,7 @@ export async function openOfficialNotebookLM(): Promise<{ success: boolean; meth
       // Create new window if not preheated
       win = new WebviewWindow('notebooklm', {
         url: 'https://notebooklm.google.com',
-        title: 'Google NotebookLM — Nerdo AI Studio',
+        title: 'Google NotebookLM â€” Nerdo AI Studio',
         width: 1300,
         height: 850,
         minWidth: 850,
@@ -110,11 +110,14 @@ function resolveModelInfo(modelName: string): { provider: 'gemini' | 'openai'; m
     return { provider: 'gemini', modelId: slug };
   }
 
+  if (m.includes('3.8')) return { provider: 'gemini', modelId: 'gemini-3.8-flash' };
+  if (m.includes('3.5')) return { provider: 'gemini', modelId: 'gemini-3.5-flash' };
+  if (m.includes('lite')) return { provider: 'gemini', modelId: 'gemini-3.5-flash-lite' };
   if (m.includes('pro')) return { provider: 'gemini', modelId: 'gemini-2.5-pro' };
-  if (m.includes('lite')) return { provider: 'gemini', modelId: 'gemini-2.5-flash-lite' };
+  if (m.includes('flash-latest') || m.includes('latest')) return { provider: 'gemini', modelId: 'gemini-flash-latest' };
+  if (m.includes('2.5')) return { provider: 'gemini', modelId: 'gemini-2.5-flash' };
   if (m.includes('2.0')) return { provider: 'gemini', modelId: 'gemini-2.0-flash' };
-  if (m.includes('1.5')) return { provider: 'gemini', modelId: 'gemini-1.5-flash-latest' };
-  return { provider: 'gemini', modelId: 'gemini-2.5-flash' };
+  return { provider: 'gemini', modelId: 'gemini-3.5-flash' };
 }
 
 // Convert file to Base64 locally
@@ -144,7 +147,7 @@ export const api = {
   // Google OAuth 2.0 Loopback & Profile
   async loginWithGoogle(): Promise<any> {
     const base = getApiBase();
-    if (!base) return { authenticated: true, user: { name: 'Google User', email: 'user@r3.ai' } };
+    if (!base) return { authenticated: true, user: { name: 'Google User', email: 'user@nerdo.ai' } };
     const res = await fetch(`${base}/api/auth/google/login`, { method: 'POST' });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -174,8 +177,8 @@ export const api = {
     }
     return {
       account: {
-        name: 'R3 User',
-        email: 'user@r3.ai',
+        name: 'Nerdo User',
+        email: 'user@nerdo.ai',
         picture: 'https://api.dicebear.com/7.x/identicon/svg?seed=r3user',
       },
       has_client_secret: false,
@@ -218,12 +221,12 @@ export const api = {
         const res = await fetch(`${base}/api/auth/demo-login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: name || 'R3 User', email: email || 'user@r3.ai' }),
+          body: JSON.stringify({ name: name || 'Nerdo User', email: email || 'user@nerdo.ai' }),
         });
         return await res.json();
       } catch {}
     }
-    return { authenticated: true, user: { name: name || 'R3 User', email: email || 'user@r3.ai' } };
+    return { authenticated: true, user: { name: name || 'Nerdo User', email: email || 'user@nerdo.ai' } };
   },
 
   async getGoogleUser(): Promise<any> {
@@ -440,7 +443,7 @@ export const api = {
     try {
       if (provider === 'gemini') {
         if (!geminiKey || !geminiKey.trim()) {
-          onChunk('⚠️ **يرجى إدخال مفتاح Google Gemini API:**\n\nافتح الإعدادات ⚙️ وأدخل مفتاح API الخاص بك من [Google AI Studio](https://aistudio.google.com/app/apikey) لبدء المحادثة فوراً وبشكل مجاني تماماً.');
+          onChunk('âڑ ï¸ڈ **ظٹط±ط¬ظ‰ ط¥ط¯ط®ط§ظ„ ظ…ظپطھط§ط­ Google Gemini API:**\n\nط§ظپطھط­ ط§ظ„ط¥ط¹ط¯ط§ط¯ط§طھ âڑ™ï¸ڈ ظˆط£ط¯ط®ظ„ ظ…ظپطھط§ط­ API ط§ظ„ط®ط§طµ ط¨ظƒ ظ…ظ† [Google AI Studio](https://aistudio.google.com/app/apikey) ظ„ط¨ط¯ط، ط§ظ„ظ…ط­ط§ط¯ط«ط© ظپظˆط±ط§ظ‹ ظˆط¨ط´ظƒظ„ ظ…ط¬ط§ظ†ظٹ طھظ…ط§ظ…ط§ظ‹.');
           onDone();
           return;
         }
@@ -464,14 +467,14 @@ export const api = {
                   },
                 });
               } else if (att.data) {
-                parts.push({ text: `[ملف مرفق: ${att.name}]\n` });
+                parts.push({ text: `[ظ…ظ„ظپ ظ…ط±ظپظ‚: ${att.name}]\n` });
               }
             }
           }
 
           if (m.content && m.content.trim()) {
             const cleaned = m.content
-              .replace(/⚠️ \*\*(?:Notice|تنبيه):\*\*[\s\S]*$/gi, '')
+              .replace(/âڑ ï¸ڈ \*\*(?:Notice|طھظ†ط¨ظٹظ‡):\*\*[\s\S]*$/gi, '')
               .trim();
             if (cleaned) {
               parts.push({ text: cleaned });
@@ -493,7 +496,7 @@ export const api = {
           formattedContents.shift();
         }
         if (formattedContents.length === 0) {
-          formattedContents.push({ role: 'user', parts: [{ text: 'مرحباً' }] });
+          formattedContents.push({ role: 'user', parts: [{ text: 'ظ…ط±ط­ط¨ط§ظ‹' }] });
         }
 
         // Query available models from user's key dynamically
@@ -526,31 +529,26 @@ export const api = {
             const errJson = await listRes.json().catch(() => ({}));
             const msg = errJson.error?.message || '';
             if (msg.toLowerCase().includes('api key not valid') || msg.toLowerCase().includes('api_key_invalid')) {
-              throw new Error('مفتاح Google Gemini API غير صالح. يرجى التأكد من نسخه بدقة من Google AI Studio وحفظه في الإعدادات ⚙️.');
+              throw new Error('ظ…ظپطھط§ط­ Google Gemini API ط؛ظٹط± طµط§ظ„ط­. ظٹط±ط¬ظ‰ ط§ظ„طھط£ظƒط¯ ظ…ظ† ظ†ط³ط®ظ‡ ط¨ط¯ظ‚ط© ظ…ظ† Google AI Studio ظˆط­ظپط¸ظ‡ ظپظٹ ط§ظ„ط¥ط¹ط¯ط§ط¯ط§طھ âڑ™ï¸ڈ.');
             }
           }
         } catch (e: any) {
           if (e.name === 'AbortError') return;
-          if (e.message && e.message.includes('مفتاح Google Gemini API غير صالح')) {
+          if (e.message && e.message.includes('ظ…ظپطھط§ط­ Google Gemini API ط؛ظٹط± طµط§ظ„ط­')) {
             throw e;
           }
           console.warn('Could not query dynamic models list:', e);
         }
 
-        // Add comprehensive static fallback list
+        // Add comprehensive static fallback list prioritizing active working models
         const staticFallbacks = [
+          'gemini-3.5-flash',
+          'gemini-3.8-flash',
+          'gemini-3.5-flash-lite',
+          'gemini-flash-latest',
           'gemini-2.5-flash',
           'gemini-2.0-flash',
-          'gemini-2.5-flash-lite',
-          'gemini-flash-latest',
-          'gemini-3.5-flash',
-          'gemini-3.5-flash-lite',
-          'gemini-3.8-flash',
-          'gemini-1.5-flash-latest',
-          'gemini-1.5-flash',
           'gemini-2.5-pro',
-          'gemini-1.5-pro-latest',
-          'gemini-pro-latest',
         ];
         for (const fb of staticFallbacks) {
           if (!candidateModels.includes(fb)) {
@@ -588,12 +586,12 @@ export const api = {
               lastError = errJson.error?.message || `HTTP ${res.status}`;
               console.warn(`[Gemini Direct API] Model ${cleanModel} returned (${res.status}): ${lastError}. Trying next model...`);
               if (lastError.toLowerCase().includes('api key not valid') || lastError.toLowerCase().includes('api_key_invalid')) {
-                throw new Error('مفتاح Google Gemini API غير صالح أو غير مفعل. يرجى الحصول على مفتاح جديد من Google AI Studio.');
+                throw new Error('ظ…ظپطھط§ط­ Google Gemini API ط؛ظٹط± طµط§ظ„ط­ ط£ظˆ ط؛ظٹط± ظ…ظپط¹ظ„. ظٹط±ط¬ظ‰ ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ظ…ظپطھط§ط­ ط¬ط¯ظٹط¯ ظ…ظ† Google AI Studio.');
               }
             }
           } catch (e: any) {
             if (e.name === 'AbortError') return;
-            if (e.message && e.message.includes('مفتاح Google Gemini API غير صالح')) {
+            if (e.message && e.message.includes('ظ…ظپطھط§ط­ Google Gemini API ط؛ظٹط± طµط§ظ„ط­')) {
               throw e;
             }
             lastError = e.message;
@@ -602,9 +600,9 @@ export const api = {
 
         if (!streamResponse || !streamResponse.body) {
           if (lastError.toLowerCase().includes('quota') || lastError.toLowerCase().includes('resource_exhausted')) {
-            throw new Error('تم تجاوز الحصة المجانية المؤقتة لمفتاح Gemini API (Quota Exceeded). يرجى الانتظار دقيقة أو تجربة مفتاح آخر.');
+            throw new Error('طھظ… طھط¬ط§ظˆط² ط§ظ„ط­طµط© ط§ظ„ظ…ط¬ط§ظ†ظٹط© ط§ظ„ظ…ط¤ظ‚طھط© ظ„ظ…ظپطھط§ط­ Gemini API (Quota Exceeded). ظٹط±ط¬ظ‰ ط§ظ„ط§ظ†طھط¸ط§ط± ط¯ظ‚ظٹظ‚ط© ط£ظˆ طھط¬ط±ط¨ط© ظ…ظپطھط§ط­ ط¢ط®ط±.');
           }
-          throw new Error(lastError || 'تعذر الاتصال بخوادم Google Gemini. يرجى التحقق من اتصال الإنترنت وصلاحية مفتاح API.');
+          throw new Error(lastError || 'طھط¹ط°ط± ط§ظ„ط§طھطµط§ظ„ ط¨ط®ظˆط§ط¯ظ… Google Gemini. ظٹط±ط¬ظ‰ ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ط§طھطµط§ظ„ ط§ظ„ط¥ظ†طھط±ظ†طھ ظˆطµظ„ط§ط­ظٹط© ظ…ظپطھط§ط­ API.');
         }
 
         const reader = streamResponse.body.getReader();
@@ -640,7 +638,7 @@ export const api = {
       } else {
         // OpenAI Direct Streaming
         if (!openaiKey) {
-          onChunk('⚠️ **يرجى إدخال مفتاح ChatGPT (OpenAI) API:**\n\nافتح الإعدادات ⚙️ وأدخل مفتاح API الخاص بك من OpenAI لبدء المحادثة.');
+          onChunk('âڑ ï¸ڈ **ظٹط±ط¬ظ‰ ط¥ط¯ط®ط§ظ„ ظ…ظپطھط§ط­ ChatGPT (OpenAI) API:**\n\nط§ظپطھط­ ط§ظ„ط¥ط¹ط¯ط§ط¯ط§طھ âڑ™ï¸ڈ ظˆط£ط¯ط®ظ„ ظ…ظپطھط§ط­ API ط§ظ„ط®ط§طµ ط¨ظƒ ظ…ظ† OpenAI ظ„ط¨ط¯ط، ط§ظ„ظ…ط­ط§ط¯ط«ط©.');
           onDone();
           return;
         }
@@ -783,19 +781,19 @@ export const api = {
         localStorage.setItem('NEXUSHUB_GEMINI_API_KEY', apiKey.trim());
         return {
           valid: true,
-          message: 'تم التحقق من مفتاح Gemini بنجاح وتفعيله على التطبيق!',
+          message: 'طھظ… ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ظ…ظپطھط§ط­ Gemini ط¨ظ†ط¬ط§ط­ ظˆطھظپط¹ظٹظ„ظ‡ ط¹ظ„ظ‰ ط§ظ„طھط·ط¨ظٹظ‚!',
           detected_model: 'gemini-3.5-flash',
         };
       }
       const data = await res.json().catch(() => ({}));
       return {
         valid: false,
-        message: data.error?.message || 'المفتاح غير صالح أو لم يتم تفعيل Gemini API له.',
+        message: data.error?.message || 'ط§ظ„ظ…ظپطھط§ط­ ط؛ظٹط± طµط§ظ„ط­ ط£ظˆ ظ„ظ… ظٹطھظ… طھظپط¹ظٹظ„ Gemini API ظ„ظ‡.',
       };
     } catch (e: any) {
       return {
         valid: false,
-        message: e.message || 'تعذر الاتصال بـ Google Gemini. تحقق من اتصال الإنترنت.',
+        message: e.message || 'طھط¹ط°ط± ط§ظ„ط§طھطµط§ظ„ ط¨ظ€ Google Gemini. طھط­ظ‚ظ‚ ظ…ظ† ط§طھطµط§ظ„ ط§ظ„ط¥ظ†طھط±ظ†طھ.',
       };
     }
   },
@@ -823,19 +821,19 @@ export const api = {
         localStorage.setItem('NEXUSHUB_OPENAI_API_KEY', apiKey.trim());
         return {
           valid: true,
-          message: 'تم التحقق من مفتاح ChatGPT (OpenAI) بنجاح وتفعيله!',
+          message: 'طھظ… ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ظ…ظپطھط§ط­ ChatGPT (OpenAI) ط¨ظ†ط¬ط§ط­ ظˆطھظپط¹ظٹظ„ظ‡!',
           detected_model: 'gpt-4o-mini',
         };
       }
       const data = await res.json().catch(() => ({}));
       return {
         valid: false,
-        message: data.error?.message || 'مفتاح OpenAI غير صالح أو ليس لديه رصيد كافٍ.',
+        message: data.error?.message || 'ظ…ظپطھط§ط­ OpenAI ط؛ظٹط± طµط§ظ„ط­ ط£ظˆ ظ„ظٹط³ ظ„ط¯ظٹظ‡ ط±طµظٹط¯ ظƒط§ظپظچ.',
       };
     } catch (e: any) {
       return {
         valid: false,
-        message: e.message || 'فشل التحقق من مفتاح OpenAI.',
+        message: e.message || 'ظپط´ظ„ ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ظ…ظپطھط§ط­ OpenAI.',
       };
     }
   },
@@ -860,8 +858,8 @@ export const api = {
 
     const defaultAcc = {
       id: 'acc_default',
-      name: 'R3 User',
-      email: 'user@r3.ai',
+      name: 'Nerdo User',
+      email: 'user@nerdo.ai',
       picture: 'https://api.dicebear.com/7.x/identicon/svg?seed=r3user',
       is_active: true,
     };
@@ -1082,7 +1080,7 @@ export const api = {
       });
       return await res.json();
     }
-    return { answer: 'تتطلب ميزة RAG Notebook Studio الاتصال بخادم R3 المحلي.', citations: [] };
+    return { answer: 'طھطھط·ظ„ط¨ ظ…ظٹط²ط© RAG Notebook Studio ط§ظ„ط§طھطµط§ظ„ ط¨ط®ط§ط¯ظ… R3 ط§ظ„ظ…ط­ظ„ظٹ.', citations: [] };
   },
 
   async generateStudyTools(
@@ -1100,7 +1098,7 @@ export const api = {
       return await res.json();
     }
     return {
-      summary: 'الدراسة الذكية',
+      summary: 'ط§ظ„ط¯ط±ط§ط³ط© ط§ظ„ط°ظƒظٹط©',
       key_points: [],
       flashcards: [],
       quiz: [],

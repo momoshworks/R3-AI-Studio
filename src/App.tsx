@@ -60,11 +60,11 @@ const AVAILABLE_MODELS = [
   {
     category: 'Google Gemini',
     models: [
-      { id: 'Google Gemini (gemini-2.5-flash)', name: 'Gemini 2.5 Flash', desc: 'الأفضل في الذكاء والسرعة والاستدلال (موصى به)', tag: 'افتراضي' },
-      { id: 'Google Gemini 2.0 Flash (gemini-2.0-flash)', name: 'Gemini 2.0 Flash', desc: 'فائق السرعة والاستجابة اللحظية', tag: 'سريع' },
-      { id: 'Google Gemini Flash Lite (gemini-2.5-flash-lite)', name: 'Gemini Flash Lite', desc: 'فائق الخفة واقتصادي للمهام السريعة', tag: 'خفيف' },
-      { id: 'Google Gemini 2.5 Pro (gemini-2.5-pro)', name: 'Gemini 2.5 Pro', desc: 'القدرات الأقوى في التحليل والبرمجة', tag: 'شامل' },
-      { id: 'Google Gemini 1.5 Flash (gemini-1.5-flash-latest)', name: 'Gemini 1.5 Flash', desc: 'النموذج الكلاسيكي الموثوق', tag: 'كلاسيك' },
+      { id: 'Google Gemini (gemini-3.5-flash)', name: 'Gemini 3.5 Flash', desc: 'النموذج الأحدث فائق الذكاء والسرعة والاستدلال (افتراضي وموصى به)', tag: 'الأسرع والأحدث' },
+      { id: 'Google Gemini 3.8 Flash (gemini-3.8-flash)', name: 'Gemini 3.8 Flash', desc: 'أحدث إصدار بقدرات تفكير متقدمة', tag: 'متقدم' },
+      { id: 'Google Gemini Flash Lite (gemini-3.5-flash-lite)', name: 'Gemini Flash Lite', desc: 'فائق الخفة واقتصادي للمهام السريعة', tag: 'خفيف' },
+      { id: 'Google Gemini Flash Latest (gemini-flash-latest)', name: 'Gemini Flash Latest', desc: 'الإصدار المباشر الدائم من فلاش', tag: 'مباشر' },
+      { id: 'Google Gemini 2.5 Pro (gemini-2.5-pro)', name: 'Gemini 2.5 Pro', desc: 'القدرات الأقوى في التحليل والبرمجة المعقدة', tag: 'شامل' },
     ],
   },
   {
@@ -206,7 +206,7 @@ export const App: React.FC = () => {
   const [activeSessionId, setActiveSessionId] = useState<string>('session-1');
 
   // Execution & Models
-  const [selectedModel, setSelectedModel] = useState<string>('Google Gemini (gemini-2.5-flash)');
+  const [selectedModel, setSelectedModel] = useState<string>('Google Gemini (gemini-3.5-flash)');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const stopGenerationRef = useRef<(() => void) | null>(null);
 

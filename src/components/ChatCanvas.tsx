@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {
@@ -21,6 +21,12 @@ import {
   ExternalLink,
   X,
   MoreHorizontal,
+  Key,
+  ClipboardPaste,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  ShieldCheck,
 } from 'lucide-react';
 import { api } from '../services/api';
 import { AttachedFile, ChatMessage } from '../types';
@@ -84,6 +90,39 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [savingMediaUrl, setSavingMediaUrl] = useState<string | null>(null);
   const [savedMediaUrls, setSavedMediaUrls] = useState<string[]>([]);
+  const [inlineKey, setInlineKey] = useState('');
+  const [isSavingInlineKey, setIsSavingInlineKey] = useState(false);
+  const [inlineKeyStatus, setInlineKeyStatus] = useState<string | null>(null);
+
+  const handlePasteInlineKey = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) setInlineKey(text.trim());
+    } catch {
+      // Fallback
+    }
+  };
+
+  const handleSaveInlineKey = async () => {
+    if (!inlineKey.trim()) return;
+    setIsSavingInlineKey(true);
+    setInlineKeyStatus(null);
+    try {
+      const res = await api.verifyApiKey(inlineKey.trim());
+      if (res.valid) {
+        setInlineKeyStatus('success');
+        setTimeout(() => {
+          window.location.reload();
+        }, 800);
+      } else {
+        setInlineKeyStatus(res.message || 'ط§ظ„ظ…ظپطھط§ط­ ط؛ظٹط± طµط§ظ„ط­ ط£ظˆ ظ„ظ… ظٹطھظ… طھظپط¹ظٹظ„ Gemini API ظ„ظ‡');
+      }
+    } catch (e: any) {
+      setInlineKeyStatus(e.message || 'طھط¹ط°ط± ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ط§ظ„ظ…ظپطھط§ط­');
+    } finally {
+      setIsSavingInlineKey(false);
+    }
+  };
 
   const handleSaveToVault = async (url: string, title?: string) => {
     setSavingMediaUrl(url);
@@ -114,7 +153,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
 
   const toggleSpeech = (text: string, id: string) => {
     if (!('speechSynthesis' in window)) {
-      alert(lang === 'ar' ? 'المتصفح لا يدعم القراءة الصوتية' : 'Speech synthesis not supported in this browser');
+      alert(lang === 'ar' ? 'ط§ظ„ظ…طھطµظپط­ ظ„ط§ ظٹط¯ط¹ظ… ط§ظ„ظ‚ط±ط§ط،ط© ط§ظ„طµظˆطھظٹط©' : 'Speech synthesis not supported in this browser');
       return;
     }
 
@@ -151,7 +190,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
     setDownloadingPdfId(id);
     try {
       await downloadPDFDirectly(content, {
-        title: title || 'R3 AI Report',
+        title: title || 'Nerdo AI Report',
         modelName: selectedModel,
       });
     } finally {
@@ -176,9 +215,9 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
         const isU = m.role === 'user';
         const sender = isU
           ? lang === 'ar'
-            ? 'المستخدم'
+            ? 'ط§ظ„ظ…ط³طھط®ط¯ظ…'
             : 'User'
-          : `R3 AI (${selectedModel})`;
+          : `Nerdo AI (${selectedModel})`;
         return `
           <div style="margin-bottom: 20px; padding: 14px; border-radius: 8px; background: ${isU ? '#f8fafc' : '#ffffff'}; border: 1px solid #e2e8f0;">
             <div style="font-weight: bold; font-size: 12px; color: ${isU ? '#2563eb' : '#d97706'}; margin-bottom: 8px;">
@@ -196,7 +235,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
   const exportFullChatPDF = () => {
     if (messages.length === 0) return;
     exportTextOrHtmlToPDF(getFullChatHtml(), {
-      title: lang === 'ar' ? 'تقرير محادثة R3 AI الكامل' : 'R3 AI Full Session Report',
+      title: lang === 'ar' ? 'طھظ‚ط±ظٹط± ظ…ط­ط§ط¯ط«ط© Nerdo AI ط§ظ„ظƒط§ظ…ظ„' : 'Nerdo AI Full Session Report',
       modelName: selectedModel,
     });
   };
@@ -206,7 +245,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
     await handleDirectPdfDownload(
       getFullChatHtml(),
       'full-chat',
-      lang === 'ar' ? 'سجل محادثة R3 AI' : 'R3 AI Chat Log'
+      lang === 'ar' ? 'ط³ط¬ظ„ ظ…ط­ط§ط¯ط«ط© Nerdo AI' : 'Nerdo AI Chat Log'
     );
   };
 
@@ -217,7 +256,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
         <div className="hidden sm:flex flex-wrap items-center justify-between gap-1.5 pb-2 border-b border-white/10 select-none text-xs">
           <div className="flex items-center gap-1.5 min-w-0">
             <span className="hidden sm:inline text-gray-400 font-medium">
-              {lang === 'ar' ? 'جلسة المحادثة الحالية' : 'Current Chat Session'}
+              {lang === 'ar' ? 'ط¬ظ„ط³ط© ط§ظ„ظ…ط­ط§ط¯ط«ط© ط§ظ„ط­ط§ظ„ظٹط©' : 'Current Chat Session'}
             </span>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 font-mono text-blue-400 truncate max-w-[130px] sm:max-w-[200px]">
               {selectedModel.replace(/^Google\s+/i, '').replace(/^OpenAI\s+/i, '').replace(/\(.*\)/, '').trim()}
@@ -226,16 +265,16 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
           <div className="flex items-center gap-1 shrink-0">
             <button
               onClick={downloadFullChatPDF}
-              title={lang === 'ar' ? 'تحميل سجل الجلسة بالكامل PDF' : 'Download full chat PDF'}
+              title={lang === 'ar' ? 'طھط­ظ…ظٹظ„ ط³ط¬ظ„ ط§ظ„ط¬ظ„ط³ط© ط¨ط§ظ„ظƒط§ظ…ظ„ PDF' : 'Download full chat PDF'}
               className="px-2 py-1 rounded-lg text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 transition-colors text-[11px] flex items-center gap-1 border border-white/10"
             >
               <Download className="w-3 h-3 text-blue-400" />
-              <span className="hidden sm:inline">{lang === 'ar' ? 'تحميل الجلسة PDF' : 'Export PDF'}</span>
+              <span className="hidden sm:inline">{lang === 'ar' ? 'طھط­ظ…ظٹظ„ ط§ظ„ط¬ظ„ط³ط© PDF' : 'Export PDF'}</span>
               <span className="sm:hidden font-mono text-[10px]">PDF</span>
             </button>
             <button
               onClick={exportFullChatPDF}
-              title={lang === 'ar' ? 'طباعة / تصدير الجلسة' : 'Print / Export Session'}
+              title={lang === 'ar' ? 'ط·ط¨ط§ط¹ط© / طھطµط¯ظٹط± ط§ظ„ط¬ظ„ط³ط©' : 'Print / Export Session'}
               className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors border border-white/10"
             >
               <Printer className="w-3 h-3" />
@@ -254,7 +293,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
 
           {/* App Logo Badge with Refined Glow */}
           <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-xl shadow-purple-900/20 ring-1 ring-white/20 relative z-10 transition-transform hover:scale-105 duration-300">
-            <img src="/app-icon.png" alt="R3" className="w-full h-full object-cover" />
+            <img src="/app-icon.png" alt="Nerdo" className="w-full h-full object-cover" />
           </div>
 
           {/* Claude AI Editorial Greeting Title */}
@@ -263,7 +302,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
               <span
                 className="text-lg md:text-xl font-medium tracking-wide text-amber-200/90 font-serif"
               >
-                {lang === 'ar' ? 'مرحباً بك في' : 'Welcome to'}
+                {lang === 'ar' ? 'ظ…ط±ط­ط¨ط§ظ‹ ط¨ظƒ ظپظٹ' : 'Welcome to'}
               </span>
               <span
                 className="text-4xl md:text-6xl font-semibold font-claude-serif text-claude-gradient tracking-tight mt-1 select-none"
@@ -294,34 +333,34 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
               {[
                 {
                   text: t.chipReport,
-                  icon: '📝',
+                  icon: 'ًں“‌',
                   prompt:
                     lang === 'ar'
-                      ? 'اكتب تقريراً تحليلياً مفصلاً ومنسقاً بصيغة تقرير احترافي جاهز للتحميل كـ PDF عن: '
+                      ? 'ط§ظƒطھط¨ طھظ‚ط±ظٹط±ط§ظ‹ طھط­ظ„ظٹظ„ظٹط§ظ‹ ظ…ظپطµظ„ط§ظ‹ ظˆظ…ظ†ط³ظ‚ط§ظ‹ ط¨طµظٹط؛ط© طھظ‚ط±ظٹط± ط§ط­طھط±ط§ظپظٹ ط¬ط§ظ‡ط² ظ„ظ„طھط­ظ…ظٹظ„ ظƒظ€ PDF ط¹ظ†: '
                       : 'Write a comprehensive analytical report formatted for PDF export about: ',
                 },
                 {
                   text: t.chipCode,
-                  icon: '💻',
+                  icon: 'ًں’»',
                   prompt:
                     lang === 'ar'
-                      ? 'قم بفحص وتحسين الكود البرمجي التالي وشرح أفضل الممارسات: '
+                      ? 'ظ‚ظ… ط¨ظپط­طµ ظˆطھط­ط³ظٹظ† ط§ظ„ظƒظˆط¯ ط§ظ„ط¨ط±ظ…ط¬ظٹ ط§ظ„طھط§ظ„ظٹ ظˆط´ط±ط­ ط£ظپط¶ظ„ ط§ظ„ظ…ظ…ط§ط±ط³ط§طھ: '
                       : 'Review and optimize this code snippet with best practices: ',
                 },
                 {
                   text: t.chipDesign,
-                  icon: '🎨',
+                  icon: 'ًںژ¨',
                   prompt:
                     lang === 'ar'
-                      ? 'اقترح تخطيطاً وتوزيع عناصر لواجهة مستخدم (UI/UX) حديثة مع ألوان عصرية: '
+                      ? 'ط§ظ‚طھط±ط­ طھط®ط·ظٹط·ط§ظ‹ ظˆطھظˆط²ظٹط¹ ط¹ظ†ط§طµط± ظ„ظˆط§ط¬ظ‡ط© ظ…ط³طھط®ط¯ظ… (UI/UX) ط­ط¯ظٹط«ط© ظ…ط¹ ط£ظ„ظˆط§ظ† ط¹طµط±ظٹط©: '
                       : 'Suggest a modern UI/UX layout concept with color palettes for: ',
                 },
                 {
                   text: t.chipPdf,
-                  icon: '📊',
+                  icon: 'ًں“ٹ',
                   prompt:
                     lang === 'ar'
-                      ? 'لخص النقاط الجوهرية والقرارات الأساسية في موضوع: '
+                      ? 'ظ„ط®طµ ط§ظ„ظ†ظ‚ط§ط· ط§ظ„ط¬ظˆظ‡ط±ظٹط© ظˆط§ظ„ظ‚ط±ط§ط±ط§طھ ط§ظ„ط£ط³ط§ط³ظٹط© ظپظٹ ظ…ظˆط¶ظˆط¹: '
                       : 'Summarize the core takeaways and action items regarding: ',
                 },
               ].map((chip, idx) => (
@@ -409,9 +448,9 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                                 </div>
                                 <div className="text-[10px] text-gray-400 flex items-center gap-1.5 font-mono mt-0.5">
                                   <span>{formatBytes(att.size)}</span>
-                                  <span>•</span>
+                                  <span>â€¢</span>
                                   <span className="text-emerald-400 font-medium">
-                                    {lang === 'ar' ? 'تمت القراءة بنجاح ✓' : 'Indexed ✓'}
+                                    {lang === 'ar' ? 'طھظ…طھ ط§ظ„ظ‚ط±ط§ط،ط© ط¨ظ†ط¬ط§ط­ âœ“' : 'Indexed âœ“'}
                                   </span>
                                 </div>
                               </div>
@@ -480,23 +519,23 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                           h2({ children }) {
                             const text = getTextFromChildren(children);
                             const isAr = hasArabic(text);
-                            let icon = '📌';
+                            let icon = 'ًں“Œ';
                             let cardClass = isDark ? 'border-s-4 border-s-blue-500 bg-[#0e131f]/80' : 'border-s-4 border-s-blue-600 bg-blue-50/70 border border-blue-200/60';
 
-                            if (text.includes('الفكرة') || text.toLowerCase().includes('core idea')) {
-                              icon = '🎯';
+                            if (text.includes('ط§ظ„ظپظƒط±ط©') || text.toLowerCase().includes('core idea')) {
+                              icon = 'ًںژ¯';
                               cardClass = 'border-s-4 border-s-sky-400 bg-sky-950/20';
-                            } else if (text.includes('تشبيه') || text.toLowerCase().includes('analogy')) {
-                              icon = '💡';
+                            } else if (text.includes('طھط´ط¨ظٹظ‡') || text.toLowerCase().includes('analogy')) {
+                              icon = 'ًں’،';
                               cardClass = 'border-s-4 border-s-amber-400 bg-amber-950/20';
-                            } else if (text.includes('لماذا') || text.toLowerCase().includes('the why')) {
-                              icon = '🚀';
+                            } else if (text.includes('ظ„ظ…ط§ط°ط§') || text.toLowerCase().includes('the why')) {
+                              icon = 'ًںڑ€';
                               cardClass = 'border-s-4 border-s-purple-400 bg-purple-950/20';
-                            } else if (text.includes('مثال') || text.toLowerCase().includes('working example') || text.includes('كود')) {
-                              icon = '💻';
+                            } else if (text.includes('ظ…ط«ط§ظ„') || text.toLowerCase().includes('working example') || text.includes('ظƒظˆط¯')) {
+                              icon = 'ًں’»';
                               cardClass = 'border-s-4 border-s-indigo-400 bg-indigo-950/20';
-                            } else if (text.includes('خطأ') || text.toLowerCase().includes('pitfall') || text.includes('تحذير')) {
-                              icon = '⚠️';
+                            } else if (text.includes('ط®ط·ط£') || text.toLowerCase().includes('pitfall') || text.includes('طھط­ط°ظٹط±')) {
+                              icon = 'âڑ ï¸ڈ';
                               cardClass = 'border-s-4 border-s-rose-400 bg-rose-950/20';
                             }
 
@@ -517,23 +556,23 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                           h3({ children }) {
                             const text = getTextFromChildren(children);
                             const isAr = hasArabic(text);
-                            let icon = '🔹';
+                            let icon = 'ًں”¹';
                             let cardClass = 'border-s-4 border-s-blue-400 bg-[#0e131f]/70';
 
-                            if (text.includes('الفكرة') || text.toLowerCase().includes('core idea')) {
-                              icon = '🎯';
+                            if (text.includes('ط§ظ„ظپظƒط±ط©') || text.toLowerCase().includes('core idea')) {
+                              icon = 'ًںژ¯';
                               cardClass = 'border-s-4 border-s-sky-400 bg-sky-950/20';
-                            } else if (text.includes('تشبيه') || text.toLowerCase().includes('analogy')) {
-                              icon = '💡';
+                            } else if (text.includes('طھط´ط¨ظٹظ‡') || text.toLowerCase().includes('analogy')) {
+                              icon = 'ًں’،';
                               cardClass = 'border-s-4 border-s-amber-400 bg-amber-950/20';
-                            } else if (text.includes('لماذا') || text.toLowerCase().includes('the why')) {
-                              icon = '🚀';
+                            } else if (text.includes('ظ„ظ…ط§ط°ط§') || text.toLowerCase().includes('the why')) {
+                              icon = 'ًںڑ€';
                               cardClass = 'border-s-4 border-s-purple-400 bg-purple-950/20';
-                            } else if (text.includes('مثال') || text.toLowerCase().includes('working example') || text.includes('كود')) {
-                              icon = '💻';
+                            } else if (text.includes('ظ…ط«ط§ظ„') || text.toLowerCase().includes('working example') || text.includes('ظƒظˆط¯')) {
+                              icon = 'ًں’»';
                               cardClass = 'border-s-4 border-s-indigo-400 bg-indigo-950/20';
-                            } else if (text.includes('خطأ') || text.toLowerCase().includes('pitfall') || text.includes('تحذير')) {
-                              icon = '⚠️';
+                            } else if (text.includes('ط®ط·ط£') || text.toLowerCase().includes('pitfall') || text.includes('طھط­ط°ظٹط±')) {
+                              icon = 'âڑ ï¸ڈ';
                               cardClass = 'border-s-4 border-s-rose-400 bg-rose-950/20';
                             }
 
@@ -606,7 +645,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                                     isDark ? 'text-amber-400' : 'text-amber-800'
                                   }`}
                                 >
-                                  💡 فكرة جوهرية:
+                                  ًں’، ظپظƒط±ط© ط¬ظˆظ‡ط±ظٹط©:
                                 </span>
                                 {children}
                               </blockquote>
@@ -697,7 +736,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                                   <button
                                     onClick={() => setLightboxUrl(src)}
                                     className="p-1 rounded-lg hover:bg-white/20 text-white transition-colors"
-                                    title={lang === 'ar' ? 'معاينة وتكبير' : 'Full Preview'}
+                                    title={lang === 'ar' ? 'ظ…ط¹ط§ظٹظ†ط© ظˆطھظƒط¨ظٹط±' : 'Full Preview'}
                                   >
                                     <Maximize2 className="w-3.5 h-3.5" />
                                   </button>
@@ -709,7 +748,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                                         ? 'text-emerald-400 bg-emerald-500/20'
                                         : 'hover:bg-white/20 text-purple-300'
                                     }`}
-                                    title={lang === 'ar' ? 'حفظ في استوديو الوسائط' : 'Save to Media Vault'}
+                                    title={lang === 'ar' ? 'ط­ظپط¸ ظپظٹ ط§ط³طھظˆط¯ظٹظˆ ط§ظ„ظˆط³ط§ط¦ط·' : 'Save to Media Vault'}
                                   >
                                     {isSaving ? (
                                       <span className="text-[10px] animate-pulse">...</span>
@@ -725,7 +764,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                                     target="_blank"
                                     rel="noreferrer"
                                     className="p-1 rounded-lg hover:bg-white/20 text-blue-400 transition-colors"
-                                    title={lang === 'ar' ? 'تحميل مباشر' : 'Download'}
+                                    title={lang === 'ar' ? 'طھط­ظ…ظٹظ„ ظ…ط¨ط§ط´ط±' : 'Download'}
                                   >
                                     <Download className="w-3.5 h-3.5" />
                                   </a>
@@ -754,7 +793,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                                       className="text-blue-400 hover:underline flex items-center gap-1"
                                     >
                                       <Download className="w-3 h-3" />
-                                      {lang === 'ar' ? 'تحميل' : 'Download'}
+                                      {lang === 'ar' ? 'طھط­ظ…ظٹظ„' : 'Download'}
                                     </a>
                                   </div>
                                 </div>
@@ -819,25 +858,141 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
 
                     {/* Quota Exhaustion Helper Card */}
                     {onSwitchModel &&
-                      (msg.content.includes('رصيد حساب OpenAI منتهي') ||
+                      (msg.content.includes('ط±طµظٹط¯ ط­ط³ط§ط¨ OpenAI ظ…ظ†طھظ‡ظٹ') ||
                         msg.content.includes('credits remaining') ||
                         msg.content.includes('Insufficient Quota') ||
-                        msg.content.includes('نفاد رصيد')) && (
+                        msg.content.includes('ظ†ظپط§ط¯ ط±طµظٹط¯')) && (
                         <div
                           className="mt-3 p-3.5 rounded-2xl bg-gradient-to-r from-blue-950/40 to-indigo-950/40 border border-blue-500/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-right"
                           dir="rtl"
                         >
                           <div className="text-xs text-blue-200">
-                            💡 <strong>نصيحة:</strong> رصيد ChatGPT منتهٍ، يمكنك المتابعة فوراً مع <strong>Google Gemini</strong> مجاناً وبأعلى سرعة.
+                            ًں’، <strong>ظ†طµظٹط­ط©:</strong> ط±طµظٹط¯ ChatGPT ظ…ظ†طھظ‡ظچطŒ ظٹظ…ظƒظ†ظƒ ط§ظ„ظ…طھط§ط¨ط¹ط© ظپظˆط±ط§ظ‹ ظ…ط¹ <strong>Google Gemini</strong> ظ…ط¬ط§ظ†ط§ظ‹ ظˆط¨ط£ط¹ظ„ظ‰ ط³ط±ط¹ط©.
                           </div>
                           <button
                             onClick={() => onSwitchModel('Google Gemini (gemini-3.5-flash)')}
                             className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/30 transition-all shrink-0 active:scale-95"
                           >
-                            التبديل إلى Google Gemini الآن
+                            ط§ظ„طھط¨ط¯ظٹظ„ ط¥ظ„ظ‰ Google Gemini ط§ظ„ط¢ظ†
                           </button>
                         </div>
                       )}
+
+                    {/* Interactive 10-Second API Key Setup Card */}
+                    {msg.content.includes('ظٹط±ط¬ظ‰ ط¥ط¯ط®ط§ظ„ ظ…ظپطھط§ط­') && (
+                      <div
+                        className={`mt-3 p-4 rounded-2xl border space-y-3 text-right shadow-lg transition-all ${
+                          isDark
+                            ? 'bg-gradient-to-br from-purple-950/40 via-black/40 to-blue-950/40 border-purple-500/40 text-gray-200'
+                            : 'bg-purple-50/90 border-purple-300 text-slate-800'
+                        }`}
+                        dir="rtl"
+                      >
+                        <div className="flex items-center justify-between pb-2 border-b border-purple-500/20">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-lg bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400">
+                              <Key className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <div className="font-bold text-xs text-purple-300">
+                                {lang === 'ar' ? 'طھظپط¹ظٹظ„ ظ…ظپطھط§ط­ Google Gemini ظپظٹ 10 ط«ظˆط§ظ†ظچ' : 'Activate Google Gemini API in 10 Seconds'}
+                              </div>
+                              <div className="text-[10px] text-gray-400">
+                                {lang === 'ar' ? 'ظ…ط¬ط§ظ†ظٹ 100% ظˆط¨ط¯ظˆظ† ط£ظٹ ط¨ط·ط§ظ‚ط© ط¨ظ†ظƒظٹط©' : '100% Free, no credit card required'}
+                              </div>
+                            </div>
+                          </div>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-medium flex items-center gap-1">
+                            <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                            <span>{lang === 'ar' ? 'ظ…ط­ظپظˆط¸ ط¹ظ„ظ‰ ط¬ظ‡ط§ط²ظƒ ظپظ‚ط·' : 'Local Storage Only'}</span>
+                          </span>
+                        </div>
+
+                        {/* Privacy Guarantee Note */}
+                        <div className="text-[11px] text-gray-300 bg-white/5 p-2 rounded-xl border border-white/5 leading-relaxed">
+                          ًں›،ï¸ڈ <strong>ط­ظ…ط§ظٹط© ظˆط£ظ…ط§ظ† ظƒط§ظ…ظ„:</strong> ظ…ظپطھط§ط­ظƒ ظٹطھظ… ط­ظپط¸ظ‡ ظ…ط­ظ„ظٹط§ظ‹ ط¹ظ„ظ‰ ط¬ظ‡ط§ط²ظƒ ط§ظ„ط­ط§ظ„ظٹ ظپظ‚ط· ط¯ط§ط®ظ„ ط§ظ„ظ€ Local Storage ظˆظ„ط§ ظٹظ…ظƒظ† ظ„ط£ظٹ ط®ط§ط¯ظ… ط£ظˆ ط£ظٹ ط´ط®طµ ط¢ط®ط± ط±ط¤ظٹطھظ‡ ط£ظˆ ط§ط³طھط®ط¯ط§ظ…ظ‡.
+                        </div>
+
+                        {/* Step 1: Link to Google AI Studio */}
+                        <a
+                          href="https://aistudio.google.com/app/apikey"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full py-2 px-3 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-200 border border-purple-500/30 flex items-center justify-between transition-all text-xs font-medium group"
+                        >
+                          <span className="flex items-center gap-2">
+                            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                            <span>1. ط§ط¶ط؛ط· ظ‡ظ†ط§ ظ„ظپطھط­ طµظپط­ط© ط¥ظ†ط´ط§ط، ط§ظ„ظ…ظپطھط§ط­ ط§ظ„ظ…ط¬ط§ظ†ظٹ (Google AI Studio)</span>
+                          </span>
+                          <ExternalLink className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
+                        </a>
+
+                        {/* Step 2: Paste and Activate */}
+                        <div className="space-y-1.5 pt-1">
+                          <div className="text-[11px] text-gray-400 font-medium">
+                            2. ط§ظ†ط³ط® ط§ظ„ظ…ظپطھط§ط­ ظˆط§ظ„طµظ‚ظ‡ ظ‡ظ†ط§ ظ„طھظپط¹ظٹظ„ظ‡ ظپظˆط±ط§ظ‹:
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="password"
+                              dir="ltr"
+                              placeholder="AIzaSy..."
+                              value={inlineKey}
+                              onChange={(e) => {
+                                setInlineKey(e.target.value);
+                                setInlineKeyStatus(null);
+                              }}
+                              className="flex-1 bg-[#131314] border border-gemini-border rounded-xl px-3 py-2 text-xs font-mono text-gray-100 placeholder-gray-600 outline-none focus:border-purple-500 transition-colors"
+                            />
+                            <button
+                              type="button"
+                              onClick={handlePasteInlineKey}
+                              className="px-2.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-gray-200 border border-white/10 text-xs flex items-center gap-1 transition-colors shrink-0"
+                              title="ظ„طµظ‚ ظ…ظ† ط§ظ„ط­ط§ظپط¸ط©"
+                            >
+                              <ClipboardPaste className="w-3.5 h-3.5" />
+                              <span>ظ„طµظ‚</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleSaveInlineKey}
+                              disabled={isSavingInlineKey || !inlineKey.trim()}
+                              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:opacity-95 text-white text-xs font-bold shadow-md shadow-purple-600/25 transition-all shrink-0 active:scale-95 disabled:opacity-50 flex items-center gap-1.5"
+                            >
+                              {isSavingInlineKey ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <CheckCircle2 className="w-3.5 h-3.5 text-amber-300" />
+                              )}
+                              <span>طھظپط¹ظٹظ„ ظپظˆط±ط§ظ‹</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Status feedback */}
+                        {inlineKeyStatus && (
+                          <div
+                            className={`p-2 rounded-xl text-xs flex items-center gap-2 ${
+                              inlineKeyStatus === 'success'
+                                ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300'
+                                : 'bg-red-500/15 border border-red-500/30 text-red-300'
+                            }`}
+                          >
+                            {inlineKeyStatus === 'success' ? (
+                              <>
+                                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                                <span>طھظ… ط§ظ„طھط­ظ‚ظ‚ ظˆطھظپط¹ظٹظ„ ط§ظ„ظ…ظپطھط§ط­ ط¨ظ†ط¬ط§ط­! ط¬ط§ط±ظٹ ط§ظ„طھط­ط¯ظٹط«...</span>
+                              </>
+                            ) : (
+                              <>
+                                <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                                <span>{inlineKeyStatus}</span>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* Action Bar for Assistant Message: Copy, TTS, Markdown, PDF */}
                     <div className="flex flex-wrap items-center gap-1.5 pt-1.5 border-t border-gemini-border/30 text-xs relative">
@@ -860,20 +1015,20 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                         )}
                       </button>
 
-                      {/* Explain Like I'm 10 / بسّطهالي */}
+                      {/* Explain Like I'm 10 / ط¨ط³ظ‘ط·ظ‡ط§ظ„ظٹ */}
                       <button
                         onClick={() => {
                           onPromptSelect?.(
                             lang === 'ar'
-                              ? 'أعد شرح الرد السابق بأسلوب مبسط جداً لشخص ليس لديه أي خلفية تقنية، واستخدم تشبيهاً من الحياة اليومية ومثالاً بسيطاً من سطرين فقط.'
+                              ? 'ط£ط¹ط¯ ط´ط±ط­ ط§ظ„ط±ط¯ ط§ظ„ط³ط§ط¨ظ‚ ط¨ط£ط³ظ„ظˆط¨ ظ…ط¨ط³ط· ط¬ط¯ط§ظ‹ ظ„ط´ط®طµ ظ„ظٹط³ ظ„ط¯ظٹظ‡ ط£ظٹ ط®ظ„ظپظٹط© طھظ‚ظ†ظٹط©طŒ ظˆط§ط³طھط®ط¯ظ… طھط´ط¨ظٹظ‡ط§ظ‹ ظ…ظ† ط§ظ„ط­ظٹط§ط© ط§ظ„ظٹظˆظ…ظٹط© ظˆظ…ط«ط§ظ„ط§ظ‹ ط¨ط³ظٹط·ط§ظ‹ ظ…ظ† ط³ط·ط±ظٹظ† ظپظ‚ط·.'
                               : 'Please re-explain the previous response in very simple terms for someone with no technical background, using a daily-life analogy and a minimal 2-line example.'
                           );
                         }}
                         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 transition-all text-[11px] font-medium shadow-sm active:scale-95"
-                        title={lang === 'ar' ? 'شرح مبسط للأطفال والمبتدئين بمثال واقعي' : "Explain Like I'm 10"}
+                        title={lang === 'ar' ? 'ط´ط±ط­ ظ…ط¨ط³ط· ظ„ظ„ط£ط·ظپط§ظ„ ظˆط§ظ„ظ…ط¨طھط¯ط¦ظٹظ† ط¨ظ…ط«ط§ظ„ ظˆط§ظ‚ط¹ظٹ' : "Explain Like I'm 10"}
                       >
                         <Sparkles className="w-3 h-3 text-amber-400" />
-                        <span>{lang === 'ar' ? 'بسّطهالي' : 'ELI5'}</span>
+                        <span>{lang === 'ar' ? 'ط¨ط³ظ‘ط·ظ‡ط§ظ„ظٹ' : 'ELI5'}</span>
                       </button>
 
                       {/* Text-to-Speech (TTS Read Aloud) */}
@@ -896,7 +1051,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
 
                       {/* Direct PDF Download */}
                       <button
-                        onClick={() => handleDirectPdfDownload(msg.content, msg.id, 'R3 AI Report')}
+                        onClick={() => handleDirectPdfDownload(msg.content, msg.id, 'Nerdo AI Report')}
                         disabled={downloadingPdfId === msg.id}
                         className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 transition-all text-[11px] font-medium disabled:opacity-50 shadow-sm active:scale-95"
                         title={t.downloadPdf}
@@ -910,7 +1065,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                         <button
                           onClick={() => setOpenMenuMsgId(openMenuMsgId === msg.id ? null : msg.id)}
                           className="p-1.5 rounded-xl hover:bg-white/15 text-gray-400 hover:text-gray-100 transition-all text-[11px] border border-white/10 bg-white/[0.04] shadow-sm active:scale-95"
-                          title={lang === 'ar' ? 'المزيد من الخيارات' : 'More Options'}
+                          title={lang === 'ar' ? 'ط§ظ„ظ…ط²ظٹط¯ ظ…ظ† ط§ظ„ط®ظٹط§ط±ط§طھ' : 'More Options'}
                         >
                           <MoreHorizontal className="w-3.5 h-3.5" />
                         </button>
@@ -929,20 +1084,20 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                               {/* Direct PDF Download (Mobile only) */}
                               <button
                                 onClick={() => {
-                                  handleDirectPdfDownload(msg.content, msg.id, 'R3 AI Report');
+                                  handleDirectPdfDownload(msg.content, msg.id, 'Nerdo AI Report');
                                   setOpenMenuMsgId(null);
                                 }}
                                 disabled={downloadingPdfId === msg.id}
                                 className="sm:hidden w-full flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all active:scale-[0.98] hover:bg-white/10 text-left transition-colors text-[11px]"
                               >
                                 <Download className="w-3.5 h-3.5 text-red-400" />
-                                <span>{lang === 'ar' ? 'تحميل كملف PDF' : 'Download PDF'}</span>
+                                <span>{lang === 'ar' ? 'طھط­ظ…ظٹظ„ ظƒظ…ظ„ظپ PDF' : 'Download PDF'}</span>
                               </button>
 
                               {/* Export Markdown (.md) */}
                               <button
                                 onClick={() => {
-                                  exportAsFile(msg.content, `R3_Response_${Date.now()}.md`, 'text/markdown');
+                                  exportAsFile(msg.content, `Nerdo_Response_${Date.now()}.md`, 'text/markdown');
                                   setOpenMenuMsgId(null);
                                 }}
                                 className="w-full flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all active:scale-[0.98] hover:bg-white/10 text-left transition-colors text-[11px]"
@@ -955,7 +1110,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                               <button
                                 onClick={() => {
                                   exportTextOrHtmlToPDF(msg.content, {
-                                    title: 'R3 AI Report',
+                                    title: 'Nerdo AI Report',
                                     modelName: selectedModel,
                                   });
                                   setOpenMenuMsgId(null);

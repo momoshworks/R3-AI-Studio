@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import {
   Play,
   Pause,
@@ -68,8 +68,8 @@ export const BackgroundMediaPlayer: React.FC<BackgroundMediaPlayerProps> = ({
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: activeMedia.name,
-        artist: 'R3 Media Studio',
-        album: 'R3 AI Workstation',
+        artist: 'Nerdo Media Studio',
+        album: 'Nerdo AI Workstation',
         artwork: [
           { src: '/app-icon.png', sizes: '256x256', type: 'image/png' },
           { src: '/app-icon.png', sizes: '512x512', type: 'image/png' },
@@ -193,7 +193,7 @@ export const BackgroundMediaPlayer: React.FC<BackgroundMediaPlayerProps> = ({
                 {activeMedia.name}
               </div>
               <div className="text-[10px] text-cyan-400 font-mono flex items-center gap-1.5">
-                <span>R3 Media Studio</span>
+                <span>Nerdo Media Studio</span>
                 {isPlaying && (
                   <div className="flex items-end gap-0.5 h-3 px-1">
                     <span className="w-0.5 bg-cyan-400 rounded-full wave-bar-1" />
@@ -215,7 +215,7 @@ export const BackgroundMediaPlayer: React.FC<BackgroundMediaPlayerProps> = ({
                 className={`p-1.5 rounded-lg transition-colors ${
                   isLooping ? 'text-blue-400 bg-blue-500/10' : 'text-gray-500 hover:text-gray-300'
                 }`}
-                title={isLooping ? 'التكرار مفعل' : 'تفعيل التكرار'}
+                title={isLooping ? 'ط§ظ„طھظƒط±ط§ط± ظ…ظپط¹ظ„' : 'طھظپط¹ظٹظ„ ط§ظ„طھظƒط±ط§ط±'}
               >
                 <Repeat className="w-3.5 h-3.5" />
               </button>
@@ -223,7 +223,7 @@ export const BackgroundMediaPlayer: React.FC<BackgroundMediaPlayerProps> = ({
               <button
                 onClick={cycleSpeed}
                 className="px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-white/5 hover:bg-white/10 text-cyan-400 border border-cyan-500/30 transition-colors"
-                title="تغيير سرعة التشغيل"
+                title="طھط؛ظٹظٹط± ط³ط±ط¹ط© ط§ظ„طھط´ط؛ظٹظ„"
               >
                 {playbackRate}x
               </button>
@@ -231,7 +231,7 @@ export const BackgroundMediaPlayer: React.FC<BackgroundMediaPlayerProps> = ({
               <button
                 onClick={togglePlay}
                 className="w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-600/30 transition-transform active:scale-95"
-                title={isPlaying ? 'إيقاف مؤقت' : 'تشغيل'}
+                title={isPlaying ? 'ط¥ظٹظ‚ط§ظپ ظ…ط¤ظ‚طھ' : 'طھط´ط؛ظٹظ„'}
               >
                 {isPlaying ? (
                   <Pause className="w-4 h-4 fill-current" />
@@ -244,7 +244,7 @@ export const BackgroundMediaPlayer: React.FC<BackgroundMediaPlayerProps> = ({
                 <button
                   onClick={triggerPictureInPicture}
                   className="p-1.5 rounded-lg text-gray-400 hover:text-blue-400 transition-colors"
-                  title="نافذة عائمة فوق النظام (Picture-in-Picture)"
+                  title="ظ†ط§ظپط°ط© ط¹ط§ط¦ظ…ط© ظپظˆظ‚ ط§ظ„ظ†ط¸ط§ظ… (Picture-in-Picture)"
                 >
                   <Maximize2 className="w-3.5 h-3.5" />
                 </button>
@@ -285,7 +285,7 @@ export const BackgroundMediaPlayer: React.FC<BackgroundMediaPlayerProps> = ({
             <button
               onClick={onClose}
               className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
-              title="إغلاق المشغل"
+              title="ط¥ط؛ظ„ط§ظ‚ ط§ظ„ظ…ط´ط؛ظ„"
             >
               <X className="w-4 h-4" />
             </button>
@@ -302,7 +302,7 @@ export const BackgroundMediaPlayer: React.FC<BackgroundMediaPlayerProps> = ({
           <button
             onClick={togglePlay}
             className="w-7 h-7 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-md active:scale-95"
-            title={isPlaying ? 'إيقاف مؤقت' : 'تشغيل'}
+            title={isPlaying ? 'ط¥ظٹظ‚ط§ظپ ظ…ط¤ظ‚طھ' : 'طھط´ط؛ظٹظ„'}
           >
             {isPlaying ? (
               <Pause className="w-3.5 h-3.5 fill-current" />
@@ -323,7 +323,7 @@ export const BackgroundMediaPlayer: React.FC<BackgroundMediaPlayerProps> = ({
           <button
             onClick={onClose}
             className="p-1 text-gray-400 hover:text-white rounded-full hover:bg-white/10"
-            title="إغلاق المشغل"
+            title="ط¥ط؛ظ„ط§ظ‚ ط§ظ„ظ…ط´ط؛ظ„"
           >
             <X className="w-3.5 h-3.5" />
           </button>

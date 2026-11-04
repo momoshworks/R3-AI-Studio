@@ -1,4 +1,4 @@
-import gc
+﻿import gc
 import os
 import sys
 import json
@@ -152,7 +152,7 @@ class ChatMessage(BaseModel):
 
 class ChatRequest(BaseModel):
     messages: List[ChatMessage]
-    model: str = "Google Gemini (gemini-2.5-flash)"
+    model: str = "Google Gemini (gemini-3.5-flash)"
     api_key: Optional[str] = None
     stream: bool = True
 
@@ -191,27 +191,27 @@ async def get_uploaded_file(filename: str):
 
 # Master Genius Lecturer Teaching System Prompt & Dynamic CoT
 TEACHING_SYSTEM_PROMPT = """
-أنت معمار برمجيات ومحاضر تقني عبقري داخل منصة R3 AI Studio. مهمتك ليست فقط إعطاء إجابة أو كود، بل جعل المستخدم يفهم الفكرة بعمق وبساطة فائقة.
+ط£ظ†طھ ظ…ط¹ظ…ط§ط± ط¨ط±ظ…ط¬ظٹط§طھ ظˆظ…ط­ط§ط¶ط± طھظ‚ظ†ظٹ ط¹ط¨ظ‚ط±ظٹ ط¯ط§ط®ظ„ ظ…ظ†طµط© R3 AI Studio. ظ…ظ‡ظ…طھظƒ ظ„ظٹط³طھ ظپظ‚ط· ط¥ط¹ط·ط§ط، ط¥ط¬ط§ط¨ط© ط£ظˆ ظƒظˆط¯طŒ ط¨ظ„ ط¬ط¹ظ„ ط§ظ„ظ…ط³طھط®ط¯ظ… ظٹظپظ‡ظ… ط§ظ„ظپظƒط±ط© ط¨ط¹ظ…ظ‚ ظˆط¨ط³ط§ط·ط© ظپط§ط¦ظ‚ط©.
 
-قبل كتابة الشرح، فكّر أولاً في الترتيب الأسهل لفهم المبتدئ، ثم ابدأ في صياغة الإجابة خطوة بخطوة.
+ظ‚ط¨ظ„ ظƒطھط§ط¨ط© ط§ظ„ط´ط±ط­طŒ ظپظƒظ‘ط± ط£ظˆظ„ط§ظ‹ ظپظٹ ط§ظ„طھط±طھظٹط¨ ط§ظ„ط£ط³ظ‡ظ„ ظ„ظپظ‡ظ… ط§ظ„ظ…ط¨طھط¯ط¦طŒ ط«ظ… ط§ط¨ط¯ط£ ظپظٹ طµظٹط§ط؛ط© ط§ظ„ط¥ط¬ط§ط¨ط© ط®ط·ظˆط© ط¨ط®ط·ظˆط©.
 
-عند شرح أي موضوع أو كود أو مشكلة برمجية أو مفهوم علمي، اتبع دائماً هذا التسلسل:
-1. الفكرة في جملة واحدة (The Core Idea): تعريف مباشر وبسيط جداً بدون تعقيد.
-2. تشبيه واقعي (Real-world Analogy): اربط المفهوم بحاجة من الحياة اليومية تثبت في الذهن فوراً.
-3. لماذا نستخدمه؟ (The Why): ما هي المشكلة الحقيقية التي يحلها هذا المفهوم لو لم يكن موجوداً؟
-4. مثال عملي مدعوم بالكود (Minimal Working Example): كود بسيط جداً وواضح ومُعلق عليه سطر بسطر.
-5. خطأ شائع يقع فيه الأغلبية (Common Pitfall): نصيحة عملية لتجنب الأخطاء عند التطبيق.
+ط¹ظ†ط¯ ط´ط±ط­ ط£ظٹ ظ…ظˆط¶ظˆط¹ ط£ظˆ ظƒظˆط¯ ط£ظˆ ظ…ط´ظƒظ„ط© ط¨ط±ظ…ط¬ظٹط© ط£ظˆ ظ…ظپظ‡ظˆظ… ط¹ظ„ظ…ظٹطŒ ط§طھط¨ط¹ ط¯ط§ط¦ظ…ط§ظ‹ ظ‡ط°ط§ ط§ظ„طھط³ظ„ط³ظ„:
+1. ط§ظ„ظپظƒط±ط© ظپظٹ ط¬ظ…ظ„ط© ظˆط§ط­ط¯ط© (The Core Idea): طھط¹ط±ظٹظپ ظ…ط¨ط§ط´ط± ظˆط¨ط³ظٹط· ط¬ط¯ط§ظ‹ ط¨ط¯ظˆظ† طھط¹ظ‚ظٹط¯.
+2. طھط´ط¨ظٹظ‡ ظˆط§ظ‚ط¹ظٹ (Real-world Analogy): ط§ط±ط¨ط· ط§ظ„ظ…ظپظ‡ظˆظ… ط¨ط­ط§ط¬ط© ظ…ظ† ط§ظ„ط­ظٹط§ط© ط§ظ„ظٹظˆظ…ظٹط© طھط«ط¨طھ ظپظٹ ط§ظ„ط°ظ‡ظ† ظپظˆط±ط§ظ‹.
+3. ظ„ظ…ط§ط°ط§ ظ†ط³طھط®ط¯ظ…ظ‡طں (The Why): ظ…ط§ ظ‡ظٹ ط§ظ„ظ…ط´ظƒظ„ط© ط§ظ„ط­ظ‚ظٹظ‚ظٹط© ط§ظ„طھظٹ ظٹط­ظ„ظ‡ط§ ظ‡ط°ط§ ط§ظ„ظ…ظپظ‡ظˆظ… ظ„ظˆ ظ„ظ… ظٹظƒظ† ظ…ظˆط¬ظˆط¯ط§ظ‹طں
+4. ظ…ط«ط§ظ„ ط¹ظ…ظ„ظٹ ظ…ط¯ط¹ظˆظ… ط¨ط§ظ„ظƒظˆط¯ (Minimal Working Example): ظƒظˆط¯ ط¨ط³ظٹط· ط¬ط¯ط§ظ‹ ظˆظˆط§ط¶ط­ ظˆظ…ظڈط¹ظ„ظ‚ ط¹ظ„ظٹظ‡ ط³ط·ط± ط¨ط³ط·ط±.
+5. ط®ط·ط£ ط´ط§ط¦ط¹ ظٹظ‚ط¹ ظپظٹظ‡ ط§ظ„ط£ط؛ظ„ط¨ظٹط© (Common Pitfall): ظ†طµظٹط­ط© ط¹ظ…ظ„ظٹط© ظ„طھط¬ظ†ط¨ ط§ظ„ط£ط®ط·ط§ط، ط¹ظ†ط¯ ط§ظ„طھط·ط¨ظٹظ‚.
 
-قواعد الأسلوب والتنسيق البصري:
-- لا تسرد نصوصاً طويلة ومملة.
-- استخدم التنسيق البصري: نقاط بوليتس، جداول مقارنة، وتنسيق الأكواد بعناية فائقة.
-- كلما كان الشرح لمعمارية نظام، مسار بيانات (Data Flow)، خوارزمية، أو علاقات مركبة، قم بتوليد مخطط تدفقي عبر كود Mermaid داخل الرد بصيغة:
+ظ‚ظˆط§ط¹ط¯ ط§ظ„ط£ط³ظ„ظˆط¨ ظˆط§ظ„طھظ†ط³ظٹظ‚ ط§ظ„ط¨طµط±ظٹ:
+- ظ„ط§ طھط³ط±ط¯ ظ†طµظˆطµط§ظ‹ ط·ظˆظٹظ„ط© ظˆظ…ظ…ظ„ط©.
+- ط§ط³طھط®ط¯ظ… ط§ظ„طھظ†ط³ظٹظ‚ ط§ظ„ط¨طµط±ظٹ: ظ†ظ‚ط§ط· ط¨ظˆظ„ظٹطھط³طŒ ط¬ط¯ط§ظˆظ„ ظ…ظ‚ط§ط±ظ†ط©طŒ ظˆطھظ†ط³ظٹظ‚ ط§ظ„ط£ظƒظˆط§ط¯ ط¨ط¹ظ†ط§ظٹط© ظپط§ط¦ظ‚ط©.
+- ظƒظ„ظ…ط§ ظƒط§ظ† ط§ظ„ط´ط±ط­ ظ„ظ…ط¹ظ…ط§ط±ظٹط© ظ†ط¸ط§ظ…طŒ ظ…ط³ط§ط± ط¨ظٹط§ظ†ط§طھ (Data Flow)طŒ ط®ظˆط§ط±ط²ظ…ظٹط©طŒ ط£ظˆ ط¹ظ„ط§ظ‚ط§طھ ظ…ط±ظƒط¨ط©طŒ ظ‚ظ… ط¨طھظˆظ„ظٹط¯ ظ…ط®ط·ط· طھط¯ظپظ‚ظٹ ط¹ط¨ط± ظƒظˆط¯ Mermaid ط¯ط§ط®ظ„ ط§ظ„ط±ط¯ ط¨طµظٹط؛ط©:
 ```mermaid
 graph TD
     ...
 ```
-- تحدث بنبرة زميل خبير عملي، مبتعداً عن أسلوب الكتب النظرية الجامدة.
-- أجب بدقة واحترافية بنفس لغة المستخدم (العربية أو الإنجليزية).
+- طھط­ط¯ط« ط¨ظ†ط¨ط±ط© ط²ظ…ظٹظ„ ط®ط¨ظٹط± ط¹ظ…ظ„ظٹطŒ ظ…ط¨طھط¹ط¯ط§ظ‹ ط¹ظ† ط£ط³ظ„ظˆط¨ ط§ظ„ظƒطھط¨ ط§ظ„ظ†ط¸ط±ظٹط© ط§ظ„ط¬ط§ظ…ط¯ط©.
+- ط£ط¬ط¨ ط¨ط¯ظ‚ط© ظˆط§ط­طھط±ط§ظپظٹط© ط¨ظ†ظپط³ ظ„ط؛ط© ط§ظ„ظ…ط³طھط®ط¯ظ… (ط§ظ„ط¹ط±ط¨ظٹط© ط£ظˆ ط§ظ„ط¥ظ†ط¬ظ„ظٹط²ظٹط©).
 """
 
 def get_dynamic_generation_params(messages: list) -> dict:
@@ -228,9 +228,9 @@ def get_dynamic_generation_params(messages: list) -> dict:
             break
             
     code_indicators = [
-        "كود", "code", "برمج", "error", "خطأ", "bug", "debug", "python", "javascript",
-        "typescript", "react", "fastapi", "sql", "function", "class", "دالة", "algorithm",
-        "خوارزم", "معادلة", "math", "حساب", "api", "syntax", "fix", "حل المشكلة"
+        "ظƒظˆط¯", "code", "ط¨ط±ظ…ط¬", "error", "ط®ط·ط£", "bug", "debug", "python", "javascript",
+        "typescript", "react", "fastapi", "sql", "function", "class", "ط¯ط§ظ„ط©", "algorithm",
+        "ط®ظˆط§ط±ط²ظ…", "ظ…ط¹ط§ط¯ظ„ط©", "math", "ط­ط³ط§ط¨", "api", "syntax", "fix", "ط­ظ„ ط§ظ„ظ…ط´ظƒظ„ط©"
     ]
     
     is_code_or_math = any(kw in last_user_content for kw in code_indicators)
@@ -248,7 +248,7 @@ async def stream_gemini(chat_request: ChatRequest, queue: asyncio.Queue):
     if not resolved_api_key:
         await queue.put({
             "type": "content_chunk",
-            "delta": "⚠️ **تنبيه مفتاح تشغيل Google Gemini API:**\n\nلم يتم العثور على مفتاح API نشط. يرجى الحصول على مفتاح مجاني من [Google AI Studio](https://aistudio.google.com/app/apikey) وتفعيله في نافذة الإعدادات (أيقونة الترس بالأسفل) لبدء الاستجابة فوراً."
+            "delta": "âڑ ï¸ڈ **طھظ†ط¨ظٹظ‡ ظ…ظپطھط§ط­ طھط´ط؛ظٹظ„ Google Gemini API:**\n\nظ„ظ… ظٹطھظ… ط§ظ„ط¹ط«ظˆط± ط¹ظ„ظ‰ ظ…ظپطھط§ط­ API ظ†ط´ط·. ظٹط±ط¬ظ‰ ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ظ…ظپطھط§ط­ ظ…ط¬ط§ظ†ظٹ ظ…ظ† [Google AI Studio](https://aistudio.google.com/app/apikey) ظˆطھظپط¹ظٹظ„ظ‡ ظپظٹ ظ†ط§ظپط°ط© ط§ظ„ط¥ط¹ط¯ط§ط¯ط§طھ (ط£ظٹظ‚ظˆظ†ط© ط§ظ„طھط±ط³ ط¨ط§ظ„ط£ط³ظپظ„) ظ„ط¨ط¯ط، ط§ظ„ط§ط³طھط¬ط§ط¨ط© ظپظˆط±ط§ظ‹."
         })
         await queue.put({"type": "done"})
         return
@@ -270,12 +270,12 @@ async def stream_gemini(chat_request: ChatRequest, queue: asyncio.Queue):
                         parts.append(types.Part.from_bytes(data=file_bytes, mime_type=file_mime))
                     else:
                         snippet = file_bytes[:100000].decode("utf-8", errors="replace")
-                        parts.append(types.Part.from_text(text=f"[ملف مرفق: {att.name}]\n```\n{snippet}\n```"))
+                        parts.append(types.Part.from_text(text=f"[ظ…ظ„ظپ ظ…ط±ظپظ‚: {att.name}]\n```\n{snippet}\n```"))
 
         if msg.content:
             parts.append(types.Part.from_text(text=msg.content))
         elif not parts:
-            parts.append(types.Part.from_text(text="مرحباً"))
+            parts.append(types.Part.from_text(text="ظ…ط±ط­ط¨ط§ظ‹"))
 
         contents.append(types.Content(role=role, parts=parts))
 
@@ -298,7 +298,7 @@ async def stream_gemini(chat_request: ChatRequest, queue: asyncio.Queue):
     if requested_slug and True:
         candidate_models.append(requested_slug)
     for default_m in [
-        "gemini-2.5-flash",
+        "gemini-3.5-flash",
         "gemini-3.5-flash-lite",
         "gemini-3.1-flash-lite",
         "gemini-3.8-flash"
@@ -328,7 +328,7 @@ async def stream_gemini(chat_request: ChatRequest, queue: asyncio.Queue):
     if not stream_success:
         await queue.put({
             "type": "content_chunk",
-            "delta": "\n\n⚠️ تم استنفاد حصة Google Gemini مؤقتاً لجميع النماذج المتاحة. يرجى المحاولة بعد قليل."
+            "delta": "\n\nâڑ ï¸ڈ طھظ… ط§ط³طھظ†ظپط§ط¯ ط­طµط© Google Gemini ظ…ط¤ظ‚طھط§ظ‹ ظ„ط¬ظ…ظٹط¹ ط§ظ„ظ†ظ…ط§ط°ط¬ ط§ظ„ظ…طھط§ط­ط©. ظٹط±ط¬ظ‰ ط§ظ„ظ…ط­ط§ظˆظ„ط© ط¨ط¹ط¯ ظ‚ظ„ظٹظ„."
         })
 
     await queue.put({"type": "done"}
@@ -340,7 +340,7 @@ async def stream_openai(chat_request: ChatRequest, queue: asyncio.Queue):
     if not api_key:
         await queue.put({
             "type": "content_chunk",
-            "delta": "⚠️ **يرجى إدخال مفتاح ChatGPT (OpenAI) API:**\n\nلم يتم العثور على مفتاح OpenAI محفوظ. يمكنك الحصول على مفتاحك من [OpenAI Platform](https://platform.openai.com/api-keys) وإدخاله في نافذة الإعدادات (أيقونة المفتاح العلوي) لبدء المحادثة فوراً."
+            "delta": "âڑ ï¸ڈ **ظٹط±ط¬ظ‰ ط¥ط¯ط®ط§ظ„ ظ…ظپطھط§ط­ ChatGPT (OpenAI) API:**\n\nظ„ظ… ظٹطھظ… ط§ظ„ط¹ط«ظˆط± ط¹ظ„ظ‰ ظ…ظپطھط§ط­ OpenAI ظ…ط­ظپظˆط¸. ظٹظ…ظƒظ†ظƒ ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ظ…ظپطھط§ط­ظƒ ظ…ظ† [OpenAI Platform](https://platform.openai.com/api-keys) ظˆط¥ط¯ط®ط§ظ„ظ‡ ظپظٹ ظ†ط§ظپط°ط© ط§ظ„ط¥ط¹ط¯ط§ط¯ط§طھ (ط£ظٹظ‚ظˆظ†ط© ط§ظ„ظ…ظپطھط§ط­ ط§ظ„ط¹ظ„ظˆظٹ) ظ„ط¨ط¯ط، ط§ظ„ظ…ط­ط§ط¯ط«ط© ظپظˆط±ط§ظ‹."
         })
         await queue.put({"type": "done"})
         return
@@ -381,7 +381,7 @@ async def stream_openai(chat_request: ChatRequest, queue: asyncio.Queue):
                         snippet = file_bytes[:100000].decode("utf-8", errors="replace")
                         content_items.append({
                             "type": "text",
-                            "text": f"[ملف مرفق: {att.name}]\n```\n{snippet}\n```"
+                            "text": f"[ظ…ظ„ظپ ظ…ط±ظپظ‚: {att.name}]\n```\n{snippet}\n```"
                         })
 
         if msg.content:
@@ -390,7 +390,7 @@ async def stream_openai(chat_request: ChatRequest, queue: asyncio.Queue):
         if has_images or any(item.get("type") == "image_url" for item in content_items):
             messages.append({"role": role, "content": content_items})
         else:
-            text_combined = "\n\n".join(item["text"] for item in content_items if "text" in item) or msg.content or "مرحباً"
+            text_combined = "\n\n".join(item["text"] for item in content_items if "text" in item) or msg.content or "ظ…ط±ط­ط¨ط§ظ‹"
             messages.append({"role": role, "content": text_combined})
 
     url = "https://api.openai.com/v1/chat/completions"
@@ -419,8 +419,8 @@ async def stream_openai(chat_request: ChatRequest, queue: asyncio.Queue):
 
                     if "credits remaining" in raw_msg.lower() or "quota" in raw_msg.lower():
                         fallback_banner = (
-                            "> 💡 **ملاحظة ذكية من R3 AI / Smart Notice:**\n"
-                            "> مفتاح OpenAI الخاص بك رصيده الحالي **$0.00** في منصة OpenAI. قام R3 **تلقائياً بالإجابة فوراً عبر Google Gemini** مجاناً وبأعلى سرعة حتى لا تتوقف محادثتك:\n\n---\n\n"
+                            "> ًں’، **ظ…ظ„ط§ط­ط¸ط© ط°ظƒظٹط© ظ…ظ† R3 AI / Smart Notice:**\n"
+                            "> ظ…ظپطھط§ط­ OpenAI ط§ظ„ط®ط§طµ ط¨ظƒ ط±طµظٹط¯ظ‡ ط§ظ„ط­ط§ظ„ظٹ **$0.00** ظپظٹ ظ…ظ†طµط© OpenAI. ظ‚ط§ظ… R3 **طھظ„ظ‚ط§ط¦ظٹط§ظ‹ ط¨ط§ظ„ط¥ط¬ط§ط¨ط© ظپظˆط±ط§ظ‹ ط¹ط¨ط± Google Gemini** ظ…ط¬ط§ظ†ط§ظ‹ ظˆط¨ط£ط¹ظ„ظ‰ ط³ط±ط¹ط© ط­طھظ‰ ظ„ط§ طھطھظˆظ‚ظپ ظ…ط­ط§ط¯ط«طھظƒ:\n\n---\n\n"
                         )
                         await queue.put({
                             "type": "content_chunk",
@@ -430,7 +430,7 @@ async def stream_openai(chat_request: ChatRequest, queue: asyncio.Queue):
                         await stream_gemini(chat_request, queue)
                         return
                     else:
-                        err_display = f"⚠️ **خطأ في الاتصال بـ OpenAI API:** {raw_msg}"
+                        err_display = f"âڑ ï¸ڈ **ط®ط·ط£ ظپظٹ ط§ظ„ط§طھطµط§ظ„ ط¨ظ€ OpenAI API:** {raw_msg}"
 
                     await queue.put({
                         "type": "content_chunk",
@@ -457,12 +457,12 @@ async def stream_openai(chat_request: ChatRequest, queue: asyncio.Queue):
     except httpx.TimeoutException:
         await queue.put({
             "type": "content_chunk",
-            "delta": "\n\n⚠️ **انتهت مهلة الاتصال بخوادم OpenAI (ChatGPT).** يرجى التحقق من اتصالك والمحاولة مجدداً."
+            "delta": "\n\nâڑ ï¸ڈ **ط§ظ†طھظ‡طھ ظ…ظ‡ظ„ط© ط§ظ„ط§طھطµط§ظ„ ط¨ط®ظˆط§ط¯ظ… OpenAI (ChatGPT).** ظٹط±ط¬ظ‰ ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ط§طھطµط§ظ„ظƒ ظˆط§ظ„ظ…ط­ط§ظˆظ„ط© ظ…ط¬ط¯ط¯ط§ظ‹."
         })
     except Exception as e:
         await queue.put({
             "type": "content_chunk",
-            "delta": f"\n\n⚠️ **حدث خطأ أثناء المحادثة مع ChatGPT:** {str(e)}"
+            "delta": f"\n\nâڑ ï¸ڈ **ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، ط§ظ„ظ…ط­ط§ط¯ط«ط© ظ…ط¹ ChatGPT:** {str(e)}"
         })
 
     await queue.put({"type": "done"})
@@ -582,7 +582,7 @@ async def save_settings(payload: Dict[str, Any] = Body(...)):
 async def verify_and_save_api_key(payload: Dict[str, Any] = Body(...)):
     raw_key = payload.get("api_key", "").strip()
     if not raw_key:
-        raise HTTPException(status_code=400, detail="يرجى إدخال مفتاح API صحيح")
+        raise HTTPException(status_code=400, detail="ظٹط±ط¬ظ‰ ط¥ط¯ط®ط§ظ„ ظ…ظپطھط§ط­ API طµط­ظٹط­")
 
     test_url = f"https://generativelanguage.googleapis.com/v1beta/models?key={raw_key}"
     async with httpx.AsyncClient(timeout=8.0) as client:
@@ -592,7 +592,7 @@ async def verify_and_save_api_key(payload: Dict[str, Any] = Body(...)):
                 data = resp.json()
                 models = [m.get("name", "").replace("models/", "") for m in data.get("models", [])]
                 active_flash = [m for m in models if "flash" in m and True]
-                detected_model = active_flash[0] if active_flash else ("gemini-2.5-flash" if "gemini-2.5-flash" in models else (models[0] if models else "gemini-2.5-flash"))
+                detected_model = active_flash[0] if active_flash else ("gemini-3.5-flash" if "gemini-3.5-flash" in models else (models[0] if models else "gemini-3.5-flash"))
 
                 save_persisted_config({"api_key": raw_key})
                 os.environ["GEMINI_API_KEY"] = raw_key
@@ -605,27 +605,27 @@ async def verify_and_save_api_key(payload: Dict[str, Any] = Body(...)):
 
                 return {
                     "valid": True,
-                    "message": "تم التحقق من مفتاح Gemini API بنجاح وتفعيله فوراً!",
+                    "message": "طھظ… ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ظ…ظپطھط§ط­ Gemini API ط¨ظ†ط¬ط§ط­ ظˆطھظپط¹ظٹظ„ظ‡ ظپظˆط±ط§ظ‹!",
                     "detected_model": detected_model,
                     "available_models_count": len(models)
                 }
             else:
                 err_json = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {}
-                err_msg = err_json.get("error", {}).get("message", "المفتاح غير صالح أو لم يتم تفعيل Gemini API له.")
+                err_msg = err_json.get("error", {}).get("message", "ط§ظ„ظ…ظپطھط§ط­ ط؛ظٹط± طµط§ظ„ط­ ط£ظˆ ظ„ظ… ظٹطھظ… طھظپط¹ظٹظ„ Gemini API ظ„ظ‡.")
                 return {
                     "valid": False,
-                    "message": f"فشل التحقق: {err_msg}"
+                    "message": f"ظپط´ظ„ ط§ظ„طھط­ظ‚ظ‚: {err_msg}"
                 }
         except httpx.TimeoutException:
-            raise HTTPException(status_code=504, detail="انتهت مهلة الاتصال بخوادم Google Gemini")
+            raise HTTPException(status_code=504, detail="ط§ظ†طھظ‡طھ ظ…ظ‡ظ„ط© ط§ظ„ط§طھطµط§ظ„ ط¨ط®ظˆط§ط¯ظ… Google Gemini")
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"خطأ أثناء التحقق: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"ط®ط·ط£ ط£ط«ظ†ط§ط، ط§ظ„طھط­ظ‚ظ‚: {str(e)}")
 
 @app.post("/api/settings/verify-openai-key")
 async def verify_and_save_openai_key(payload: Dict[str, Any] = Body(...)):
     raw_key = payload.get("api_key", "").strip()
     if not raw_key:
-        raise HTTPException(status_code=400, detail="يرجى إدخال مفتاح OpenAI API صحيح")
+        raise HTTPException(status_code=400, detail="ظٹط±ط¬ظ‰ ط¥ط¯ط®ط§ظ„ ظ…ظپطھط§ط­ OpenAI API طµط­ظٹط­")
 
     test_url = "https://api.openai.com/v1/models"
     headers = {"Authorization": f"Bearer {raw_key}"}
@@ -656,28 +656,28 @@ async def verify_and_save_openai_key(payload: Dict[str, Any] = Body(...)):
                         p_msg = p_data.get("error", {}).get("message", "")
                         if "credit" in p_msg.lower() or "quota" in p_msg.lower():
                             has_quota = False
-                            quota_warning = " (ملاحظة: رصيد الحساب 0$ في OpenAI - يلزم الشحن لبدء الردود)"
+                            quota_warning = " (ظ…ظ„ط§ط­ط¸ط©: ط±طµظٹط¯ ط§ظ„ط­ط³ط§ط¨ 0$ ظپظٹ OpenAI - ظٹظ„ط²ظ… ط§ظ„ط´ط­ظ† ظ„ط¨ط¯ط، ط§ظ„ط±ط¯ظˆط¯)"
                 except Exception:
                     pass
 
                 return {
                     "valid": True,
                     "has_quota": has_quota,
-                    "message": f"تم التحقق من مفتاح ChatGPT بنجاح!{quota_warning}",
+                    "message": f"طھظ… ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ظ…ظپطھط§ط­ ChatGPT ط¨ظ†ط¬ط§ط­!{quota_warning}",
                     "detected_model": preferred,
                     "available_models_count": len(chat_models)
                 }
             else:
                 err_json = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {}
-                err_msg = err_json.get("error", {}).get("message", "المفتاح غير صالح أو ليس لديه رصيد كافٍ في OpenAI.")
+                err_msg = err_json.get("error", {}).get("message", "ط§ظ„ظ…ظپطھط§ط­ ط؛ظٹط± طµط§ظ„ط­ ط£ظˆ ظ„ظٹط³ ظ„ط¯ظٹظ‡ ط±طµظٹط¯ ظƒط§ظپظچ ظپظٹ OpenAI.")
                 return {
                     "valid": False,
-                    "message": f"فشل التحقق: {err_msg}"
+                    "message": f"ظپط´ظ„ ط§ظ„طھط­ظ‚ظ‚: {err_msg}"
                 }
         except httpx.TimeoutException:
-            raise HTTPException(status_code=504, detail="انتهت مهلة الاتصال بخوادم OpenAI")
+            raise HTTPException(status_code=504, detail="ط§ظ†طھظ‡طھ ظ…ظ‡ظ„ط© ط§ظ„ط§طھطµط§ظ„ ط¨ط®ظˆط§ط¯ظ… OpenAI")
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"خطأ أثناء التحقق من OpenAI: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"ط®ط·ط£ ط£ط«ظ†ط§ط، ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† OpenAI: {str(e)}")
 
 # Multi-Account Endpoints
 @app.get("/api/accounts")
@@ -691,7 +691,7 @@ async def add_account(payload: Dict[str, Any] = Body(...)):
     name = payload.get("name", "").strip() or "Google User"
     email = payload.get("email", "").strip()
     if not email:
-        raise HTTPException(status_code=400, detail="يرجى إدخال البريد الإلكتروني للحساب")
+        raise HTTPException(status_code=400, detail="ظٹط±ط¬ظ‰ ط¥ط¯ط®ط§ظ„ ط§ظ„ط¨ط±ظٹط¯ ط§ظ„ط¥ظ„ظƒطھط±ظˆظ†ظٹ ظ„ظ„ط­ط³ط§ط¨")
 
     api_key = payload.get("api_key", "").strip()
     picture = payload.get("picture") or f"https://api.dicebear.com/7.x/identicon/svg?seed={email}"
@@ -736,7 +736,7 @@ async def switch_account(payload: Dict[str, Any] = Body(...)):
     accounts = get_persisted_accounts()
     target = next((a for a in accounts if a.get("id") == account_id), None)
     if not target:
-        raise HTTPException(status_code=404, detail="الحساب غير موجود")
+        raise HTTPException(status_code=404, detail="ط§ظ„ط­ط³ط§ط¨ ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
 
     for a in accounts:
         a["is_active"] = (a["id"] == account_id)
@@ -756,7 +756,7 @@ async def delete_account(account_id: str):
     accounts = get_persisted_accounts()
     filtered = [a for a in accounts if a.get("id") != account_id]
     if len(filtered) == len(accounts):
-        raise HTTPException(status_code=404, detail="الحساب غير موجود")
+        raise HTTPException(status_code=404, detail="ط§ظ„ط­ط³ط§ط¨ ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
 
     if not any(a.get("is_active") for a in filtered) and filtered:
         filtered[0]["is_active"] = True
@@ -931,10 +931,10 @@ def render_html_to_pdf_sync(html_content: str, title: str, model_name: str) -> s
 </head>
 <body>
   <div class="header-banner">
-    <div class="brand-title">✨ R3 AI &nbsp;|&nbsp; {title}</div>
+    <div class="brand-title">âœ¨ R3 AI &nbsp;|&nbsp; {title}</div>
     <div class="meta-box">
-      <div><strong>Model / النموذج:</strong> {model_name}</div>
-      <div><strong>Date / التاريخ:</strong> {time.strftime('%Y-%m-%d %H:%M')}</div>
+      <div><strong>Model / ط§ظ„ظ†ظ…ظˆط°ط¬:</strong> {model_name}</div>
+      <div><strong>Date / ط§ظ„طھط§ط±ظٹط®:</strong> {time.strftime('%Y-%m-%d %H:%M')}</div>
     </div>
   </div>
   <div class="content-body">
@@ -1015,7 +1015,7 @@ async def export_pdf_endpoint(payload: PDFExportPayload):
         raise HTTPException(status_code=500, detail=str(e))
 
 # ==============================================================================
-# رع (Ra) Local Media Vault & High-Performance Streaming Media Engine
+# ط±ط¹ (Ra) Local Media Vault & High-Performance Streaming Media Engine
 # ==============================================================================
 def stream_media_file(file_path: Path, range_header: Optional[str] = None):
     file_size = file_path.stat().st_size
@@ -1124,7 +1124,7 @@ async def stream_media(filename: str, request: Request):
     safe_name = Path(filename).name
     target = MEDIA_DIR / safe_name
     if not target.exists() or not target.is_file():
-        raise HTTPException(status_code=404, detail="الملف غير موجود في مخزن الوسائط")
+        raise HTTPException(status_code=404, detail="ط§ظ„ظ…ظ„ظپ ط؛ظٹط± ظ…ظˆط¬ظˆط¯ ظپظٹ ظ…ط®ط²ظ† ط§ظ„ظˆط³ط§ط¦ط·")
     range_header = request.headers.get("range")
     return stream_media_file(target, range_header)
 
@@ -1153,7 +1153,7 @@ async def delete_media_file(filename: str):
     if target.exists() and target.is_file():
         target.unlink(missing_ok=True)
         return {"status": "success", "deleted": safe_name}
-    raise HTTPException(status_code=404, detail="الملف غير موجود")
+    raise HTTPException(status_code=404, detail="ط§ظ„ظ…ظ„ظپ ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
 
 # ==============================================================================
 # NotebookLM / R3 Research Notebook & Offline-First RAG Engine
@@ -1165,7 +1165,7 @@ notebook_engine = NotebookEngine(base_storage_dir=BASE_DIR / "notebooks")
 def generate_gemini_fallback(prompt: str, client: genai.Client) -> Optional[str]:
     """Smart fallback across active Gemini models to bypass 429 quota or 503 load spikes."""
     models_to_try = [
-        "gemini-2.5-flash",
+        "gemini-3.5-flash",
         "gemini-3.5-flash-lite",
         "gemini-3.1-flash-lite",
         "gemini-3.8-flash",
@@ -1195,21 +1195,21 @@ async def create_notebook_endpoint(payload: Dict[str, Any] = Body(...)):
 async def get_notebook_endpoint(notebook_id: str):
     nb = notebook_engine.get_notebook(notebook_id)
     if not nb:
-        raise HTTPException(status_code=404, detail="الدفتر غير موجود")
+        raise HTTPException(status_code=404, detail="ط§ظ„ط¯ظپطھط± ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
     return nb
 
 @app.delete("/api/notebooks/{notebook_id}")
 async def delete_notebook_endpoint(notebook_id: str):
     success = notebook_engine.delete_notebook(notebook_id)
     if not success:
-        raise HTTPException(status_code=404, detail="الدفتر غير موجود")
+        raise HTTPException(status_code=404, detail="ط§ظ„ط¯ظپطھط± ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
     return {"status": "success", "deleted": notebook_id}
 
 @app.post("/api/notebooks/{notebook_id}/upload")
 async def upload_notebook_source(notebook_id: str, files: List[UploadFile] = File(...)):
     nb = notebook_engine.get_notebook(notebook_id)
     if not nb:
-        raise HTTPException(status_code=404, detail="الدفتر غير موجود")
+        raise HTTPException(status_code=404, detail="ط§ظ„ط¯ظپطھط± ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
     
     results = []
     for f in files:
@@ -1223,7 +1223,7 @@ async def upload_notebook_source(notebook_id: str, files: List[UploadFile] = Fil
 async def delete_notebook_source_endpoint(notebook_id: str, source_id: str):
     success = notebook_engine.delete_source(notebook_id, source_id)
     if not success:
-        raise HTTPException(status_code=404, detail="المصدر غير موجود")
+        raise HTTPException(status_code=404, detail="ط§ظ„ظ…طµط¯ط± ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
     return {"status": "success", "deleted": source_id}
 
 @app.get("/api/notebooks/{notebook_id}/sources/{source_id}/content")
@@ -1331,7 +1331,7 @@ async def notebook_chat_endpoint(notebook_id: str, payload: Dict[str, Any] = Bod
     enable_web = payload.get("enable_web", False)
     mode = payload.get("mode", "qa")  # "qa" | "explain" | "solve"
     if not query:
-        raise HTTPException(status_code=400, detail="الرجاء كتابة سؤال")
+        raise HTTPException(status_code=400, detail="ط§ظ„ط±ط¬ط§ط، ظƒطھط§ط¨ط© ط³ط¤ط§ظ„")
     
     # 1. Retrieve local relevant chunks
     chunks = await asyncio.to_thread(notebook_engine.query_notebook, notebook_id, query, top_k=8, source_ids=source_ids)
@@ -1357,7 +1357,7 @@ async def notebook_chat_endpoint(notebook_id: str, payload: Dict[str, Any] = Bod
     for w in web_results:
         citations.append({
             "source_id": "web",
-            "source_name": f"🌐 {w.get('title', 'الويب')}",
+            "source_name": f"ًںŒگ {w.get('title', 'ط§ظ„ظˆظٹط¨')}",
             "page": 1,
             "excerpt": w.get("snippet", "")[:280] + "..."
         })
@@ -1365,16 +1365,16 @@ async def notebook_chat_endpoint(notebook_id: str, payload: Dict[str, Any] = Bod
     # If both local chunks and web are empty
     if not chunks and not web_results:
         return {
-            "answer": "لم أجد أي معلومات متعلقة بهذا السؤال في المستندات المرفوعة. يمكنك تفعيل خيار 'البحث في الويب' للبحث عن حلول إضافية على الإنترنت.",
+            "answer": "ظ„ظ… ط£ط¬ط¯ ط£ظٹ ظ…ط¹ظ„ظˆظ…ط§طھ ظ…طھط¹ظ„ظ‚ط© ط¨ظ‡ط°ط§ ط§ظ„ط³ط¤ط§ظ„ ظپظٹ ط§ظ„ظ…ط³طھظ†ط¯ط§طھ ط§ظ„ظ…ط±ظپظˆط¹ط©. ظٹظ…ظƒظ†ظƒ طھظپط¹ظٹظ„ ط®ظٹط§ط± 'ط§ظ„ط¨ط­ط« ظپظٹ ط§ظ„ظˆظٹط¨' ظ„ظ„ط¨ط­ط« ط¹ظ† ط­ظ„ظˆظ„ ط¥ط¶ط§ظپظٹط© ط¹ظ„ظ‰ ط§ظ„ط¥ظ†طھط±ظ†طھ.",
             "citations": []
         }
     
     # 3. Build comprehensive prompt
     grounded_prompt = notebook_engine.build_grounded_context_prompt(query, chunks, web_results)
     if mode == "explain":
-        grounded_prompt += "\nملاحظة: المطلوب شرح أكاديمي مفصل وتبسيط عميق للموضوع من الصفر مع أمثلة توضيحية وقوانين."
+        grounded_prompt += "\nظ…ظ„ط§ط­ط¸ط©: ط§ظ„ظ…ط·ظ„ظˆط¨ ط´ط±ط­ ط£ظƒط§ط¯ظٹظ…ظٹ ظ…ظپطµظ„ ظˆطھط¨ط³ظٹط· ط¹ظ…ظٹظ‚ ظ„ظ„ظ…ظˆط¶ظˆط¹ ظ…ظ† ط§ظ„طµظپط± ظ…ط¹ ط£ظ…ط«ظ„ط© طھظˆط¶ظٹط­ظٹط© ظˆظ‚ظˆط§ظ†ظٹظ†."
     elif mode == "solve":
-        grounded_prompt += "\nملاحظة: المطلوب حل وتوضيح المسألة أو التمرين خطوة بخطوة مع توضيح القوانين والمعادلات."
+        grounded_prompt += "\nظ…ظ„ط§ط­ط¸ط©: ط§ظ„ظ…ط·ظ„ظˆط¨ ط­ظ„ ظˆطھظˆط¶ظٹط­ ط§ظ„ظ…ط³ط£ظ„ط© ط£ظˆ ط§ظ„طھظ…ط±ظٹظ† ط®ط·ظˆط© ط¨ط®ط·ظˆط© ظ…ط¹ طھظˆط¶ظٹط­ ط§ظ„ظ‚ظˆط§ظ†ظٹظ† ظˆط§ظ„ظ…ط¹ط§ط¯ظ„ط§طھ."
 
     answer_text = ""
     gemini_key = get_gemini_api_key()
@@ -1392,17 +1392,17 @@ async def notebook_chat_endpoint(notebook_id: str, payload: Dict[str, Any] = Bod
         top_chunks_summary = []
         for i, c in enumerate(chunks[:4], 1):
             top_chunks_summary.append(
-                f"**المقطع {i}** من [{c['source_name']} - ص {c['page']}]:\n"
+                f"**ط§ظ„ظ…ظ‚ط·ط¹ {i}** ظ…ظ† [{c['source_name']} - طµ {c['page']}]:\n"
                 f"> \"{c['text'][:350]}...\"\n"
             )
         if web_results:
             for w in web_results[:2]:
                 top_chunks_summary.append(
-                    f"**معلومة من الويب** [{w['title']}]:\n"
+                    f"**ظ…ط¹ظ„ظˆظ…ط© ظ…ظ† ط§ظ„ظˆظٹط¨** [{w['title']}]:\n"
                     f"> \"{w['snippet']}...\"\n"
                 )
         answer_text = (
-            f"### 📚 نتائج الاسترجاع والبحث (وضع Offline / Fallback):\n\n"
+            f"### ًں“ڑ ظ†طھط§ط¦ط¬ ط§ظ„ط§ط³طھط±ط¬ط§ط¹ ظˆط§ظ„ط¨ط­ط« (ظˆط¶ط¹ Offline / Fallback):\n\n"
             + "\n".join(top_chunks_summary)
         )
     
@@ -1419,7 +1419,7 @@ async def notebook_study_tools_endpoint(notebook_id: str, payload: Dict[str, Any
     
     nb = notebook_engine.get_notebook(notebook_id)
     if not nb:
-        raise HTTPException(status_code=404, detail="الدفتر غير موجود")
+        raise HTTPException(status_code=404, detail="ط§ظ„ط¯ظپطھط± ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
     
     # Generate base study data
     study_data = await asyncio.to_thread(notebook_engine.generate_offline_study_tools, notebook_id, tool_type)
@@ -1429,22 +1429,22 @@ async def notebook_study_tools_endpoint(notebook_id: str, payload: Dict[str, Any
         try:
             chunks = notebook_engine.query_notebook(notebook_id, "summary key concepts terms definitions formulas", top_k=15)
             if chunks:
-                joined_text = "\n".join([f"[{c['source_name']} ص{c['page']}]: {c['text'][:350]}" for c in chunks[:8]])
+                joined_text = "\n".join([f"[{c['source_name']} طµ{c['page']}]: {c['text'][:350]}" for c in chunks[:8]])
                 ai_prompt = (
-                    f"أنت أستاذ ومصمم مناهج أكاديمي ذكي. بناءً على محتوى المستندات المرفقة أدناه، أنشئ دليلاً دراسياً فائق الذكاء بصيغة JSON حصراً.\n\n"
-                    f"المستندات المرفقة:\n{joined_text}\n\n"
-                    f"يجب أن تكون الإجابة عبارة عن كود JSON صالح فقط بدون أي علامات ماركداون إضافية بالهيكل التالي:\n"
+                    f"ط£ظ†طھ ط£ط³طھط§ط° ظˆظ…طµظ…ظ… ظ…ظ†ط§ظ‡ط¬ ط£ظƒط§ط¯ظٹظ…ظٹ ط°ظƒظٹ. ط¨ظ†ط§ط،ظ‹ ط¹ظ„ظ‰ ظ…ط­طھظˆظ‰ ط§ظ„ظ…ط³طھظ†ط¯ط§طھ ط§ظ„ظ…ط±ظپظ‚ط© ط£ط¯ظ†ط§ظ‡طŒ ط£ظ†ط´ط¦ ط¯ظ„ظٹظ„ط§ظ‹ ط¯ط±ط§ط³ظٹط§ظ‹ ظپط§ط¦ظ‚ ط§ظ„ط°ظƒط§ط، ط¨طµظٹط؛ط© JSON ط­طµط±ط§ظ‹.\n\n"
+                    f"ط§ظ„ظ…ط³طھظ†ط¯ط§طھ ط§ظ„ظ…ط±ظپظ‚ط©:\n{joined_text}\n\n"
+                    f"ظٹط¬ط¨ ط£ظ† طھظƒظˆظ† ط§ظ„ط¥ط¬ط§ط¨ط© ط¹ط¨ط§ط±ط© ط¹ظ† ظƒظˆط¯ JSON طµط§ظ„ط­ ظپظ‚ط· ط¨ط¯ظˆظ† ط£ظٹ ط¹ظ„ط§ظ…ط§طھ ظ…ط§ط±ظƒط¯ط§ظˆظ† ط¥ط¶ط§ظپظٹط© ط¨ط§ظ„ظ‡ظٹظƒظ„ ط§ظ„طھط§ظ„ظٹ:\n"
                     f"{{\n"
-                    f'  "summary": "ملخص تنفيذي وأكاديمي عميق يشرح موضوع المادة وقوانينها بالتفصيل مع الاستشهادات",\n'
-                    f'  "key_points": ["نقطة رئيسية 1", "نقطة رئيسية 2", "نقطة رئيسية 3", "نقطة رئيسية 4", "نقطة رئيسية 5"],\n'
+                    f'  "summary": "ظ…ظ„ط®طµ طھظ†ظپظٹط°ظٹ ظˆط£ظƒط§ط¯ظٹظ…ظٹ ط¹ظ…ظٹظ‚ ظٹط´ط±ط­ ظ…ظˆط¶ظˆط¹ ط§ظ„ظ…ط§ط¯ط© ظˆظ‚ظˆط§ظ†ظٹظ†ظ‡ط§ ط¨ط§ظ„طھظپطµظٹظ„ ظ…ط¹ ط§ظ„ط§ط³طھط´ظ‡ط§ط¯ط§طھ",\n'
+                    f'  "key_points": ["ظ†ظ‚ط·ط© ط±ط¦ظٹط³ظٹط© 1", "ظ†ظ‚ط·ط© ط±ط¦ظٹط³ظٹط© 2", "ظ†ظ‚ط·ط© ط±ط¦ظٹط³ظٹط© 3", "ظ†ظ‚ط·ط© ط±ط¦ظٹط³ظٹط© 4", "ظ†ظ‚ط·ط© ط±ط¦ظٹط³ظٹط© 5"],\n'
                     f'  "flashcards": [\n'
-                    f'    {{"question": "سؤال استذكار عميق حول مفهوم أو قانون؟", "answer": "الإجابة العلمية الوافية", "source_name": "المصدر", "page": 1}}\n'
+                    f'    {{"question": "ط³ط¤ط§ظ„ ط§ط³طھط°ظƒط§ط± ط¹ظ…ظٹظ‚ ط­ظˆظ„ ظ…ظپظ‡ظˆظ… ط£ظˆ ظ‚ط§ظ†ظˆظ†طں", "answer": "ط§ظ„ط¥ط¬ط§ط¨ط© ط§ظ„ط¹ظ„ظ…ظٹط© ط§ظ„ظˆط§ظپظٹط©", "source_name": "ط§ظ„ظ…طµط¯ط±", "page": 1}}\n'
                     f'  ],\n'
                     f'  "quiz": [\n'
-                    f'    {{"question": "سؤال امتحانات اختياري دقيق؟", "options": [{{"key": "A", "text": "خيار 1"}}, {{"key": "B", "text": "خيار 2"}}, {{"key": "C", "text": "خيار 3"}}, {{"key": "D", "text": "خيار 4"}}], "correct_option": "A", "explanation": "تفسير أكاديمي مع التعليل", "source_name": "المصدر", "page": 1}}\n'
+                    f'    {{"question": "ط³ط¤ط§ظ„ ط§ظ…طھط­ط§ظ†ط§طھ ط§ط®طھظٹط§ط±ظٹ ط¯ظ‚ظٹظ‚طں", "options": [{{"key": "A", "text": "ط®ظٹط§ط± 1"}}, {{"key": "B", "text": "ط®ظٹط§ط± 2"}}, {{"key": "C", "text": "ط®ظٹط§ط± 3"}}, {{"key": "D", "text": "ط®ظٹط§ط± 4"}}], "correct_option": "A", "explanation": "طھظپط³ظٹط± ط£ظƒط§ط¯ظٹظ…ظٹ ظ…ط¹ ط§ظ„طھط¹ظ„ظٹظ„", "source_name": "ط§ظ„ظ…طµط¯ط±", "page": 1}}\n'
                     f'  ],\n'
                     f'  "key_concepts": [\n'
-                    f'    {{"term": "المصطلح أو المفهوم", "definition": "التعريف والصيغة الرياضية أو العلمية", "source_name": "المصدر", "page": 1}}\n'
+                    f'    {{"term": "ط§ظ„ظ…طµط·ظ„ط­ ط£ظˆ ط§ظ„ظ…ظپظ‡ظˆظ…", "definition": "ط§ظ„طھط¹ط±ظٹظپ ظˆط§ظ„طµظٹط؛ط© ط§ظ„ط±ظٹط§ط¶ظٹط© ط£ظˆ ط§ظ„ط¹ظ„ظ…ظٹط©", "source_name": "ط§ظ„ظ…طµط¯ط±", "page": 1}}\n'
                     f'  ]\n'
                     f"}}"
                 )
@@ -1484,7 +1484,7 @@ async def serve_notebook_file(notebook_id: str, filename: str):
         if candidates and candidates[0].is_file():
             target = candidates[0]
         else:
-            raise HTTPException(status_code=404, detail="الملف غير موجود")
+            raise HTTPException(status_code=404, detail="ط§ظ„ظ…ظ„ظپ ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
     mime_type, _ = mimetypes.guess_type(str(target))
     return FileResponse(
         str(target),
@@ -1497,10 +1497,10 @@ async def serve_notebook_file(notebook_id: str, filename: str):
 async def serve_notebook_source_file(notebook_id: str, source_id: str):
     nb = notebook_engine.get_notebook(notebook_id)
     if not nb:
-        raise HTTPException(status_code=404, detail="الدفتر غير موجود")
+        raise HTTPException(status_code=404, detail="ط§ظ„ط¯ظپطھط± ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
     source = next((s for s in nb.get("sources", []) if s["id"] == source_id), None)
     if not source:
-        raise HTTPException(status_code=404, detail="المصدر غير موجود")
+        raise HTTPException(status_code=404, detail="ط§ظ„ظ…طµط¯ط± ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
 
     files_dir = notebook_engine._notebook_dir(notebook_id) / "files"
     filename = source["name"]
@@ -1512,7 +1512,7 @@ async def serve_notebook_source_file(notebook_id: str, source_id: str):
         if candidates and candidates[0].is_file():
             target = candidates[0]
         else:
-            raise HTTPException(status_code=404, detail="الملف غير موجود على القرص")
+            raise HTTPException(status_code=404, detail="ط§ظ„ظ…ظ„ظپ ط؛ظٹط± ظ…ظˆط¬ظˆط¯ ط¹ظ„ظ‰ ط§ظ„ظ‚ط±طµ")
 
     mime_type, _ = mimetypes.guess_type(str(target))
     return FileResponse(
