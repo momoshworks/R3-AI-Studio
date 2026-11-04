@@ -12,7 +12,8 @@
   "app": {
     "windows": [
       {
-        "title": "NexusHub",
+        "label": "main",
+        "title": "Ra AI Studio",
         "width": 1400,
         "height": 900,
         "minWidth": 900,
@@ -20,6 +21,19 @@
         "decorations": true,
         "transparent": false,
         "center": true
+      },
+      {
+        "label": "notebooklm",
+        "title": "Google NotebookLM — Ra AI Studio",
+        "url": "https://notebooklm.google.com",
+        "width": 1300,
+        "height": 850,
+        "minWidth": 850,
+        "minHeight": 600,
+        "decorations": true,
+        "transparent": false,
+        "center": true,
+        "visible": false
       }
     ],
     "security": {

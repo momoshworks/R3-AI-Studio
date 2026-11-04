@@ -297,14 +297,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
             {!isCollapsed && (
               <div className="text-right">
-                <div className="text-xs font-bold leading-none">{t.notebookStudio}</div>
-                <div className="text-[10px] opacity-60 mt-0.5">{lang === 'ar' ? 'أبحاث ودراسة RAG' : 'AI Research & RAG'}</div>
+                <div className="text-xs font-bold leading-none">Google NotebookLM</div>
+                <div className="text-[10px] opacity-60 mt-0.5">{lang === 'ar' ? 'الخدمة الرسمية · البودكاست' : 'Official Studio · Audio Pods'}</div>
               </div>
             )}
           </div>
           {!isCollapsed && (
-            <span className="text-[9px] font-mono bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded-md border border-amber-500/30">
-              AI Study
+            <span className="text-[9px] font-mono bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded-md border border-purple-500/30">
+              Webview 2.0
             </span>
           )}
         </button>

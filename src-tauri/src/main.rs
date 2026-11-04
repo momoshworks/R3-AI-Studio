@@ -11,6 +11,18 @@ use sidecar::SidecarManager;
 use system_monitor::{get_system_telemetry, SystemMonitor};
 use tauri::{Manager, RunEvent, WindowEvent};
 
+#[tauri::command]
+async fn open_notebooklm_window(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("notebooklm") {
+        let _ = window.show();
+        let _ = window.unminimize();
+        let _ = window.set_focus();
+        return Ok(());
+    }
+
+    Ok(())
+}
+
 fn main() {
     let sidecar_manager = Arc::new(SidecarManager::new());
     let sidecar_for_setup = sidecar_manager.clone();
@@ -23,6 +35,7 @@ fn main() {
             download_binary_tool,
             list_installed_tools,
             get_system_telemetry,
+            open_notebooklm_window,
         ])
         .setup(move |app| {
             let handle = app.handle().clone();
@@ -40,10 +53,18 @@ fn main() {
 
     app.run(move |_app_handle, event| match event {
         RunEvent::WindowEvent {
-            event: WindowEvent::CloseRequested { .. } | WindowEvent::Destroyed,
+            label,
+            event: WindowEvent::CloseRequested { api, .. },
             ..
         } => {
-            sidecar_for_exit.shutdown();
+            if label == "notebooklm" {
+                api.prevent_close();
+                if let Some(w) = _app_handle.get_webview_window("notebooklm") {
+                    let _ = w.hide();
+                }
+            } else if label == "main" {
+                sidecar_for_exit.shutdown();
+            }
         }
         RunEvent::Exit => {
             sidecar_for_exit.shutdown();

@@ -13,9 +13,9 @@ export const getApiBase = (): string => {
   return 'http://127.0.0.1:8000';
 };
 
-const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+export const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
-async function tauriInvoke<T>(cmd: string, args?: Record<string, any>): Promise<T | null> {
+export async function tauriInvoke<T>(cmd: string, args?: Record<string, any>): Promise<T | null> {
   if (isTauri) {
     try {
       const { invoke } = await import('@tauri-apps/api/core');
@@ -25,6 +25,66 @@ async function tauriInvoke<T>(cmd: string, args?: Record<string, any>): Promise<
     }
   }
   return null;
+}
+
+// Seamless Official Google NotebookLM Integration via Tauri v2 Webview Window
+export async function openOfficialNotebookLM(): Promise<{ success: boolean; method: string }> {
+  // 1. Tauri v2 Desktop Mode
+  if (isTauri) {
+    try {
+      const { WebviewWindow } = await import('@tauri-apps/api/webviewWindow');
+      let win = await WebviewWindow.getByLabel('notebooklm');
+      if (win) {
+        await win.show();
+        await win.unminimize();
+        await win.setFocus();
+        return { success: true, method: 'tauri_existing_window' };
+      }
+
+      // Create new window if not preheated
+      win = new WebviewWindow('notebooklm', {
+        url: 'https://notebooklm.google.com',
+        title: 'Google NotebookLM — Ra AI Studio',
+        width: 1300,
+        height: 850,
+        minWidth: 850,
+        minHeight: 600,
+        center: true,
+        focus: true,
+      });
+
+      win.once('tauri://error', (e) => {
+        console.warn('Tauri WebviewWindow creation error:', e);
+      });
+
+      return { success: true, method: 'tauri_new_window' };
+    } catch (err) {
+      console.warn('Tauri WebviewWindow error, trying invoke fallback:', err);
+      try {
+        await tauriInvoke('open_notebooklm_window');
+        return { success: true, method: 'tauri_invoke' };
+      } catch (invokeErr) {
+        console.warn('Tauri invoke failed:', invokeErr);
+      }
+    }
+  }
+
+  // 2. Web Browser / Mobile fallback
+  const targetUrl = 'https://notebooklm.google.com';
+  try {
+    const pop = window.open(
+      targetUrl,
+      'Google_NotebookLM',
+      'width=1300,height=850,menubar=no,toolbar=no,location=yes,status=no,resizable=yes'
+    );
+    if (pop) {
+      pop.focus();
+      return { success: true, method: 'window_popup' };
+    }
+  } catch {}
+
+  window.open(targetUrl, '_blank');
+  return { success: true, method: 'blank_tab' };
 }
 
 // Map selected UI model name to public Gemini / OpenAI endpoints
