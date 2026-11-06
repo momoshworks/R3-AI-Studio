@@ -30,12 +30,84 @@ interface AutomationsHubProps {
   t?: Translations;
 }
 
+const DEFAULT_FALLBACK_TEMPLATES: AutomationTemplate[] = [
+  {
+    id: 'auto_delta_lms',
+    name: 'مراقب إعلانات وكويزات جامعة الدلتا (Delta LMS Monitor)',
+    description: 'تسجيل دخول دوري تلقائي لبوابة جامعة الدلتا (42510314) واستخراج أحدث الإعلانات ومواعيد الكويزات وتحليلها وتنبيهك بها فوراً.',
+    type: 'interval',
+    interval_minutes: 60,
+    prompt: 'أنت المساعد الأكاديمي الذكي لطالب جامعة الدلتا. حلل أحدث إعلانات وتكليفات نظام إدارة التعلم (Delta LMS) المسحوبة للتو، واستخرج أهم المواعيد والتنبيهات العاجلة (الكويزات، التكليفات، ومحاضرات الأونلاين)، مع تحديد الموعد والإجراء المطلوب لكل إعلان.',
+    model: 'Google Gemini (gemini-2.5-flash)',
+    enabled: true,
+    action_type: 'notify_and_vault'
+  },
+  {
+    id: 'tpl_code_reviewer',
+    name: 'مراقب ومراجع الأكواد الذكي (Code Reviewer)',
+    description: 'يرصد أي تعديل أو إضافة في ملفات الكود بمجلد المشروع، ويراجع الأكواد لاكتشاف الثغرات وتحسين الأداء فوراً.',
+    type: 'folder_watch',
+    prompt: 'أنت مدقق جودة وكود خبير. راجع الملفات البرمجية التالية بدقة: اكتشف أي ثغرات أمنية (Security vulnerabilities)، مشاكل في الأداء (Performance bottlenecks)، أو عدم توافق مع أفضل الممارسات، واقترح التحسينات البرمجية المباشرة فوراً.',
+    model: 'Google Gemini (gemini-2.5-flash)',
+    enabled: false,
+    interval_minutes: 10,
+    watch_folder: 'C:\\Users\\momos\\Desktop\\Nerdo_Watch',
+    file_extensions: ['.py', '.js', '.ts', '.tsx', '.html', '.css', '.json', '.sql'],
+    action_type: 'notify_and_vault'
+  },
+  {
+    id: 'tpl_morning_brief',
+    name: 'الملخص الصباحي وأولويات العمل (Daily Briefing)',
+    description: 'يولد تقريراً صباحياً يومياً في ساعة محددة يشمل أهم النصائح الإنتاجية، ملخص أخبار التقنية، وأولويات التطوير اليومية.',
+    type: 'daily',
+    daily_time: '09:00',
+    prompt: 'اكتب لي تقريراً صباحياً ذكياً وموجزاً: أهم 3 نصائح إنتاجية وتطويرية لمهندس البرمجيات، ملخص سريع لأهم اتجاهات الذكاء الاصطناعي وتقنيات الويب اليوم، وخطة تركيز سريعة لليوم.',
+    model: 'Google Gemini (gemini-2.5-flash)',
+    enabled: false,
+    interval_minutes: 1440,
+    action_type: 'notify_and_vault'
+  },
+  {
+    id: 'tpl_pdf_summarizer',
+    name: 'ملخص المستندات والأبحاث (PDF & Doc Analyzer)',
+    description: 'يراقب مجلد التنزيلات أو المستندات، ويستخرج الأفكار الجوهرية والقرارات من أي ملف PDF أو مستند جديد يُضاف.',
+    type: 'folder_watch',
+    prompt: 'لخص المستندات الجديدة الملتقطة بشكل مباشر: استخرج النقاط الجوهرية، الإحصائيات أو القرارات المهمة، والخطوات العملية في نقاط محددة.',
+    model: 'Google Gemini (gemini-2.5-flash)',
+    enabled: false,
+    interval_minutes: 15,
+    watch_folder: 'C:\\Users\\momos\\Downloads',
+    file_extensions: ['.pdf', '.txt', '.md'],
+    action_type: 'notify_and_vault'
+  },
+  {
+    id: 'tpl_system_health',
+    name: 'فاحص صحة وأمان النظام (System Health Check)',
+    description: 'فحص دوري كل عدة ساعات لحالة المعالج والذاكرة والمساحة وإصدار توصيات للصيانة والأمان.',
+    type: 'interval',
+    interval_minutes: 180,
+    prompt: 'حلل حالة النظام التالية: استهلاك المعالج {cpu}%، استهلاك الذاكرة {memory}%، المساحة المتبقية على القرص {disk_free} GB. أعطِ تقييماً سريعاً ونصائح للصيانة إذا لزم الأمر.',
+    model: 'Google Gemini (gemini-2.5-flash)',
+    enabled: false,
+    action_type: 'notify_and_vault'
+  }
+];
+
 export const AutomationsHub: React.FC<AutomationsHubProps> = ({ theme, lang }) => {
   const isDark = theme === 'dark';
   const isAr = lang === 'ar';
 
-  const [tasks, setTasks] = useState<AutomationTask[]>([]);
-  const [templates, setTemplates] = useState<AutomationTemplate[]>([]);
+  const [tasks, setTasks] = useState<AutomationTask[]>(() => {
+    try {
+      const cached = localStorage.getItem('NERDO_AUTOMATIONS_CACHE');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [];
+  });
+  const [templates, setTemplates] = useState<AutomationTemplate[]>(DEFAULT_FALLBACK_TEMPLATES);
   const [isLoading, setIsLoading] = useState(true);
   const [runningTaskId, setRunningTaskId] = useState<string | null>(null);
 
@@ -70,10 +142,28 @@ export const AutomationsHub: React.FC<AutomationsHubProps> = ({ theme, lang }) =
         api.getAutomations(),
         api.getAutomationTemplates()
       ]);
-      setTasks(automationsRes.tasks || []);
-      setTemplates(templatesRes.templates || []);
+      if (automationsRes?.tasks && automationsRes.tasks.length > 0) {
+        setTasks(automationsRes.tasks);
+        try {
+          localStorage.setItem('NERDO_AUTOMATIONS_CACHE', JSON.stringify(automationsRes.tasks));
+        } catch {}
+      } else {
+        const cached = localStorage.getItem('NERDO_AUTOMATIONS_CACHE');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) setTasks(parsed);
+        }
+      }
+
+      if (templatesRes?.templates && templatesRes.templates.length > 0) {
+        setTemplates(templatesRes.templates);
+      }
     } catch (err) {
       console.error('Failed to load automations:', err);
+      try {
+        const cached = localStorage.getItem('NERDO_AUTOMATIONS_CACHE');
+        if (cached) setTasks(JSON.parse(cached));
+      } catch {}
     } finally {
       setIsLoading(false);
     }
