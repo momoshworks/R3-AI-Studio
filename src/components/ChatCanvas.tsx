@@ -266,15 +266,23 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
   };
 
   return (
-    <div className="flex-1 overflow-y-auto px-2.5 sm:px-6 md:px-12 py-3 sm:py-6 space-y-4 sm:space-y-6 max-w-4xl mx-auto w-full">
+    <div className={`flex-1 overflow-y-auto px-2.5 sm:px-6 md:px-12 py-3 sm:py-6 space-y-4 sm:space-y-6 max-w-4xl mx-auto w-full transition-colors ${
+      isDark ? 'text-gray-100' : 'text-slate-900'
+    }`}>
       {/* Top Action Bar when messages exist (Responsive Single-Line) */}
       {messages.length > 0 && (
-        <div className="hidden sm:flex flex-wrap items-center justify-between gap-1.5 pb-2 border-b border-white/10 select-none text-xs">
+        <div className={`hidden sm:flex flex-wrap items-center justify-between gap-1.5 pb-2 border-b select-none text-xs ${
+          isDark ? 'border-white/10' : 'border-slate-200'
+        }`}>
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className="hidden sm:inline text-gray-400 font-medium">
+            <span className={`hidden sm:inline font-medium ${isDark ? 'text-gray-400' : 'text-slate-600'}`}>
               {lang === 'ar' ? 'جلسة المحادثة الحالية' : 'Current Chat Session'}
             </span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 font-mono text-blue-400 truncate max-w-[130px] sm:max-w-[200px]">
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono truncate max-w-[130px] sm:max-w-[200px] border ${
+              isDark
+                ? 'bg-white/5 border-white/10 text-blue-400'
+                : 'bg-blue-50 border-blue-200 text-blue-700 font-semibold'
+            }`}>
               {selectedModel.replace(/^Google\s+/i, '').replace(/^OpenAI\s+/i, '').replace(/\(.*\)/, '').trim()}
             </span>
           </div>
@@ -282,16 +290,24 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
             <button
               onClick={downloadFullChatPDF}
               title={lang === 'ar' ? 'تحميل سجل الجلسة بالكامل PDF' : 'Download full chat PDF'}
-              className="px-2 py-1 rounded-lg text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 transition-colors text-[11px] flex items-center gap-1 border border-white/10"
+              className={`px-2 py-1 rounded-lg transition-colors text-[11px] flex items-center gap-1 border ${
+                isDark
+                  ? 'text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 border-white/10'
+                  : 'text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border-slate-300'
+              }`}
             >
-              <Download className="w-3 h-3 text-blue-400" />
+              <Download className="w-3 h-3 text-blue-500" />
               <span className="hidden sm:inline">{lang === 'ar' ? 'تحميل الجلسة PDF' : 'Export PDF'}</span>
               <span className="sm:hidden font-mono text-[10px]">PDF</span>
             </button>
             <button
               onClick={exportFullChatPDF}
               title={lang === 'ar' ? 'طباعة / تصدير الجلسة' : 'Print / Export Session'}
-              className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors border border-white/10"
+              className={`p-1.5 rounded-lg transition-colors border ${
+                isDark
+                  ? 'text-gray-400 hover:text-white hover:bg-white/5 border-white/10'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 border-slate-300'
+              }`}
             >
               <Printer className="w-3 h-3" />
             </button>
@@ -304,13 +320,19 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
         <div className="min-h-[58vh] flex flex-col items-center justify-center text-center py-10 space-y-6 select-none animate-in fade-in duration-300">
           {/* Centered Greeting: Vibrant Gradient Sparkle Icon + Heading */}
           <div className="flex flex-col items-center space-y-3">
-            <div className="p-3.5 rounded-2xl bg-[#16181d] border border-[#262930] shadow-sm">
+            <div className={`p-3.5 rounded-2xl border shadow-sm ${
+              isDark ? 'bg-[#16181d] border-[#262930]' : 'bg-white border-slate-200 shadow-slate-200'
+            }`}>
               <Sparkles className="w-8 h-8 text-[#8ab4f8]" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#EDEDED]">
+            <h1 className={`text-2xl sm:text-3xl font-bold tracking-tight ${
+              isDark ? 'text-[#EDEDED]' : 'text-slate-900'
+            }`}>
               {lang === 'ar' ? 'كيف يمكنني مساعدتك اليوم؟' : 'How can I help you today?'}
             </h1>
-            <p className="text-xs sm:text-sm text-[#8F95A0] max-w-md leading-relaxed">
+            <p className={`text-xs sm:text-sm max-w-md leading-relaxed ${
+              isDark ? 'text-[#8F95A0]' : 'text-slate-600 font-medium'
+            }`}>
               {lang === 'ar'
                 ? 'اطرح أسئلة برمجية معقدة، حلل تقارير وأوراق عمل، أو استكشف أفكاراً جديدة'
                 : 'Ask questions, review complex code, analyze reports, or brainstorm high-level concepts.'}
@@ -356,7 +378,11 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
               <button
                 key={idx}
                 onClick={() => onPromptSelect && onPromptSelect(chip.prompt)}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#16181d] hover:bg-[#1e2026] border border-[#262930] hover:border-[#8ab4f8]/50 text-[#8F95A0] hover:text-[#EDEDED] text-xs font-medium transition-all shadow-sm active:scale-95"
+                className={`flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-medium transition-all shadow-sm active:scale-95 ${
+                  isDark
+                    ? 'bg-[#16181d] hover:bg-[#1e2026] border-[#262930] hover:border-[#8ab4f8]/50 text-[#8F95A0] hover:text-[#EDEDED]'
+                    : 'bg-white hover:bg-slate-50 border-slate-200 hover:border-blue-400 text-slate-700 hover:text-slate-900 shadow-slate-200/60'
+                }`}
               >
                 <span>{chip.icon}</span>
                 <span>{chip.text}</span>
@@ -451,7 +477,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                   <div className="w-full space-y-3">
                     <div
                       className={`text-[13px] md:text-[14px] leading-relaxed select-text ${
-                        isDark ? 'text-gray-100' : 'text-slate-800'
+                        isDark ? 'text-gray-100' : 'text-slate-900'
                       }`}
                       dir={msgArabic ? 'rtl' : 'ltr'}
                     >
@@ -464,8 +490,8 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             return (
                               <p
                                 dir={isAr ? 'rtl' : 'ltr'}
-                                className={`my-2 leading-[1.75] font-normal text-[14px] md:text-[15px] ${
-                                  isDark ? 'text-[#E3E3E3]' : 'text-slate-800'
+                                className={`my-2 leading-[1.75] text-[14px] md:text-[15px] ${
+                                  isDark ? 'text-[#E3E3E3] font-normal' : 'text-slate-900 font-normal'
                                 } ${isAr ? 'text-right' : 'text-left'}`}
                                 style={{ unicodeBidi: 'plaintext' }}
                               >
@@ -479,7 +505,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             return (
                               <strong
                                 dir={isEnglishOnly ? 'ltr' : undefined}
-                                className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}
+                                className={`font-semibold ${isDark ? 'text-white' : 'text-slate-950'}`}
                                 style={{ unicodeBidi: 'isolate' }}
                               >
                                 {children}
@@ -493,7 +519,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                               <h1
                                 dir={isAr ? 'rtl' : 'ltr'}
                                 className={`text-xl sm:text-2xl font-bold mt-5 mb-2.5 pb-1 border-b ${
-                                  isDark ? 'text-white border-white/10' : 'text-slate-900 border-slate-200'
+                                  isDark ? 'text-white border-white/10' : 'text-slate-950 border-slate-200'
                                 } ${isAr ? 'text-right' : 'text-left'}`}
                               >
                                 {children}
@@ -507,7 +533,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                               <h2
                                 dir={isAr ? 'rtl' : 'ltr'}
                                 className={`text-lg sm:text-xl font-semibold mt-4 mb-2 ${
-                                  isDark ? 'text-[#EDEDED]' : 'text-slate-900'
+                                  isDark ? 'text-[#EDEDED]' : 'text-slate-950'
                                 } ${isAr ? 'text-right' : 'text-left'}`}
                               >
                                 {children}
@@ -521,7 +547,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                               <h3
                                 dir={isAr ? 'rtl' : 'ltr'}
                                 className={`text-base sm:text-lg font-semibold mt-3.5 mb-1.5 ${
-                                  isDark ? 'text-[#8ab4f8]' : 'text-blue-600'
+                                  isDark ? 'text-[#8ab4f8]' : 'text-blue-700'
                                 } ${isAr ? 'text-right' : 'text-left'}`}
                               >
                                 {children}
@@ -532,7 +558,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             return (
                               <ul
                                 className={`list-disc ps-6 my-2.5 space-y-1.5 leading-[1.7] text-[14px] md:text-[15px] ${
-                                  isDark ? 'text-[#D0D4DC]' : 'text-slate-800'
+                                  isDark ? 'text-[#D0D4DC]' : 'text-slate-900'
                                 }`}
                               >
                                 {children}
@@ -543,7 +569,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             return (
                               <ol
                                 className={`list-decimal ps-6 my-2.5 space-y-1.5 leading-[1.7] text-[14px] md:text-[15px] ${
-                                  isDark ? 'text-[#D0D4DC]' : 'text-slate-800'
+                                  isDark ? 'text-[#D0D4DC]' : 'text-slate-900'
                                 }`}
                               >
                                 {children}
@@ -571,8 +597,8 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                                 dir={isAr ? 'rtl' : 'ltr'}
                                 className={`my-3 border-s-2 ps-4 py-1.5 text-xs md:text-[13.5px] leading-relaxed italic ${
                                   isDark
-                                    ? 'border-[#8ab4f8] text-gray-300 bg-white/[0.02]'
-                                    : 'border-blue-500 text-gray-700 bg-black/[0.02]'
+                                    ? 'border-[#8ab4f8] text-gray-200 bg-white/[0.04]'
+                                    : 'border-blue-600 text-slate-800 bg-blue-50/70'
                                 } rounded-e`}
                                 style={{ unicodeBidi: 'plaintext' }}
                               >
@@ -855,7 +881,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                           <div className="text-[11px] text-gray-400 font-medium">
                             2. {lang === 'ar' ? 'انسخ المفتاح والصقه هنا لتفعيله فوراً:' : 'Paste your key here and activate:'}
                           </div>
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                             <input
                               type="password"
                               dir="ltr"
@@ -865,30 +891,40 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                                 setInlineKey(e.target.value);
                                 setInlineKeyStatus(null);
                               }}
-                              className="flex-1 bg-[#131314] border border-gemini-border rounded-xl px-3 py-2 text-xs font-mono text-gray-100 placeholder-gray-600 outline-none focus:border-purple-500 transition-colors"
+                              className={`w-full sm:flex-1 rounded-xl px-3 py-2 text-xs font-mono outline-none transition-colors ${
+                                isDark
+                                  ? 'bg-[#131314] border border-gemini-border text-gray-100 placeholder-gray-600 focus:border-purple-500'
+                                  : 'bg-white border border-slate-300 text-slate-900 placeholder-slate-400 focus:border-purple-600 shadow-sm'
+                              }`}
                             />
-                            <button
-                              type="button"
-                              onClick={handlePasteInlineKey}
-                              className="px-2.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-gray-200 border border-white/10 text-xs flex items-center gap-1 transition-colors shrink-0"
-                              title={lang === 'ar' ? 'لصق من الحافظة' : 'Paste from clipboard'}
-                            >
-                              <ClipboardPaste className="w-3.5 h-3.5" />
-                              <span>{lang === 'ar' ? 'لصق' : 'Paste'}</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={handleSaveInlineKey}
-                              disabled={isSavingInlineKey || !inlineKey.trim()}
-                              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:opacity-95 text-white text-xs font-bold shadow-md shadow-purple-600/25 transition-all shrink-0 active:scale-95 disabled:opacity-50 flex items-center gap-1.5"
-                            >
-                              {isSavingInlineKey ? (
-                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                              ) : (
-                                <CheckCircle2 className="w-3.5 h-3.5 text-amber-300" />
-                              )}
-                              <span>{lang === 'ar' ? 'تفعيل فوراً' : 'Activate'}</span>
-                            </button>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <button
+                                type="button"
+                                onClick={handlePasteInlineKey}
+                                className={`px-3 py-2 rounded-xl text-xs flex items-center justify-center gap-1 transition-colors shrink-0 ${
+                                  isDark
+                                    ? 'bg-white/10 hover:bg-white/15 text-gray-200 border border-white/10'
+                                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 shadow-sm'
+                                }`}
+                                title={lang === 'ar' ? 'لصق من الحافظة' : 'Paste from clipboard'}
+                              >
+                                <ClipboardPaste className="w-3.5 h-3.5" />
+                                <span>{lang === 'ar' ? 'لصق' : 'Paste'}</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleSaveInlineKey}
+                                disabled={isSavingInlineKey || !inlineKey.trim()}
+                                className="flex-1 sm:flex-none justify-center px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:opacity-95 text-white text-xs font-bold shadow-md shadow-purple-600/25 transition-all shrink-0 active:scale-95 disabled:opacity-50 flex items-center gap-1.5"
+                              >
+                                {isSavingInlineKey ? (
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-amber-300" />
+                                )}
+                                <span>{lang === 'ar' ? 'تفعيل فوراً' : 'Activate'}</span>
+                              </button>
+                            </div>
                           </div>
                         </div>
 
@@ -918,11 +954,17 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                     )}
 
                     {/* Action Bar for Assistant Message: Copy, TTS, Markdown, PDF */}
-                    <div className="flex flex-wrap items-center gap-1.5 pt-1.5 border-t border-gemini-border/30 text-xs relative">
+                    <div className={`flex flex-wrap items-center gap-1.5 pt-1.5 border-t text-xs relative ${
+                      isDark ? 'border-white/10' : 'border-slate-200'
+                    }`}>
                       {/* Copy Text */}
                       <button
                         onClick={() => copyMessageContent(msg.content, msg.id)}
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl hover:bg-white/10 text-gray-300 hover:text-white transition-all text-[11px] bg-white/[0.04] border border-white/10 shadow-sm active:scale-95"
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all text-[11px] border shadow-sm active:scale-95 ${
+                          isDark
+                            ? 'hover:bg-white/10 text-gray-300 hover:text-white bg-white/[0.04] border-white/10'
+                            : 'hover:bg-slate-200 text-slate-700 hover:text-slate-900 bg-slate-100 border-slate-300'
+                        }`}
                         title={t.copy}
                       >
                         {copiedMsgId === msg.id ? (
@@ -947,10 +989,14 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                               : 'Please re-explain the previous response in very simple terms for someone with no technical background, using a daily-life analogy and a minimal 2-line example.'
                           );
                         }}
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 transition-all text-[11px] font-medium shadow-sm active:scale-95"
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all text-[11px] font-medium border shadow-sm active:scale-95 ${
+                          isDark
+                            ? 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/30'
+                            : 'bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300'
+                        }`}
                         title={lang === 'ar' ? 'شرح مبسط للأطفال والمبتدئين بمثال واقعي' : "Explain Like I'm 10"}
                       >
-                        <Sparkles className="w-3 h-3 text-amber-400" />
+                        <Sparkles className="w-3 h-3 text-amber-500" />
                         <span>{lang === 'ar' ? 'بسّطهالي' : 'ELI5'}</span>
                       </button>
 
@@ -960,7 +1006,9 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                         className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all text-[11px] border shadow-sm active:scale-95 ${
                           speakingMsgId === msg.id
                             ? 'bg-purple-500/20 text-purple-300 border-purple-500/40 animate-pulse'
-                            : 'hover:bg-white/5 text-gray-300 hover:text-white bg-white/[0.03] border-white/5'
+                            : isDark
+                            ? 'hover:bg-white/5 text-gray-300 hover:text-white bg-white/[0.03] border-white/5'
+                            : 'hover:bg-slate-200 text-slate-700 hover:text-slate-900 bg-slate-100 border-slate-300'
                         }`}
                         title={speakingMsgId === msg.id ? t.stopReading : t.readAloud}
                       >
@@ -976,10 +1024,14 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                       <button
                         onClick={() => handleDirectPdfDownload(msg.content, msg.id, 'Nerdo AI Report')}
                         disabled={downloadingPdfId === msg.id}
-                        className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 transition-all text-[11px] font-medium disabled:opacity-50 shadow-sm active:scale-95"
+                        className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all text-[11px] font-medium disabled:opacity-50 border shadow-sm active:scale-95 ${
+                          isDark
+                            ? 'bg-red-500/15 hover:bg-red-500/25 text-red-300 border-red-500/30'
+                            : 'bg-red-50 hover:bg-red-100 text-red-700 border-red-200'
+                        }`}
                         title={t.downloadPdf}
                       >
-                        <Download className="w-3 h-3 text-red-400" />
+                        <Download className="w-3 h-3 text-red-500" />
                         <span>{downloadingPdfId === msg.id ? '...' : 'PDF'}</span>
                       </button>
 
@@ -987,7 +1039,11 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                       <div className="relative">
                         <button
                           onClick={() => setOpenMenuMsgId(openMenuMsgId === msg.id ? null : msg.id)}
-                          className="p-1.5 rounded-xl hover:bg-white/15 text-gray-400 hover:text-gray-100 transition-all text-[11px] border border-white/10 bg-white/[0.04] shadow-sm active:scale-95"
+                          className={`p-1.5 rounded-xl transition-all text-[11px] border shadow-sm active:scale-95 ${
+                            isDark
+                              ? 'hover:bg-white/15 text-gray-400 hover:text-gray-100 border-white/10 bg-white/[0.04]'
+                              : 'hover:bg-slate-200 text-slate-700 hover:text-slate-900 border-slate-300 bg-slate-100'
+                          }`}
                           title={lang === 'ar' ? 'المزيد من الخيارات' : 'More Options'}
                         >
                           <MoreHorizontal className="w-3.5 h-3.5" />

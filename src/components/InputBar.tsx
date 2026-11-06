@@ -204,7 +204,7 @@ export const InputBar: React.FC<InputBarProps> = ({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 pb-2 sm:pb-4 safe-bottom">
+    <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 pb-4 sm:pb-3 pb-[max(1.75rem,env(safe-area-inset-bottom,0px))] safe-bottom">
       {/* Input Outer Container with Liquid Glass and Drag State */}
       <div
         onDragOver={(e) => {
@@ -217,12 +217,12 @@ export const InputBar: React.FC<InputBarProps> = ({
           setIsDragging(false);
           handleFiles(e.dataTransfer.files);
         }}
-        className={`relative rounded-3xl p-2 sm:p-3 border transition-all duration-200 shadow-2xl ${
+        className={`relative rounded-3xl p-2 sm:p-3 border transition-all duration-200 shadow-xl ${
           isDragging
             ? 'border-blue-500 bg-blue-500/10 ring-4 ring-blue-500/20'
             : isDark
             ? 'bg-[#16181d] border-[#2a2d36] focus-within:border-[#8ab4f8]/60 focus-within:ring-1 focus-within:ring-[#8ab4f8]/20 hover:border-[#3c404c]'
-            : 'bg-white/95 border-slate-200 focus-within:border-blue-500 hover:border-slate-300'
+            : 'bg-white border-slate-200 shadow-slate-200/80 focus-within:border-blue-500 hover:border-slate-300'
         }`}
       >
         {/* Render Attachments Chips */}
@@ -373,7 +373,9 @@ export const InputBar: React.FC<InputBarProps> = ({
       </div>
 
       {/* Footer Info Pill */}
-      <div className="flex text-center mt-2.5 text-[11px] text-[#8F95A0] items-center justify-center gap-1.5 font-normal select-none">
+      <div className={`flex text-center mt-2 text-[10px] sm:text-[11px] ${
+        isDark ? 'text-[#8F95A0]' : 'text-slate-500'
+      } items-center justify-center gap-1.5 font-normal select-none`}>
         <span>
           {lang === 'ar'
             ? 'Nerdo AI Workstation • يتم الحفظ محلياً على جهازك'

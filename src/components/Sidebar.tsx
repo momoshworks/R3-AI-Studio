@@ -12,6 +12,7 @@ import {
   Menu,
   BookOpen,
   Zap,
+  X,
 } from 'lucide-react';
 import { DriveStatus, Session, SidebarTab, SystemMetrics } from '../types';
 import { USEFUL_WEBSITES } from '../data/usefulWebsites';
@@ -128,32 +129,47 @@ export const Sidebar: React.FC<SidebarProps> = ({
           isDark ? 'border-[#262930]/60' : 'border-slate-200'
         } ${isCollapsed ? 'px-1 sm:px-2 justify-center' : 'px-3 justify-between'}`}
       >
-        <button
-          onClick={onToggleCollapse}
-          className={`p-2 rounded-xl transition-all active:scale-95 duration-200 flex items-center justify-center ${
-            isDark
-              ? 'text-gray-300 hover:text-white hover:bg-white/10'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-          }`}
-          title={t.toggleSidebar}
-        >
-          <Menu className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onToggleCollapse}
+            className={`p-2 rounded-xl transition-all active:scale-95 duration-200 flex items-center justify-center ${
+              isDark
+                ? 'text-gray-300 hover:text-white hover:bg-white/10'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+            title={t.toggleSidebar}
+          >
+            <Menu className="w-5 h-5" />
+          </button>
 
+          {!isCollapsed && (
+            <div className="flex items-center space-x-2 space-x-reverse pe-1 select-none">
+              <div className="flex items-baseline space-x-1.5 space-x-reverse">
+                <span className={`font-black text-lg tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  Nerdo
+                </span>
+                <span className="font-semibold text-xs text-cyan-400">
+                  AI Studio
+                </span>
+              </div>
+              <div className="w-6 h-6 rounded-lg overflow-hidden border border-purple-500/30 shadow-md shadow-purple-500/10 shrink-0">
+                <img src="/app-icon.png" alt="Nerdo" className="w-full h-full object-cover" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile-only Close X Button */}
         {!isCollapsed && (
-          <div className="flex items-center space-x-2 space-x-reverse pe-1 select-none">
-            <div className="flex items-baseline space-x-1.5 space-x-reverse">
-              <span className={`font-black text-lg tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                Nerdo
-              </span>
-              <span className="font-semibold text-xs text-cyan-400">
-                AI Studio
-              </span>
-            </div>
-            <div className="w-7 h-7 rounded-lg overflow-hidden border border-purple-500/30 shadow-md shadow-purple-500/10 shrink-0">
-              <img src="/app-icon.png" alt="Nerdo" className="w-full h-full object-cover" />
-            </div>
-          </div>
+          <button
+            onClick={onToggleCollapse}
+            className={`p-1.5 rounded-lg md:hidden transition-colors ${
+              isDark ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+            title={lang === 'ar' ? 'إغلاق' : 'Close'}
+          >
+            <X className="w-5 h-5" />
+          </button>
         )}
       </div>
 
@@ -465,7 +481,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Compact System Metrics Status Indicator */}
       {!isCollapsed && metrics && (
-        <div className="px-3 py-1.5 flex items-center justify-between text-[11px] font-mono text-[#8F95A0] border-t border-[#262930] bg-[#141519] select-none">
+        <div className={`px-3 py-1.5 flex items-center justify-between text-[11px] font-mono border-t select-none ${
+          isDark
+            ? 'border-[#262930] bg-[#141519] text-[#8F95A0]'
+            : 'border-slate-200 bg-slate-100 text-slate-600'
+        }`}>
           <div className="flex items-center gap-1.5">
             <span
               className={`w-1.5 h-1.5 rounded-full ${
@@ -485,7 +505,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Footer Settings Button */}
       <div
-        className={`p-3 border-t ${
+        className={`p-3 border-t pb-[max(1rem,env(safe-area-inset-bottom,0px))] ${
           isDark ? 'border-[#262930]' : 'border-slate-200'
         }`}
       >

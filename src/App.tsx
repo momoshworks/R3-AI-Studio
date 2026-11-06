@@ -566,7 +566,9 @@ export const App: React.FC = () => {
 
       {/* 2. Main Workspace (dir adapts for Arabic or English content) */}
       <div
-        className="flex-1 flex flex-col h-full overflow-hidden relative bg-[#0e0f12]"
+        className={`flex-1 flex flex-col h-full overflow-hidden relative transition-colors duration-200 ${
+          isDark ? 'bg-[#0e0f12] text-[#EDEDED]' : 'bg-[#f8fafc] text-slate-800'
+        }`}
         dir={lang === 'ar' ? 'rtl' : 'ltr'}
       >
         {/* Top Navigation Bar - Ultra-Clean Linear & Gemini Aesthetic */}
@@ -574,7 +576,7 @@ export const App: React.FC = () => {
           className={`h-14 px-3 sm:px-6 border-b flex items-center justify-between select-none z-10 transition-colors gap-2 shrink-0 ${
             isDark
               ? 'bg-[#0e0f12]/80 backdrop-blur-md border-[#262930] text-[#EDEDED]'
-              : 'bg-white/90 backdrop-blur-md border-slate-200 text-slate-800'
+              : 'bg-white/95 backdrop-blur-md border-slate-200 text-slate-800 shadow-sm'
           }`}
         >
           {/* Left section: Sidebar toggle + Minimalist Branding */}
@@ -592,7 +594,7 @@ export const App: React.FC = () => {
             >
               <Menu className="w-4 h-4" />
             </button>
-            <span className="font-semibold text-sm tracking-tight text-[#EDEDED] hidden xs:inline">
+            <span className={`font-bold text-sm tracking-tight hidden xs:inline ${isDark ? 'text-[#EDEDED]' : 'text-slate-900'}`}>
               Nerdo
             </span>
           </div>
@@ -662,13 +664,13 @@ export const App: React.FC = () => {
                             }`}
                           >
                             <div className="truncate">
-                              <div className="font-medium text-xs flex items-center gap-1.5 text-[#EDEDED]">
+                              <div className={`font-medium text-xs flex items-center gap-1.5 ${isDark ? 'text-[#EDEDED]' : 'text-slate-900'}`}>
                                 <span>{m.name}</span>
-                                <span className="text-[9px] px-1.5 py-0.2 rounded font-mono bg-black/40 text-[#8F95A0]">
+                                <span className={`text-[9px] px-1.5 py-0.2 rounded font-mono ${isDark ? 'bg-black/40 text-[#8F95A0]' : 'bg-slate-200 text-slate-600'}`}>
                                   {m.tag}
                                 </span>
                               </div>
-                              <div className="text-[10px] text-[#8F95A0] truncate mt-0.5">
+                              <div className={`text-[10px] truncate mt-0.5 ${isDark ? 'text-[#8F95A0]' : 'text-slate-500'}`}>
                                 {m.desc}
                               </div>
                             </div>
@@ -715,7 +717,11 @@ export const App: React.FC = () => {
             <div className="relative shrink-0">
               <button
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="flex items-center gap-1.5 p-1 rounded-full border border-[#262930] hover:border-[#8ab4f8]/50 transition-colors"
+                className={`flex items-center gap-1.5 p-1 rounded-full border transition-colors ${
+                  isDark
+                    ? 'border-[#262930] hover:border-[#8ab4f8]/50'
+                    : 'border-slate-300 hover:border-blue-500'
+                }`}
               >
                 <img
                   src={currentPicture}

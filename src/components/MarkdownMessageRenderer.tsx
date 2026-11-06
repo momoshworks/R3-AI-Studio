@@ -185,7 +185,9 @@ export const MarkdownMessageRenderer: React.FC<MarkdownMessageRendererProps> = (
       dir={isMsgArabic ? 'rtl' : 'ltr'}
     >
       {/* 1. Markdown Core Content */}
-      <div className="text-[14px] md:text-[14.5px] leading-relaxed text-[#E3E3E3] select-text">
+      <div className={`text-[14px] md:text-[14.5px] leading-relaxed select-text ${
+        isDark ? 'text-[#E3E3E3]' : 'text-slate-900'
+      }`}>
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{
@@ -196,7 +198,7 @@ export const MarkdownMessageRenderer: React.FC<MarkdownMessageRendererProps> = (
                 <p
                   dir={isAr ? 'rtl' : 'ltr'}
                   className={`my-2 leading-[1.75] font-normal ${
-                    isDark ? 'text-[#E3E3E3]' : 'text-slate-800'
+                    isDark ? 'text-[#E3E3E3]' : 'text-slate-900'
                   } ${isAr ? 'text-right' : 'text-left'}`}
                   style={{ unicodeBidi: 'plaintext' }}
                 >

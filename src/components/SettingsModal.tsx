@@ -296,16 +296,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 select-none animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-2 sm:p-4 select-none animate-in fade-in duration-200">
       <div
         dir="rtl"
-        className="bg-[#1e1f20] border border-gemini-border w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col text-xs text-gray-300 max-h-[90vh]"
+        className="bg-[#1e1f20] border border-gemini-border w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col text-xs text-gray-300 max-h-[92vh] sm:max-h-[85vh]"
       >
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gemini-border flex items-center justify-between bg-[#171819]">
-          <div className="flex items-center space-x-2.5 space-x-reverse">
-            <ShieldCheck className="w-5 h-5 text-emerald-400" />
-            <span className="font-semibold text-sm text-white">إعدادات النماذج والذكاء الاصطناعي والحسابات</span>
+        <div className="px-4 sm:px-6 py-3.5 border-b border-gemini-border flex items-center justify-between bg-[#171819] shrink-0">
+          <div className="flex items-center space-x-2.5 space-x-reverse min-w-0">
+            <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
+            <span className="font-semibold text-xs sm:text-sm text-white truncate">{lang === 'ar' ? 'إعدادات النماذج والذكاء الاصطناعي والحسابات' : 'AI Models & Settings'}</span>
           </div>
           <button
             onClick={onClose}
@@ -316,46 +316,49 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         {/* Tab Navigation (API Keys vs Multi-Accounts vs Appearance) */}
-        <div className="flex border-b border-gemini-border/60 bg-[#141517] px-6 pt-2 overflow-x-auto no-scrollbar">
+        <div className="flex border-b border-gemini-border/60 bg-[#141517] px-3 sm:px-6 pt-2 overflow-x-auto no-scrollbar flex-nowrap shrink-0 snap-x gap-1">
           <button
             onClick={() => setActiveTab('api-keys')}
-            className={`pb-2.5 px-3 md:px-4 font-medium text-xs border-b-2 flex items-center gap-1.5 transition-colors whitespace-nowrap ${
+            className={`pb-2.5 px-2.5 sm:px-4 font-medium text-xs border-b-2 flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
               activeTab === 'api-keys'
                 ? 'border-purple-500 text-purple-400 font-semibold'
                 : 'border-transparent text-gray-400 hover:text-gray-200'
             }`}
           >
-            <Key className="w-3.5 h-3.5" />
-            <span>{lang === 'ar' ? 'مفاتيح AI (Gemini & ChatGPT)' : 'AI Keys (Gemini & GPT)'}</span>
+            <Key className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden sm:inline">{lang === 'ar' ? 'مفاتيح AI (Gemini & ChatGPT)' : 'AI Keys (Gemini & GPT)'}</span>
+            <span className="sm:hidden">{lang === 'ar' ? 'مفاتيح AI' : 'AI Keys'}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('accounts')}
-            className={`pb-2.5 px-3 md:px-4 font-medium text-xs border-b-2 flex items-center gap-1.5 transition-colors whitespace-nowrap ${
+            className={`pb-2.5 px-2.5 sm:px-4 font-medium text-xs border-b-2 flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
               activeTab === 'accounts'
                 ? 'border-blue-500 text-blue-400 font-semibold'
                 : 'border-transparent text-gray-400 hover:text-gray-200'
             }`}
           >
-            <Users className="w-3.5 h-3.5" />
-            <span>{lang === 'ar' ? `الحسابات والتبديل (${accounts.length})` : `Accounts (${accounts.length})`}</span>
+            <Users className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden sm:inline">{lang === 'ar' ? `الحسابات والتبديل (${accounts.length})` : `Accounts (${accounts.length})`}</span>
+            <span className="sm:hidden">{lang === 'ar' ? `الحسابات (${accounts.length})` : `Accounts (${accounts.length})`}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('appearance')}
-            className={`pb-2.5 px-3 md:px-4 font-medium text-xs border-b-2 flex items-center gap-1.5 transition-colors whitespace-nowrap ${
+            className={`pb-2.5 px-2.5 sm:px-4 font-medium text-xs border-b-2 flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
               activeTab === 'appearance'
                 ? 'border-amber-500 text-amber-400 font-semibold'
                 : 'border-transparent text-gray-400 hover:text-gray-200'
             }`}
           >
-            <Palette className="w-3.5 h-3.5" />
-            <span>{lang === 'ar' ? 'المظهر واللغة' : 'Theme & Language'}</span>
+            <Palette className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden sm:inline">{lang === 'ar' ? 'المظهر واللغة' : 'Theme & Language'}</span>
+            <span className="sm:hidden">{lang === 'ar' ? 'المظهر' : 'Theme'}</span>
           </button>
         </div>
 
         {/* Scrollable Content */}
-        <div className="p-6 space-y-6 overflow-y-auto">
+        <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto flex-1">
           {activeTab === 'api-keys' && (
             <>
               {/* R3 Backend Server / Mode Configuration */}
@@ -376,7 +379,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     : 'Leave empty for direct standalone mode using your API keys. Or enter your PC IP address (e.g. http://192.168.1.15:8000) to connect to R3 local backend.'}
                 </p>
 
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
                     dir="ltr"
@@ -395,7 +398,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       setBackendSaveStatus(lang === 'ar' ? 'تم الحفظ!' : 'Saved!');
                       setTimeout(() => setBackendSaveStatus(null), 2500);
                     }}
-                    className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-medium text-xs transition-all shadow-md active:scale-95 shrink-0"
+                    className="w-full sm:w-auto px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-medium text-xs transition-all shadow-md active:scale-95 shrink-0 text-center"
                   >
                     {backendSaveStatus || (lang === 'ar' ? 'حفظ' : 'Save')}
                   </button>
@@ -425,8 +428,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </p>
 
                 {/* Input & Verify */}
-                <div className="flex items-center gap-2 pt-1">
-                  <div className="relative flex-1">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
+                  <div className="relative flex-1 min-w-0">
                     <input
                       type={showOpenaiKey ? 'text' : 'password'}
                       dir="ltr"
@@ -436,50 +439,52 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         setOpenaiStatus(null);
                       }}
                       placeholder="sk-proj-..."
-                      className="w-full bg-[#131314] border border-gemini-border rounded-xl px-3 py-2 text-xs font-mono text-gray-100 placeholder-gray-600 outline-none focus:border-emerald-500 transition-colors"
+                      className="w-full bg-[#131314] border border-gemini-border rounded-xl ps-3 pe-9 py-2 text-xs font-mono text-gray-100 placeholder-gray-600 outline-none focus:border-emerald-500 transition-colors"
                     />
                     <button
                       type="button"
                       onClick={() => setShowOpenaiKey(!showOpenaiKey)}
-                      className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                      className="absolute end-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
                     >
                       {showOpenaiKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                     </button>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      try {
-                        const text = await navigator.clipboard.readText();
-                        if (text) setOpenaiKey(text.trim());
-                      } catch {}
-                    }}
-                    className="px-2.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-gray-200 border border-white/10 text-xs flex items-center gap-1 transition-colors shrink-0"
-                    title="لصق من الحافظة"
-                  >
-                    <ClipboardPaste className="w-3.5 h-3.5" />
-                    <span>لصق</span>
-                  </button>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          const text = await navigator.clipboard.readText();
+                          if (text) setOpenaiKey(text.trim());
+                        } catch {}
+                      }}
+                      className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-gray-200 border border-white/10 text-xs flex items-center justify-center gap-1 transition-colors shrink-0"
+                      title="لصق من الحافظة"
+                    >
+                      <ClipboardPaste className="w-3.5 h-3.5" />
+                      <span>لصق</span>
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={handleVerifyOpenaiKey}
-                    disabled={isVerifyingOpenai || !openaiKey.trim()}
-                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs flex items-center gap-1.5 transition-all shadow-md active:scale-95 disabled:opacity-50 shrink-0"
-                  >
-                    {isVerifyingOpenai ? (
-                      <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        <span>جاري الفحص...</span>
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>تفعيل وتحقق فوري</span>
-                      </>
-                    )}
-                  </button>
+                    <button
+                      type="button"
+                      onClick={handleVerifyOpenaiKey}
+                      disabled={isVerifyingOpenai || !openaiKey.trim()}
+                      className="flex-1 sm:flex-none justify-center px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs flex items-center gap-1.5 transition-all shadow-md active:scale-95 disabled:opacity-50 shrink-0"
+                    >
+                      {isVerifyingOpenai ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>جاري الفحص...</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>تفعيل وتحقق فوري</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 {openaiStatus && (
@@ -530,8 +535,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </p>
 
                 {/* Input & Verify */}
-                <div className="flex items-center gap-2 pt-1">
-                  <div className="relative flex-1">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
+                  <div className="relative flex-1 min-w-0">
                     <input
                       type={showGeminiKey ? 'text' : 'password'}
                       dir="ltr"
@@ -541,50 +546,52 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         setGeminiStatus(null);
                       }}
                       placeholder="AIzaSy..."
-                      className="w-full bg-[#131314] border border-gemini-border rounded-xl px-3 py-2 text-xs font-mono text-gray-100 placeholder-gray-600 outline-none focus:border-purple-500 transition-colors"
+                      className="w-full bg-[#131314] border border-gemini-border rounded-xl ps-3 pe-9 py-2 text-xs font-mono text-gray-100 placeholder-gray-600 outline-none focus:border-purple-500 transition-colors"
                     />
                     <button
                       type="button"
                       onClick={() => setShowGeminiKey(!showGeminiKey)}
-                      className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                      className="absolute end-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
                     >
                       {showGeminiKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                     </button>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      try {
-                        const text = await navigator.clipboard.readText();
-                        if (text) setGeminiKey(text.trim());
-                      } catch {}
-                    }}
-                    className="px-2.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-gray-200 border border-white/10 text-xs flex items-center gap-1 transition-colors shrink-0"
-                    title="لصق من الحافظة"
-                  >
-                    <ClipboardPaste className="w-3.5 h-3.5" />
-                    <span>لصق</span>
-                  </button>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          const text = await navigator.clipboard.readText();
+                          if (text) setGeminiKey(text.trim());
+                        } catch {}
+                      }}
+                      className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-gray-200 border border-white/10 text-xs flex items-center justify-center gap-1 transition-colors shrink-0"
+                      title="لصق من الحافظة"
+                    >
+                      <ClipboardPaste className="w-3.5 h-3.5" />
+                      <span>لصق</span>
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={handleVerifyGeminiKey}
-                    disabled={isVerifyingGemini || !geminiKey.trim()}
-                    className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-medium text-xs flex items-center gap-1.5 transition-all shadow-md active:scale-95 disabled:opacity-50 shrink-0"
-                  >
-                    {isVerifyingGemini ? (
-                      <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        <span>جاري الفحص...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-3.5 h-3.5" />
-                        <span>تفعيل وتحقق فوري</span>
-                      </>
-                    )}
-                  </button>
+                    <button
+                      type="button"
+                      onClick={handleVerifyGeminiKey}
+                      disabled={isVerifyingGemini || !geminiKey.trim()}
+                      className="flex-1 sm:flex-none justify-center px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-medium text-xs flex items-center gap-1.5 transition-all shadow-md active:scale-95 disabled:opacity-50 shrink-0"
+                    >
+                      {isVerifyingGemini ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>جاري الفحص...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span>تفعيل وتحقق فوري</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 {geminiStatus && (
@@ -967,10 +974,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3.5 bg-[#171819] border-t border-gemini-border flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] text-gray-500">
-              Nerdo AI Studio v1.0.0 · Google Gemini &amp; ChatGPT &amp; Media Vault
+        <div className="px-4 sm:px-6 py-3 bg-[#171819] border-t border-gemini-border flex flex-col sm:flex-row items-center justify-between gap-2.5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] shrink-0">
+          <div className="flex items-center justify-between sm:justify-start w-full sm:w-auto gap-2">
+            <span className="text-[10px] sm:text-[11px] text-gray-500 truncate max-w-[200px] sm:max-w-none">
+              Nerdo AI Studio v1.0.0
             </span>
             <button
               type="button"
@@ -978,7 +985,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 onClose();
                 onOpenUpdateModal && onOpenUpdateModal();
               }}
-              className="text-[11px] text-purple-400 hover:text-purple-300 underline font-mono cursor-pointer flex items-center gap-1"
+              className="text-[11px] text-purple-400 hover:text-purple-300 underline font-mono cursor-pointer flex items-center gap-1 shrink-0"
             >
               <span>{lang === 'ar' ? 'التحديثات' : 'Updates'}</span>
               {releaseInfo?.has_update && (
@@ -989,7 +996,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2 rounded-xl text-xs bg-white text-black font-semibold hover:bg-gray-200 transition-colors shadow-md"
+            className="w-full sm:w-auto px-6 py-2 rounded-xl text-xs bg-white text-black font-semibold hover:bg-gray-200 transition-colors shadow-md text-center active:scale-95"
           >
             {lang === 'ar' ? 'إغلاق' : 'Close'}
           </button>
