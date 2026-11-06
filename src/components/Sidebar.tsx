@@ -11,6 +11,7 @@ import {
   Settings as SettingsIcon,
   Menu,
   BookOpen,
+  Zap,
 } from 'lucide-react';
 import { DriveStatus, Session, SidebarTab, SystemMetrics } from '../types';
 import { USEFUL_WEBSITES } from '../data/usefulWebsites';
@@ -194,6 +195,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         {[
           { id: 'chats', label: t.chat, icon: MessageSquare },
+          { id: 'automations', label: lang === 'ar' ? 'الأتمتة والمهام' : 'Automations', icon: Zap, badge: 'AI' },
           { id: 'tools', label: t.tools, icon: Globe },
           { id: 'media', label: t.media, icon: Film },
           { id: 'drive', label: t.drive, icon: Cloud },

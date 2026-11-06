@@ -1,4 +1,4 @@
-import { AttachedFile, ChatMessage, DriveStatus, SystemMetrics, Notebook, NotebookChunk, Citation, StudyGuideData } from '../types';
+import { AttachedFile, ChatMessage, DriveStatus, SystemMetrics, Notebook, NotebookChunk, Citation, StudyGuideData, AutomationTask, AutomationLog, AutomationTemplate } from '../types';
 
 export const getApiBase = (): string => {
   try {
@@ -1177,5 +1177,81 @@ export const api = {
       if (res.ok) return await res.json();
     }
     return { error: 'Image generation requires backend server.' };
+  },
+
+  // --- Nerdo Intelligent Automations Engine ---
+  async getAutomations(): Promise<{ tasks: AutomationTask[]; count: number; active_count: number }> {
+    const base = getApiBase();
+    if (base) {
+      const res = await fetch(`${base}/api/automations`);
+      if (res.ok) return await res.json();
+    }
+    return { tasks: [], count: 0, active_count: 0 };
+  },
+
+  async getAutomationTemplates(): Promise<{ templates: AutomationTemplate[] }> {
+    const base = getApiBase();
+    if (base) {
+      const res = await fetch(`${base}/api/automations/templates`);
+      if (res.ok) return await res.json();
+    }
+    return { templates: [] };
+  },
+
+  async createAutomation(task: Partial<AutomationTask>): Promise<{ success: boolean; task: AutomationTask }> {
+    const base = getApiBase();
+    if (base) {
+      const res = await fetch(`${base}/api/automations`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(task),
+      });
+      if (res.ok) return await res.json();
+    }
+    throw new Error('Failed to create automation');
+  },
+
+  async updateAutomation(taskId: string, updates: Partial<AutomationTask>): Promise<{ success: boolean; task: AutomationTask }> {
+    const base = getApiBase();
+    if (base) {
+      const res = await fetch(`${base}/api/automations/${taskId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      if (res.ok) return await res.json();
+    }
+    throw new Error('Failed to update automation');
+  },
+
+  async deleteAutomation(taskId: string): Promise<{ success: boolean }> {
+    const base = getApiBase();
+    if (base) {
+      const res = await fetch(`${base}/api/automations/${taskId}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) return await res.json();
+    }
+    throw new Error('Failed to delete automation');
+  },
+
+  async runAutomationNow(taskId: string): Promise<any> {
+    const base = getApiBase();
+    if (base) {
+      const res = await fetch(`${base}/api/automations/${taskId}/run`, {
+        method: 'POST',
+      });
+      if (res.ok) return await res.json();
+    }
+    throw new Error('Failed to trigger automation');
+  },
+
+  async getAutomationLogs(taskId: string): Promise<{ task_id: string; logs: AutomationLog[] }> {
+    const base = getApiBase();
+    if (base) {
+      const res = await fetch(`${base}/api/automations/${taskId}/logs`);
+      if (res.ok) return await res.json();
+    }
+    return { task_id: taskId, logs: [] };
   },
 };

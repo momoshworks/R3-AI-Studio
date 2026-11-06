@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
 import { ChatCanvas } from './components/ChatCanvas';
+import { AutomationsHub } from './components/AutomationsHub';
 import { InputBar } from './components/InputBar';
 import { UsefulToolsHub } from './components/UsefulToolsHub';
 import { SettingsModal } from './components/SettingsModal';
@@ -912,6 +913,8 @@ export const App: React.FC = () => {
         <div key={currentTab} className="flex-1 flex flex-col h-full overflow-hidden relative tab-enter transform-gpu">
         {currentTab === 'tools' ? (
           <UsefulToolsHub theme={theme} lang={lang} />
+        ) : currentTab === 'automations' ? (
+          <AutomationsHub theme={theme} lang={lang} t={t} />
         ) : currentTab === 'media' ? (
           <MediaVault
             activeMedia={activeMedia}

@@ -70,7 +70,7 @@ export interface SettingsState {
   raw_openai_key?: string;
 }
 
-export type SidebarTab = 'chats' | 'tools' | 'drive' | 'media' | 'notebook';
+export type SidebarTab = 'chats' | 'tools' | 'drive' | 'media' | 'notebook' | 'automations';
 
 export interface MediaItem {
   id: string;
@@ -165,4 +165,53 @@ export interface Notebook {
   updated_at: number;
   sources: NotebookSource[];
   study_guide?: StudyGuideData;
+}
+
+export interface AutomationTask {
+  id: string;
+  name: string;
+  description?: string;
+  type: 'interval' | 'daily' | 'folder_watch' | 'manual';
+  prompt: string;
+  model: string;
+  enabled: boolean;
+  interval_minutes?: number;
+  daily_time?: string;
+  watch_folder?: string;
+  file_extensions?: string[];
+  action_type?: 'notify' | 'vault' | 'notify_and_vault';
+  last_run?: number;
+  last_status?: 'idle' | 'running' | 'success' | 'error';
+  last_output?: string;
+  run_count?: number;
+  created_at?: number;
+}
+
+export interface AutomationLog {
+  id: string;
+  task_id: string;
+  task_name: string;
+  timestamp: number;
+  date_str?: string;
+  model: string;
+  status: 'success' | 'error';
+  output: string;
+  prompt_used?: string;
+  context_details?: string[];
+  error?: string;
+}
+
+export interface AutomationTemplate {
+  id: string;
+  name: string;
+  description: string;
+  type: 'interval' | 'daily' | 'folder_watch' | 'manual';
+  prompt: string;
+  model: string;
+  enabled: boolean;
+  interval_minutes?: number;
+  daily_time?: string;
+  watch_folder?: string;
+  file_extensions?: string[];
+  action_type?: 'notify' | 'vault' | 'notify_and_vault';
 }

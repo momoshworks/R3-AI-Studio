@@ -45,6 +45,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Nerdo Intelligent Automations Engine Router & Background Scheduler
+from automations import automations_router, start_automation_scheduler
+app.include_router(automations_router)
+
+@app.on_event("startup")
+async def on_app_startup():
+    start_automation_scheduler()
+
 # Base Directories & Config
 def _resolve_base_dir() -> Path:
     candidate = Path.home() / ".nexushub"
