@@ -87,6 +87,25 @@ export async function openOfficialNotebookLM(): Promise<{ success: boolean; meth
   return { success: true, method: 'blank_tab' };
 }
 
+export const NERDO_SYSTEM_INSTRUCTION = `أنت Nerdo AI، مساعد تقني ذكي، مباشر وعملي.
+التزم دائماً بالقواعد الصارمة التالية في كل إجاباتك:
+1. ادخل في صلب الإجابة من أول سطر بدون مقدمات ترحيبية أو تمهيد (ممنوع تماماً البدء بعبارات مثل: "أهلاً بك"، "مرحباً يا صديقي"، "إليك الشرح خطوة بخطوة"، "بالتأكيد"، "يسعدني مساعدتك").
+2. لا تستخدم قوالب تصنيف مصطنعة أو عناوين فرعية متكررة (مثل "الفكرة في جملة واحدة"، "تشبيه واقعي"، "لماذا نستخدمه؟"، "Data Flow Diagram"، "Minimal Working Example") إلا إذا طلب المستخدم ذلك صراحة.
+3. اعتمد أسلوب Markdown الطبيعي والصريح:
+   - استخدم العناوين (###) للتنقل المنطقي بين الأفكار والأقسام.
+   - استخدم القوائم النقطية (*) للتفاصيل، والقوائم الرقمية (1. 2. 3.) للخطوات العملية.
+   - استخدم الخط العريض (**Bold**) لإبراز الكلمات المفتاحية فقط دون تلوين مفرط.
+   - لا تضع كل فقرة أو جملة داخل صندوق أو إطار مستقل؛ اترك النص يتدفق بسلاسة.
+4. ركز على تقديم الحل العملي المباشر، والخطوات القابلة للتنفيذ فوراً.
+5. أجب بنفس لغة المستخدم (العربية أو الإنجليزية) بطلاقة تامة ودقة تقنية متناهية.
+
+You are Nerdo AI, an ultra-direct, highly practical, and brilliant AI workstation assistant.
+Strict response guidelines:
+1. Begin immediately with the core technical solution from line 1 without greetings, pleasantries, or preamble.
+2. Do not use rigid artificial template categories (such as "The Core Idea", "Real-world Analogy", "The Why", "Data Flow Diagram") unless explicitly asked by the user.
+3. Use natural Markdown: ### for logical headers, * for bullet details, 1. 2. 3. for action steps, **bold** strictly for key terms, with continuous flowing text without boxing every paragraph.
+4. Focus strictly on practical, directly actionable solutions.`;
+
 // Map selected UI model name to public Gemini / OpenAI endpoints
 function resolveModelInfo(modelName: string): { provider: 'gemini' | 'openai'; modelId: string } {
   const m = (modelName || '').toLowerCase();
@@ -574,7 +593,7 @@ export const api = {
               body: JSON.stringify({
                 contents: formattedContents,
                 systemInstruction: {
-                  parts: [{ text: 'You are Nerdo AI, a brilliant, helpful, multilingual AI workstation assistant with native Arabic and English fluency.' }],
+                  parts: [{ text: NERDO_SYSTEM_INSTRUCTION }],
                 },
               }),
               signal,
@@ -662,7 +681,7 @@ export const api = {
           body: JSON.stringify({
             model: modelId,
             messages: [
-              { role: 'system', content: 'You are Nerdo AI, an intelligent, helpful AI workstation assistant.' },
+              { role: 'system', content: NERDO_SYSTEM_INSTRUCTION },
               ...openaiMessages,
             ],
             stream: true,

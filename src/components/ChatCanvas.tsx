@@ -464,8 +464,8 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             return (
                               <p
                                 dir={isAr ? 'rtl' : 'ltr'}
-                                className={`my-2 leading-[1.68] font-normal text-[13px] md:text-[14px] ${
-                                  isDark ? 'text-slate-200' : 'text-slate-800'
+                                className={`my-2 leading-[1.75] font-normal text-[14px] md:text-[15px] ${
+                                  isDark ? 'text-[#E3E3E3]' : 'text-slate-800'
                                 } ${isAr ? 'text-right' : 'text-left'}`}
                                 style={{ unicodeBidi: 'plaintext' }}
                               >
@@ -479,11 +479,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             return (
                               <strong
                                 dir={isEnglishOnly ? 'ltr' : undefined}
-                                className={`font-bold px-1.5 py-0.5 rounded shadow-sm inline-block my-0.5 ${
-                                  isDark
-                                    ? 'text-amber-300 bg-amber-500/20 border border-amber-500/30'
-                                    : 'text-[#92400E] bg-[#FEF3C7] border border-[#FDE68A]'
-                                }`}
+                                className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}
                                 style={{ unicodeBidi: 'isolate' }}
                               >
                                 {children}
@@ -496,7 +492,9 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             return (
                               <h1
                                 dir={isAr ? 'rtl' : 'ltr'}
-                                className={`text-base md:text-lg font-bold mt-4 mb-2 text-sky-400 pb-1.5 border-b border-white/10 ${isAr ? 'text-right' : 'text-left'}`}
+                                className={`text-xl sm:text-2xl font-bold mt-5 mb-2.5 pb-1 border-b ${
+                                  isDark ? 'text-white border-white/10' : 'text-slate-900 border-slate-200'
+                                } ${isAr ? 'text-right' : 'text-left'}`}
                               >
                                 {children}
                               </h1>
@@ -505,82 +503,36 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                           h2({ children }) {
                             const text = getTextFromChildren(children);
                             const isAr = hasArabic(text);
-                            let icon = '📌';
-                            let cardClass = isDark ? 'border-s-4 border-s-blue-500 bg-[#0e131f]/80' : 'border-s-4 border-s-blue-600 bg-blue-50/70 border border-blue-200/60';
-
-                            if (text.includes('الفكرة') || text.toLowerCase().includes('core idea')) {
-                              icon = '🎯';
-                              cardClass = 'border-s-4 border-s-sky-400 bg-sky-950/20';
-                            } else if (text.includes('تشبيه') || text.toLowerCase().includes('analogy')) {
-                              icon = '💡';
-                              cardClass = 'border-s-4 border-s-amber-400 bg-amber-950/20';
-                            } else if (text.includes('لماذا') || text.toLowerCase().includes('the why')) {
-                              icon = '🚀';
-                              cardClass = 'border-s-4 border-s-purple-400 bg-purple-950/20';
-                            } else if (text.includes('مثال') || text.toLowerCase().includes('working example') || text.includes('كود')) {
-                              icon = '💻';
-                              cardClass = 'border-s-4 border-s-indigo-400 bg-indigo-950/20';
-                            } else if (text.includes('خطأ') || text.toLowerCase().includes('pitfall') || text.includes('تحذير')) {
-                              icon = '⚠️';
-                              cardClass = 'border-s-4 border-s-rose-400 bg-rose-950/20';
-                            }
-
                             return (
-                              <div className={`p-2 my-2 rounded-lg border border-white/10 ${cardClass} shadow-md backdrop-blur-md`}>
-                                <h2
-                                  dir={isAr ? 'rtl' : 'ltr'}
-                                  className={`text-[13.5px] md:text-sm font-bold text-gray-100 flex items-center gap-2 ${
-                                    isAr ? 'text-right' : 'text-left'
-                                  }`}
-                                >
-                                  <span className="text-base select-none">{icon}</span>
-                                  <span className="flex-1">{children}</span>
-                                </h2>
-                              </div>
+                              <h2
+                                dir={isAr ? 'rtl' : 'ltr'}
+                                className={`text-lg sm:text-xl font-semibold mt-4 mb-2 ${
+                                  isDark ? 'text-[#EDEDED]' : 'text-slate-900'
+                                } ${isAr ? 'text-right' : 'text-left'}`}
+                              >
+                                {children}
+                              </h2>
                             );
                           },
                           h3({ children }) {
                             const text = getTextFromChildren(children);
                             const isAr = hasArabic(text);
-                            let icon = '🔹';
-                            let cardClass = 'border-s-4 border-s-blue-400 bg-[#0e131f]/70';
-
-                            if (text.includes('الفكرة') || text.toLowerCase().includes('core idea')) {
-                              icon = '🎯';
-                              cardClass = 'border-s-4 border-s-sky-400 bg-sky-950/20';
-                            } else if (text.includes('تشبيه') || text.toLowerCase().includes('analogy')) {
-                              icon = '💡';
-                              cardClass = 'border-s-4 border-s-amber-400 bg-amber-950/20';
-                            } else if (text.includes('لماذا') || text.toLowerCase().includes('the why')) {
-                              icon = '🚀';
-                              cardClass = 'border-s-4 border-s-purple-400 bg-purple-950/20';
-                            } else if (text.includes('مثال') || text.toLowerCase().includes('working example') || text.includes('كود')) {
-                              icon = '💻';
-                              cardClass = 'border-s-4 border-s-indigo-400 bg-indigo-950/20';
-                            } else if (text.includes('خطأ') || text.toLowerCase().includes('pitfall') || text.includes('تحذير')) {
-                              icon = '⚠️';
-                              cardClass = 'border-s-4 border-s-rose-400 bg-rose-950/20';
-                            }
-
                             return (
-                              <div className={`p-3 my-3 rounded-2xl border border-white/10 ${cardClass} shadow-sm backdrop-blur-md`}>
-                                <h3
-                                  dir={isAr ? 'rtl' : 'ltr'}
-                                  className={`text-sm font-bold text-gray-100 flex items-center gap-2 ${
-                                    isAr ? 'text-right' : 'text-left'
-                                  }`}
-                                >
-                                  <span className="text-sm select-none">{icon}</span>
-                                  <span className="flex-1">{children}</span>
-                                </h3>
-                              </div>
+                              <h3
+                                dir={isAr ? 'rtl' : 'ltr'}
+                                className={`text-base sm:text-lg font-semibold mt-3.5 mb-1.5 ${
+                                  isDark ? 'text-[#8ab4f8]' : 'text-blue-600'
+                                } ${isAr ? 'text-right' : 'text-left'}`}
+                              >
+                                {children}
+                              </h3>
                             );
                           },
                           ul({ children }) {
                             return (
                               <ul
-                                className={`list-disc ps-5 my-2 space-y-1.5 leading-[1.68] text-[13px] md:text-[14px] ${
-                                  isDark ? 'text-slate-200' : 'text-slate-800'
+                                className={`list-disc ps-6 my-2.5 space-y-1.5 leading-[1.7] text-[14px] md:text-[15px] ${
+                                  isDark ? 'text-[#D0D4DC]' : 'text-slate-800'
                                 }`}
                               >
                                 {children}
@@ -590,8 +542,8 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                           ol({ children }) {
                             return (
                               <ol
-                                className={`list-decimal ps-5 my-2 space-y-1.5 leading-[1.68] text-[13px] md:text-[14px] ${
-                                  isDark ? 'text-slate-200' : 'text-slate-800'
+                                className={`list-decimal ps-6 my-2.5 space-y-1.5 leading-[1.7] text-[14px] md:text-[15px] ${
+                                  isDark ? 'text-[#D0D4DC]' : 'text-slate-800'
                                 }`}
                               >
                                 {children}
@@ -604,9 +556,7 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             return (
                               <li
                                 dir={isAr ? 'rtl' : 'ltr'}
-                                className={`my-0.5 leading-[1.68] ${
-                                  isDark ? 'text-slate-200' : 'text-slate-800'
-                                }`}
+                                className="my-0.5 leading-[1.7]"
                                 style={{ unicodeBidi: 'plaintext' }}
                               >
                                 {children}
@@ -619,24 +569,18 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
                             return (
                               <blockquote
                                 dir={isAr ? 'rtl' : 'ltr'}
-                                className={`my-2.5 border-s-4 p-3 rounded-e-xl text-xs md:text-[13px] leading-[1.68] shadow-md backdrop-blur-md ${
+                                className={`my-3 border-s-2 ps-4 py-1.5 text-xs md:text-[13.5px] leading-relaxed italic ${
                                   isDark
-                                    ? 'border-amber-400 bg-amber-950/20 text-amber-200'
-                                    : 'border-amber-500 bg-amber-50/90 text-amber-950 border border-amber-200/60'
-                                }`}
+                                    ? 'border-[#8ab4f8] text-gray-300 bg-white/[0.02]'
+                                    : 'border-blue-500 text-gray-700 bg-black/[0.02]'
+                                } rounded-e`}
                                 style={{ unicodeBidi: 'plaintext' }}
                               >
-                                <span
-                                  className={`block font-bold text-xs mb-1 ${
-                                    isDark ? 'text-amber-400' : 'text-amber-800'
-                                  }`}
-                                >
-                                  💡 فكرة جوهرية:
-                                </span>
                                 {children}
                               </blockquote>
                             );
                           },
+
                           code({ inline, className, children, ...props }: any) {
                             const match = /language-(\w+)/.exec(className || '');
                             const codeContent = String(children).replace(/\n$/, '');
