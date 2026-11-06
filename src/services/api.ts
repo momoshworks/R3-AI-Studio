@@ -1,4 +1,5 @@
 import { AttachedFile, ChatMessage, DriveStatus, SystemMetrics, Notebook, NotebookChunk, Citation, StudyGuideData, AutomationTask, AutomationLog, AutomationTemplate } from '../types';
+import { storageService } from './storage';
 
 export const getApiBase = (): string => {
   try {
@@ -355,7 +356,7 @@ export const api = {
 
     const base64Data = await fileToBase64(file);
     const isImage = file.type.startsWith('image/');
-    return {
+    const attached: AttachedFile = {
       id: `file_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
       name: file.name,
       size: file.size,
@@ -364,6 +365,15 @@ export const api = {
       preview_url: isImage ? base64Data : undefined,
       data: base64Data,
     };
+
+    // Store in offline database immediately
+    try {
+      await storageService.saveAttachment(attached);
+    } catch (err) {
+      console.warn('Failed to cache attachment locally:', err);
+    }
+
+    return attached;
   },
 
   // Streaming Chat with Automatic Direct Fallback (Gemini & OpenAI)
@@ -1154,16 +1164,29 @@ export const api = {
   },
 
   async saveMediaFromUrl(url: string, title?: string): Promise<any> {
+    // 1. Always save to local offline IndexedDB media vault
+    let localItem: any = null;
+    try {
+      localItem = await storageService.saveMediaFromUrl(url, title);
+    } catch (e) {
+      console.warn('Failed to save media item locally:', e);
+    }
+
+    // 2. Also save to remote backend if connected
     const base = getApiBase();
     if (base) {
-      const res = await fetch(`${base}/api/media/save-from-url`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, title }),
-      });
-      if (res.ok) return await res.json();
+      try {
+        const res = await fetch(`${base}/api/media/save-from-url`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url, title }),
+        });
+        if (res.ok) return await res.json();
+      } catch (err) {
+        console.warn('Backend save media error:', err);
+      }
     }
-    return { status: 'saved', url, title };
+    return localItem || { status: 'saved', url, title };
   },
 
   async generateAiImage(prompt: string): Promise<any> {

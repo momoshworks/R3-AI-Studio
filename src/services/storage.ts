@@ -1,9 +1,10 @@
-import { Session, AttachedFile } from '../types';
+import { Session, AttachedFile, MediaItem } from '../types';
 
 const DB_NAME = 'Nerdo_Offline_Database';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const SESSIONS_STORE = 'sessions';
 const ATTACHMENTS_STORE = 'attachments';
+const MEDIA_STORE = 'media_vault';
 const METADATA_STORE = 'metadata';
 
 const CACHE_KEY_SESSIONS = 'NERDO_SESSIONS_CACHE';
@@ -30,6 +31,9 @@ class StorageService {
         }
         if (!db.objectStoreNames.contains(ATTACHMENTS_STORE)) {
           db.createObjectStore(ATTACHMENTS_STORE, { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains(MEDIA_STORE)) {
+          db.createObjectStore(MEDIA_STORE, { keyPath: 'id' });
         }
         if (!db.objectStoreNames.contains(METADATA_STORE)) {
           db.createObjectStore(METADATA_STORE, { keyPath: 'key' });
@@ -84,23 +88,21 @@ class StorageService {
 
   /**
    * Loads full sessions with complete message history from local database
+   * and automatically rehydrates any missing attachment binary data.
    */
   async loadSessions(): Promise<Session[]> {
     try {
       const db = await this.getDB();
-      return new Promise((resolve) => {
+      const sessions = await new Promise<Session[]>((resolve) => {
         const tx = db.transaction(SESSIONS_STORE, 'readonly');
         const store = tx.objectStore(SESSIONS_STORE);
         const req = store.getAll();
 
         req.onsuccess = () => {
-          const sessions = req.result as Session[];
-          if (sessions && sessions.length > 0) {
-            // Sort sessions by timestamp descending (newest first)
-            sessions.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-            // Keep fast synchronous cache updated
-            this.updateFastCache(sessions);
-            resolve(sessions);
+          const list = req.result as Session[];
+          if (list && list.length > 0) {
+            list.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            resolve(list);
           } else {
             resolve(this.getInitialSessions());
           }
@@ -110,6 +112,26 @@ class StorageService {
           resolve(this.getInitialSessions());
         };
       });
+
+      // Hydrate attachments from ATTACHMENTS_STORE if binary was stripped for cache
+      for (const s of sessions) {
+        for (const m of s.messages) {
+          if (m.attachments && m.attachments.length > 0) {
+            for (let i = 0; i < m.attachments.length; i++) {
+              const att = m.attachments[i];
+              if (!att.data && !att.preview_url) {
+                const fullAtt = await this.getAttachment(att.id);
+                if (fullAtt) {
+                  m.attachments[i] = fullAtt;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      this.updateFastCache(sessions);
+      return sessions;
     } catch (e) {
       console.warn('Error loading sessions from IndexedDB, falling back to cache:', e);
       return this.getInitialSessions();
@@ -134,10 +156,8 @@ class StorageService {
    * Save all sessions and update fast cache
    */
   async saveAllSessions(sessions: Session[]): Promise<void> {
-    // 1. Update localStorage cache for instant reboot
     this.updateFastCache(sessions);
 
-    // 2. Persist full complete data to IndexedDB
     try {
       const db = await this.getDB();
       const tx = db.transaction(SESSIONS_STORE, 'readwrite');
@@ -214,7 +234,6 @@ class StorageService {
       console.warn('Error storing attachment in IndexedDB:', e);
     }
 
-    // Optional: if in Tauri desktop environment, also backup to appDataDir/chat_attachments
     if (file.data && typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window) {
       try {
         await this.saveToTauriDisk(file.name, file.data);
@@ -237,6 +256,89 @@ class StorageService {
     } catch {
       return null;
     }
+  }
+
+  // =========================================================================
+  // OFFLINE MEDIA VAULT REPOSITORY (Persistent Photos, Videos & Audios)
+  // =========================================================================
+
+  /**
+   * Retrieve all saved media items from local offline database
+   */
+  async getMediaItems(): Promise<MediaItem[]> {
+    try {
+      const db = await this.getDB();
+      return new Promise((resolve) => {
+        const tx = db.transaction(MEDIA_STORE, 'readonly');
+        const store = tx.objectStore(MEDIA_STORE);
+        const req = store.getAll();
+        req.onsuccess = () => {
+          const items = (req.result || []) as MediaItem[];
+          items.sort((a, b) => (b.modified_at || 0) - (a.modified_at || 0));
+          resolve(items);
+        };
+        req.onerror = () => resolve([]);
+      });
+    } catch (e) {
+      console.warn('Failed to load media items from IndexedDB:', e);
+      return [];
+    }
+  }
+
+  /**
+   * Save a media item permanently in offline database
+   */
+  async saveMediaItem(item: MediaItem): Promise<void> {
+    try {
+      const db = await this.getDB();
+      const tx = db.transaction(MEDIA_STORE, 'readwrite');
+      const store = tx.objectStore(MEDIA_STORE);
+      store.put(item);
+    } catch (e) {
+      console.warn('Failed to save media item in IndexedDB:', e);
+    }
+  }
+
+  /**
+   * Delete a media item from offline database
+   */
+  async deleteMediaItem(id: string): Promise<void> {
+    try {
+      const db = await this.getDB();
+      const tx = db.transaction(MEDIA_STORE, 'readwrite');
+      const store = tx.objectStore(MEDIA_STORE);
+      store.delete(id);
+    } catch (e) {
+      console.warn('Failed to delete media item from IndexedDB:', e);
+    }
+  }
+
+  /**
+   * Convert any media URL (data URL or external URL) and store it permanently
+   */
+  async saveMediaFromUrl(url: string, title?: string): Promise<MediaItem> {
+    const filename = `${title || 'Media'}_${Date.now()}`;
+    const extMatch = url.match(/\.(png|jpg|jpeg|gif|webp|mp4|webm|mp3|wav)($|\?)/i);
+    const extension = extMatch ? extMatch[1].toLowerCase() : 'png';
+    const isVideo = ['mp4', 'webm', 'mov', 'mkv'].includes(extension);
+    const isAudio = ['mp3', 'wav', 'ogg', 'm4a', 'aac'].includes(extension);
+    const category = isVideo ? 'video' : isAudio ? 'audio' : 'image';
+
+    const item: MediaItem = {
+      id: `media_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
+      name: `${filename}.${extension}`,
+      filename: `${filename}.${extension}`,
+      extension,
+      size_bytes: 250000,
+      size_human: '250 KB',
+      category,
+      mime_type: isVideo ? `video/${extension}` : isAudio ? `audio/${extension}` : `image/${extension}`,
+      url,
+      modified_at: Date.now(),
+    };
+
+    await this.saveMediaItem(item);
+    return item;
   }
 
   private async saveToTauriDisk(fileName: string, base64Data: string): Promise<string | null> {
@@ -264,7 +366,6 @@ class StorageService {
 
   private updateFastCache(sessions: Session[]) {
     try {
-      // Store lightweight cache in localStorage without huge base64 strings
       const lightweight = sessions.map((s) => ({
         ...s,
         messages: s.messages.slice(-80).map((m) => ({

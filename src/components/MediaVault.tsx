@@ -24,6 +24,8 @@ import {
 } from 'lucide-react';
 import { MediaItem } from '../types';
 import { Theme, Language, Translations, translations } from '../utils/translations';
+import { storageService } from '../services/storage';
+import { getApiBase } from '../services/api';
 
 interface MediaVaultProps {
   onSendToChat?: (file: { name: string; url: string; type: string }) => void;
@@ -69,14 +71,63 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
+  const readFileAsDataUrl = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
+    });
+  };
+
   const fetchMedia = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/media/items');
-      if (res.ok) {
-        const data = await res.json();
-        setItems(data.items || []);
-        setTotalHuman(data.total_human || '0 MB');
+      // 1. Fetch local media items from offline IndexedDB
+      const localItems = await storageService.getMediaItems();
+      const itemsMap = new Map<string, MediaItem>();
+
+      // Index by ID or filename
+      for (const item of localItems) {
+        itemsMap.set(item.id || item.filename, item);
+      }
+
+      // 2. Attempt to fetch from PC backend if server is connected
+      try {
+        const apiBase = getApiBase();
+        const res = await fetch(`${apiBase}/api/media/items`, {
+          signal: AbortSignal.timeout(1800),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const serverItems: MediaItem[] = data.items || [];
+          for (const sItem of serverItems) {
+            if (!itemsMap.has(sItem.id) && !itemsMap.has(sItem.filename)) {
+              itemsMap.set(sItem.id || sItem.filename, sItem);
+            }
+          }
+        }
+      } catch {
+        // Standalone mobile offline mode, no backend running
+      }
+
+      const mergedItems = Array.from(itemsMap.values());
+      // Sort newest first
+      mergedItems.sort((a, b) => {
+        const timeA = typeof b.modified_at === 'number' ? b.modified_at : new Date(b.modified_at || 0).getTime();
+        const timeB = typeof a.modified_at === 'number' ? a.modified_at : new Date(a.modified_at || 0).getTime();
+        return timeA - timeB;
+      });
+
+      setItems(mergedItems);
+
+      const totalBytes = mergedItems.reduce((acc, it) => acc + (it.size_bytes || 0), 0);
+      if (totalBytes > 1024 * 1024 * 1024) {
+        setTotalHuman(`${(totalBytes / (1024 * 1024 * 1024)).toFixed(2)} GB`);
+      } else if (totalBytes > 1024 * 1024) {
+        setTotalHuman(`${(totalBytes / (1024 * 1024)).toFixed(1)} MB`);
+      } else {
+        setTotalHuman(`${Math.round(totalBytes / 1024)} KB`);
       }
     } catch (err) {
       console.error('Failed to load media vault items:', err);
@@ -94,21 +145,66 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
     if (!files || files.length === 0) return;
 
     setIsUploading(true);
-    const formData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-      formData.append('files', files[i]);
-    }
 
     try {
-      const res = await fetch('/api/media/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      if (res.ok) {
-        setUploadSuccess(true);
-        setTimeout(() => setUploadSuccess(false), 2500);
-        await fetchMedia();
+      const filesList = Array.from(files);
+
+      for (const file of filesList) {
+        try {
+          const dataUrl = await readFileAsDataUrl(file);
+          const ext = file.name.split('.').pop()?.toLowerCase() || '';
+
+          let category: 'video' | 'audio' | 'image' = 'image';
+          if (file.type.startsWith('video/') || ['mp4', 'webm', 'mkv', 'mov', 'avi'].includes(ext)) {
+            category = 'video';
+          } else if (file.type.startsWith('audio/') || ['mp3', 'wav', 'ogg', 'm4a', 'aac', 'flac'].includes(ext)) {
+            category = 'audio';
+          }
+
+          const sizeHuman =
+            file.size > 1024 * 1024
+              ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+              : `${Math.max(1, Math.round(file.size / 1024))} KB`;
+
+          const mediaItem: MediaItem = {
+            id: `media_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+            name: file.name,
+            filename: file.name,
+            url: dataUrl,
+            category,
+            mime_type: file.type || (category === 'video' ? 'video/mp4' : category === 'audio' ? 'audio/mpeg' : 'image/jpeg'),
+            extension: ext,
+            size_bytes: file.size,
+            size_human: sizeHuman,
+            modified_at: Date.now(),
+          };
+
+          // Save to local offline database (IndexedDB) immediately
+          await storageService.saveMediaItem(mediaItem);
+        } catch (readErr) {
+          console.error('Error reading media file:', file.name, readErr);
+        }
       }
+
+      // Try uploading to backend if reachable in background
+      try {
+        const formData = new FormData();
+        for (const file of filesList) {
+          formData.append('files', file);
+        }
+        const apiBase = getApiBase();
+        await fetch(`${apiBase}/api/media/upload`, {
+          method: 'POST',
+          body: formData,
+          signal: AbortSignal.timeout(3000),
+        });
+      } catch {
+        // Backend optional, ignore in offline standalone mode
+      }
+
+      setUploadSuccess(true);
+      setTimeout(() => setUploadSuccess(false), 2500);
+      await fetchMedia();
     } catch (err) {
       console.error('Failed to upload media:', err);
     } finally {
@@ -117,19 +213,31 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
     }
   };
 
-  const handleDelete = async (filename: string) => {
+  const handleDelete = async (filename: string, id?: string) => {
     if (!window.confirm(`هل أنت متأكد من حذف الملف "${filename}" من مخزن الوسائط؟`)) return;
 
     try {
-      const res = await fetch(`/api/media/${encodeURIComponent(filename)}`, {
-        method: 'DELETE',
-      });
-      if (res.ok) {
-        setItems((prev) => prev.filter((i) => i.filename !== filename));
-        if (activeAudio?.filename === filename) setActiveAudio(null);
-        if (activeVideo?.filename === filename) setActiveVideo(null);
-        if (activeImage?.filename === filename) setActiveImage(null);
+      // 1. Delete from local IndexedDB
+      if (id) {
+        await storageService.deleteMediaItem(id);
       }
+      await storageService.deleteMediaItem(filename);
+
+      // 2. Try deleting from backend if connected
+      try {
+        const apiBase = getApiBase();
+        await fetch(`${apiBase}/api/media/${encodeURIComponent(filename)}`, {
+          method: 'DELETE',
+          signal: AbortSignal.timeout(2000),
+        });
+      } catch {
+        // ignore offline backend
+      }
+
+      setItems((prev) => prev.filter((i) => i.filename !== filename && i.id !== id));
+      if (activeAudio?.filename === filename || activeAudio?.id === id) setActiveAudio(null);
+      if (activeVideo?.filename === filename || activeVideo?.id === id) setActiveVideo(null);
+      if (activeImage?.filename === filename || activeImage?.id === id) setActiveImage(null);
     } catch (err) {
       console.error('Failed to delete media:', err);
     }
@@ -501,7 +609,7 @@ export const MediaVault: React.FC<MediaVaultProps> = ({
                       </div>
 
                       <button
-                        onClick={() => handleDelete(item.filename)}
+                        onClick={() => handleDelete(item.filename, item.id)}
                         className="p-1.5 rounded-lg hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-colors"
                         title="حذف الملف من المخزن"
                       >

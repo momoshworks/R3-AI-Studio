@@ -529,7 +529,7 @@ export const App: React.FC = () => {
   return (
     // Outer Flex is strictly dir="ltr" so Sidebar is ALWAYS anchored to the left of the screen!
     <div
-      className={`flex flex-row h-screen w-screen overflow-hidden font-sans transition-colors duration-200 ${
+      className={`fixed inset-0 flex flex-row h-full w-full overflow-hidden font-sans transition-colors duration-200 ${
         isDark ? 'bg-[#0e0f12] text-[#EDEDED]' : 'bg-slate-50 text-slate-800'
       }`}
       dir="ltr"
