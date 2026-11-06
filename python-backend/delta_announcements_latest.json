@@ -1,0 +1,326 @@
+{
+  "status": "success",
+  "student_id": "42510314",
+  "total_count": 32,
+  "fetched_at": "2026-11-06 13:52:15",
+  "announcements": [
+    {
+      "id": "55347",
+      "subject": "quiz",
+      "type": "Warning",
+      "instructor": "Nouran Emad El-Nemr",
+      "date": "03 November 2026 - 10:01 PM",
+      "body": "فيه كويز بكرة الاربعاء 4 نوفمبر الساعة 9 مساء مهم الناس تدخله وتعمل الاسايمنت عشان من غيرهم مش هعتمد درجات اي بونص اديتها قبل كده ببلغكم قبلها بمدة كافية عشان مش هفتحه تاني ايا كان العذر او السبب",
+      "images": []
+    },
+    {
+      "id": "55341",
+      "subject": "اختبارات كرة اليد",
+      "type": "Announcement",
+      "instructor": "Amr Keshk",
+      "date": "03 November 2026 - 06:14 PM",
+      "body": "",
+      "images": [
+        "https://dulms.deltauniv.edu.eg/files/Announcement/10658_7318859631.png"
+      ]
+    },
+    {
+      "id": "55326",
+      "subject": "تعويض سيكشن المراجعه digital logic",
+      "type": "Announcement",
+      "instructor": "Menna-Allah Hazem Ahmed Tolba Abo-Elsoud",
+      "date": "02 November 2026 - 05:54 PM",
+      "body": "Monday 2 Nov &bull; 9:00&thinsp;&ndash;&thinsp;10:00 pm Google Meet joining info Video call link: https://meet.google.com/qsp-ahez-ych",
+      "images": []
+    },
+    {
+      "id": "55315",
+      "subject": "Quiz 2 , Quiz 3",
+      "type": "Announcement",
+      "instructor": "Dr./Noha Emad hassan El Sayad",
+      "date": "02 November 2026 - 11:26 AM",
+      "body": "Dear Students, This is to inform you that Quiz 2 Will be opened at: Nov 3, 2026 at 10:00 PM Quiz 3 Will be opened at: Nov 6, 2026 at 03:30 PM Please make sure you are prepared and join on time. Best of luck! Dr. Noha El-Sayad",
+      "images": []
+    },
+    {
+      "id": "55307",
+      "subject": "Quiz",
+      "type": "Announcement",
+      "instructor": "mona mohamed abdallah mohamed",
+      "date": "01 November 2026 - 06:01 PM",
+      "body": "فيه كويز يوم الخميس باذن الله الساعة ٧",
+      "images": []
+    },
+    {
+      "id": "55303",
+      "subject": "اختبارات ( كرة السلة - كرة الطائرة )",
+      "type": "Announcement",
+      "instructor": "Amr Keshk",
+      "date": "01 November 2026 - 01:44 PM",
+      "body": "",
+      "images": [
+        "https://dulms.deltauniv.edu.eg/files/Announcement/10658_6317448214.png",
+        "https://dulms.deltauniv.edu.eg/files/Announcement/10658_8118260828.png"
+      ]
+    },
+    {
+      "id": "55276",
+      "subject": "اسايمنت وكويز",
+      "type": "Announcement",
+      "instructor": "Nouran Emad El-Nemr",
+      "date": "31 October 2026 - 09:53 AM",
+      "body": "ان شاء الله فيه اسايمنت هيفتح النهاردة الساعة 6 بالليل الناس تشوف الفيديوهات وبعدين تعمله هيبقى فيه كويز اون لاين برضو خلال الاسبوع ده هعرفكم قبل ميعاده بالضبط ان شاء الله",
+      "images": []
+    },
+    {
+      "id": "55249",
+      "subject": "Quiz OR",
+      "type": "Announcement",
+      "instructor": "takwa el baz el sayed elsawy",
+      "date": "30 October 2026 - 02:15 PM",
+      "body": "هيكون في كويز السكشن الجاي ان شاء الله الكويز عبارة عن سؤالين 1-Graphical 2-Simplex",
+      "images": []
+    },
+    {
+      "id": "55172",
+      "subject": "Important Announcement - Machine Learning Quiz",
+      "type": "Announcement",
+      "instructor": "Reham Farrag Elsayed Farrag",
+      "date": "27 October 2026 - 12:00 AM",
+      "body": "Dear Students, Please be informed that, Insha&rsquo;Allah, a machine learning quiz will be held according to the following schedule: 📅 Date: Tuesday, October 27, 2026 🕙 Time: 10:00 PM Please make sure to be prepared and attend on time. Best of luck to everyone!",
+      "images": []
+    },
+    {
+      "id": "55083",
+      "subject": "quiz",
+      "type": "Announcement",
+      "instructor": "Dr./Amani Abdel Hamid Jumaa Mujahid",
+      "date": "23 October 2026 - 07:56 PM",
+      "body": "كويز غدا السبت الساعه 9:50 مساءا",
+      "images": []
+    },
+    {
+      "id": "55056",
+      "subject": "quiz",
+      "type": "Announcement",
+      "instructor": "Dr./Amani Abdel Hamid Jumaa Mujahid",
+      "date": "23 October 2026 - 12:53 AM",
+      "body": "الكويز الجمعه 23/10/2026 الساعه 6:40 مساءا",
+      "images": []
+    },
+    {
+      "id": "55055",
+      "subject": "quiz",
+      "type": "Announcement",
+      "instructor": "Dr./Amani Abdel Hamid Jumaa Mujahid",
+      "date": "22 October 2026 - 10:29 PM",
+      "body": "الكويز هيفتح الجمعه الموافق 23/10/2026 الساعه 7:40 مساءا",
+      "images": []
+    },
+    {
+      "id": "55052",
+      "subject": "quiz",
+      "type": "Announcement",
+      "instructor": "Dr./Amani Abdel Hamid Jumaa Mujahid",
+      "date": "22 October 2026 - 08:34 PM",
+      "body": "الكويز سيتم فتحه غدا الجمعه الساعه 6:40 مساءا على الدالمز",
+      "images": []
+    },
+    {
+      "id": "54975",
+      "subject": "هــــــــــــــــــــــــــــــــــــــام جدا",
+      "type": "Announcement",
+      "instructor": "Ass. Prof.Dr./Hanaa Salem Mohamed Marie",
+      "date": "18 October 2026 - 02:27 PM",
+      "body": "طلابنا الاعزاء ..... برجاء ملء الاستبيان للضرورة https://docs.google.com/forms/d/e/1FAIpQLScEdkT095AR00fGt0uyKfJYZTOO0mxSmq6sNlcMiTFTsBowIw/viewform?usp=publish-editor",
+      "images": []
+    },
+    {
+      "id": "54890",
+      "subject": "OR",
+      "type": "Announcement",
+      "instructor": "takwa el baz el sayed elsawy",
+      "date": "14 October 2026 - 11:03 PM",
+      "body": "يرجي من سكاشن يوم الخميس الموافق 15/10 احضار الLaptop لتطبيق السكشن",
+      "images": []
+    },
+    {
+      "id": "54852",
+      "subject": "تعويض سيكشن يوم 8-10-2026",
+      "type": "Announcement",
+      "instructor": "Menna-Allah Hazem Ahmed Tolba Abo-Elsoud",
+      "date": "13 October 2026 - 09:05 PM",
+      "body": "شرح محتوى شيت 2 لجروب f2 موجود فى الماتريل week 5",
+      "images": []
+    },
+    {
+      "id": "54791",
+      "subject": "الحضور والغياب",
+      "type": "Warning",
+      "instructor": "Nouran Emad El-Nemr",
+      "date": "11 October 2026 - 03:41 PM",
+      "body": "غير مسموح بتعويض سكشسن النتورك مع معيد غير اللي مسجل معاه معنتش هاخد غيابات من معيدين تاني الحضور معايا في اي ميعاد يناسبك غير كده تعتبر غياب",
+      "images": []
+    },
+    {
+      "id": "54786",
+      "subject": "برنامج رحلات يوم واحد",
+      "type": "Announcement",
+      "instructor": "Amr Keshk",
+      "date": "11 October 2026 - 12:47 PM",
+      "body": "",
+      "images": [
+        "https://dulms.deltauniv.edu.eg/files/Announcement/10658_2706675427.jfif"
+      ]
+    },
+    {
+      "id": "54597",
+      "subject": "quiz 1",
+      "type": "Announcement",
+      "instructor": "Dr./Noha Emad hassan El Sayad",
+      "date": "06 October 2026 - 09:07 PM",
+      "body": "Dear Students, This is to inform you that Quiz 1 will be held on Thursday, October 8, 2026, at 9:00 PM . Please make sure you are prepared and join on time. Best of luck! Dr. Noha El-Sayad",
+      "images": []
+    },
+    {
+      "id": "54456",
+      "subject": "برنامج رحلات يوم واحد",
+      "type": "Announcement",
+      "instructor": "Amr Keshk",
+      "date": "03 October 2026 - 05:32 PM",
+      "body": "",
+      "images": [
+        "https://dulms.deltauniv.edu.eg/files/Announcement/10658_1406539021.png"
+      ]
+    },
+    {
+      "id": "54445",
+      "subject": "بطولة الجامعة لكرة القدم الخماسي",
+      "type": "Announcement",
+      "instructor": "Amr Keshk",
+      "date": "03 October 2026 - 11:32 AM",
+      "body": "",
+      "images": [
+        "https://dulms.deltauniv.edu.eg/files/Announcement/10658_1641120565.jpeg"
+      ]
+    },
+    {
+      "id": "54439",
+      "subject": "quiz and assign. data mining",
+      "type": "Announcement",
+      "instructor": "Dr./Samia Mohammed Mohammed Abd-Alhalem",
+      "date": "03 October 2026 - 10:44 AM",
+      "body": "السلام عليكم فيه كويز و اسيايمنت الاسبوع الحالى على السيستم",
+      "images": []
+    },
+    {
+      "id": "54438",
+      "subject": "data mining lec.",
+      "type": "Announcement",
+      "instructor": "Dr./Samia Mohammed Mohammed Abd-Alhalem",
+      "date": "03 October 2026 - 10:41 AM",
+      "body": "السلام عليكم احتمال كبير ان يوم الخميس اجازه رسمى لذا ارجو منكم الحضور المحاضره الاسبوع الحالى يوم السبت او الاحد",
+      "images": []
+    },
+    {
+      "id": "54144",
+      "subject": "اعلان الانشطة الطلابية",
+      "type": "Announcement",
+      "instructor": "Amr Keshk",
+      "date": "27 September 2026 - 04:00 PM",
+      "body": "",
+      "images": [
+        "https://dulms.deltauniv.edu.eg/files/Announcement/10658_7092504612.jfif"
+      ]
+    },
+    {
+      "id": "54007",
+      "subject": "اعلان هام ... ارقام السادة المرشدين الأكاديمين للتواصل",
+      "type": "Announcement",
+      "instructor": "Ass. Prof.Dr./Hanaa Salem Mohamed Marie",
+      "date": "23 September 2026 - 08:06 PM",
+      "body": "",
+      "images": [
+        "https://dulms.deltauniv.edu.eg/files/Announcement/17_5178644771.jpeg"
+      ]
+    },
+    {
+      "id": "53992",
+      "subject": "تعليمات الدخول للحرم الجامعى",
+      "type": "Announcement",
+      "instructor": "Delta University",
+      "date": "23 September 2026 - 03:01 PM",
+      "body": "",
+      "images": [
+        "https://dulms.deltauniv.edu.eg/files/Announcement/2462_8548359334.png"
+      ]
+    },
+    {
+      "id": "53761",
+      "subject": "اعلان",
+      "type": "Announcement",
+      "instructor": "Ass. Prof.Dr./Hanaa Salem Mohamed Marie",
+      "date": "20 September 2026 - 02:09 PM",
+      "body": "التقويم الأكاديمي للعام الجامعي 2026-2027 🎓 انطلاق رحلة التميز: الإعلان الرسمي عن التقويم الأكاديمي لجامعة الدلتا للعام الجامعي 2026-2027! 🚀 أبنائنا الطلاب، بناتنا الطالبات في جامعة الدلتا للعلوم والتكنولوجيا، نرحب بكم في مستهل عام دراسي جديد مليء بالطموح والنجاح. لكي تكون دائماً على خط الاستعداد ولكي تنظم جدولك من البداية، يسعدنا أن نعلن عن التقويم الأكاديمي المعتمد للعام الجامعي 2026-2027: 📌 أولاً: الفصل الدراسي الخريفي 2026 *بداية الدراسة : 19 سبتمبر 2026. *نهاية الحذف والإضافة: 3 أكتوبر 2026. *امتحانات منتصف الفصل (الميدترم): 7 نوفمبر 2026. *بداية الامتحانات النظرية: 2 يناير 2027. *بداية عطلة منتصف العام الجامعي: 23 يناير 2027. 📌 ثانياً: الفصل الدراسي الربيعي 2027 *بداية الدراسة للفصل الربيعي: 6 فبراير 2027. *نهاية الحذف والإضافة: 20 فبراير 2027. *امتحانات منتصف الفصل (الميدترم): 27 مارس 2027. *بداية الامتحانات النظرية : 29 مايو 2027. 📌 ثالثاً: الفصل الدراسي الصيفي 2027 *بداية الدراسة للفصل الصيفي: 10 يوليو 2027. *امتحانات منتصف الفصل الصيفي: 31 يوليو 2027. *إعلان النتيجة وبداية التسجيل المبكر للعام القادم: 4 سبتمبر 2027. كل تمنياتنا لكم بعام دراسي موفق وممتع.",
+      "images": [
+        "https://dulms.deltauniv.edu.eg/files/Announcement/17_5687734105.png"
+      ]
+    },
+    {
+      "id": "53681",
+      "subject": "اعلان هام",
+      "type": "Announcement",
+      "instructor": "Ass. Prof.Dr./Hanaa Salem Mohamed Marie",
+      "date": "18 September 2026 - 07:29 PM",
+      "body": "إعلان هام: امتحانات &quot;غير مكتمل&quot; للمقررات الدراسية للفصل الصيفي 2025/2026 تعلن كلية الذكاء الاصطناعي عن عقد امتحانات المقررات الدراسية (غير مكتمل) للفصل الصيفي، وذلك طبقاً للجدول التالي: يرجى من السادة الطلاب المعنيين الالتزام بالحضور في المواعيد المحددة. نتمنى لجميع الطلاب التوفيق والنجاح.",
+      "images": [
+        "https://dulms.deltauniv.edu.eg/files/Announcement/17_9749966658.jpeg",
+        "https://dulms.deltauniv.edu.eg/files/Announcement/17_2995789673.jpeg",
+        "https://dulms.deltauniv.edu.eg/files/Announcement/17_3926929822.jpeg",
+        "https://dulms.deltauniv.edu.eg/files/Announcement/17_4491984223.jpeg"
+      ]
+    },
+    {
+      "id": "53621",
+      "subject": "اعلان هام",
+      "type": "Announcement",
+      "instructor": "Delta University",
+      "date": "17 September 2026 - 03:19 PM",
+      "body": "",
+      "images": [
+        "https://dulms.deltauniv.edu.eg/files/Announcement/2462_1884374630.jpeg"
+      ]
+    },
+    {
+      "id": "53250",
+      "subject": "طرق دفع جديدة",
+      "type": "Announcement",
+      "instructor": "Delta University",
+      "date": "07 September 2026 - 10:23 PM",
+      "body": "طرق دفع جديدة ومتعددة لسداد المصروفات الجامعية حرصًا من جامعة الدلتا للعلوم والتكنولوجيا على توفير تجربة دفع أسهل وأسرع وأكثر مرونة، أصبح بإمكانكم الآن سداد المصروفات الجامعية من خلال مجموعة متنوعة من طرق الدفع التي تناسب احتياجاتكم . 💳 1️ ⃣ الدفع الإلكتروني Online Payment يمكنك سداد المصروفات الجامعية إلكترونيًا بكل سهولة وأمان باستخدام بطاقات Visa و Mastercard ، دون الحاجة إلى زيارة الجامعة . ✅ بدون أي عمولات أو مصاريف إضافية . ✅ يتم اضافة المبلغ لحظيًا في حساب الطالب لدى الجامعة . ✅ لا تحتاج إلى إرفاق أي إيصالات . ✅ لا تحتاج إلى انتظار أي موافقة على عملية السداد . 🏧 2️ ⃣ ماكينات الخدمة الذاتية Kiosk Self Service يمكنك سداد المصروفات بنفسك دون الوقوف في طوابير أو الحاجة إلى التعامل مع أي موظف، من خلال أجهزة الدفع الذاتي المتاحة في مداخل جميع كليات الجامعة . اختر الخدمة أو الرسوم التي ترغب في سدادها، ثم حدد قيمة الرسوم المناسبة لك من الخيارات المتاحة داخل كل خدمة. ويمكنك اختيار أكثر من خدمة وسدادها جميعًا من خلال عملية دفع واحدة . أدخل بطاقتك البنكية في قارئ البطاقات بالجهاز، أو قرّب هاتفك لاستخدام Apple Pay لإتمام عملية السداد بأمان . ✅ بدون أي عمولات أو مصاريف إضافية . ✅ يتم اضافة المبلغ لحظيًا في حساب الطالب لدى الجامعة . ✅ لا تحتاج إلى إنشاء إذن دفع مسبق . ✅ لا تحتاج إلى إرفاق أي إيصالات . ✅ لا تحتاج إلى انتظار أي موافقة على عملية السداد . 💰 3️ ⃣ خزينة الجامعة University Cashier يجب أولًا إنشاء إذن دفع مسبق من خلال منصة الطالب، حيث يمكنك تحديد الخدمة أو الرسوم المطلوب سدادها وتخصيص المبلغ الذي ترغب في سداده وفقًا لاحتياجاتك . بعد إنشاء إذن الدفع، توجه إلى منفذ السداد بالخزينة داخل الجامعة، وقم بسداد قيمة الإذن لدى موظف الخزينة . ✅ يتم اضافة المبلغ لحظيًا في حساب الطالب لدى الجامعة . ✅ لا توجد أي رسوم أو مصاريف إضافية . ⏱️ يجب الالتزام بالدور المحدد لك ضمن طابور الانتظار . 🟡 4️ ⃣ فوري Fawry Payment يجب أولًا إنشاء إذن دفع مسبق من خلال منصة الطالب، ثم تحديد الخدمة المراد سدادها وتعديل المبلغ وفقًا للقيمة التي ترغب في سدادها . بعد ذلك، قم بإنشاء طلب السداد للحصول على كود الدفع الخاص بك، والذي سيصلك في رسالة SMS من الجامعة على رقم هاتف الطالب المسجل لدى الجامعة . استخدم كود الدفع الموجود في الرسالة لدى أي منفذ من منافذ فوري أو أي تاجر لديه ماكينة فوري، سواء للسداد نقدًا أو باستخدام البطاقة البنكية . ✅ يتم اضافة المبلغ لحظيًا في حساب الطالب لدى الجامعة . ✅ لا تحتاج إلى إرفاق أي إيصالات . ✅ لا تحتاج إلى انتظار الموافقة على عملية السداد . 🔸 تطبق عمولة على السداد بنسبة 1% ، بحد أقصى 100 جنيه مصري مهما كانت قيمة المبلغ المراد سداده . 📱 5️ ⃣ إنستا باي والإيداع البنكي InstaPay &amp; Bank Deposit قم بتحويل المبلغ المطلوب من خلال تطبيق إنستا باي أو عن طريق الإيداع البنكي في أحد حسابات الجامعة . أرقام الحسابات البنكية متاحة على منصة الطالب ، ويمكنك الاطلاع عليها عند الدخول إلى خدمة السداد عن طريق الإيداع البنكي . بعد إتمام عملية السداد، قم برفع إيصال التحويل أو الإيداع من خلال منصة الطالب، مع استكمال جميع الحقول الإلزامية، ثم انتظر مراجعة العملية واعتمادها لإضافة المبلغ إلى رصيد حسابك لدى الجامعة . ⏱️ تستغرق عملية اضافة الرصيد في حساب الطالب من يوم إلى 5 أيام عمل . 🔸 قد يتم تطبيق رسوم إضافية من خلال البنك أو تطبيق إنستا باي . 📮 6️ ⃣ البريد المصري Egyptian Post كل ما عليك فعله هو التوجه إلى أحد فروع البريد المصري المنتشرة في جميع أنحاء الجمهورية، وإيداع المبلغ الذي ترغب في إضافته إلى حسابك لدى الجامعة، مع استخدام الرقم القومي للطالب كبيان للإيداع . على رقم الحساب التالى اسم الحساب : ربيع جروب التعليمية رقم الحساب : 1129313000004818 ⏱️ تستغرق عملية إضافة المبلغ إلى حسابك من يوم إلى 3 أيام عمل . ⚠️ تنبيه : لا تقم برفع إيصال الإيداع على منصة الطالب، حيث يتم تسجيل عملية الإيداع تلقائيًا على حسابك بعد وصول بيانات العملية من البريد المصري ومراجعتها . 📌 ملاحظة للطلاب الوافدين يمكن للطلاب الوافدين سداد المصروفات الجامعية من خلال الإيداع البنكي، مع إرفاق مستند الإيداع من خلال منصة الطالب، أو من خلال السداد النقدي (الكاش) بخزينة الجامعة. ولا يمكن للطلاب الوافدين استخدام أي من طرق السداد الأخرى المتاحة .",
+      "images": [
+        "https://dulms.deltauniv.edu.eg/files/Announcement/2462_6438331482.png"
+      ]
+    },
+    {
+      "id": "53242",
+      "subject": "Wegz Live Concert",
+      "type": "Announcement",
+      "instructor": "Amr Keshk",
+      "date": "03 September 2026 - 03:53 PM",
+      "body": "",
+      "images": [
+        "https://dulms.deltauniv.edu.eg/files/Announcement/10658_9268762484.png"
+      ]
+    },
+    {
+      "id": "53227",
+      "subject": "إعلان هــــــــــــــــــــــــــــــــــــــــــــــــــــام",
+      "type": "Announcement",
+      "instructor": "Ass. Prof.Dr./Hanaa Salem Mohamed Marie",
+      "date": "01 September 2026 - 10:45 AM",
+      "body": "خريجينا الاعزاء................ برجاء الحضور يوم الثلاثاء الموافق 1-9-2026 فى تمام الساعة الواحدة ظهرً ا بمكتية الكلية بالدور الثالث غرفة رقم (309) قسم الذكاء الاصطناعى نورهان سامى على محمد ابراهيم روضه فتحى محمد عبدالغفار طحينه تقى وائل صلاح عبدالفتاح مصطفى يوسف محمد عبدالبارى عبدل موسى سلمى محمد السيد محمود الحسينى الشهاوى منيره اشرف نبيل سليمان حسين لبنى احمد السيد عبد اللطيف رخا ياسين احمد عثمان محمد عسيلى يوسف محمد عبدالفتاح ابراهيم محمد أدهم محمد أحمد أحمد عيسى سلمى هشام لطفى حسن ابراهيم ايه جمعه محمد بسيونى حسان امنيه ايمن الغرباوى النبوى محمدين اسلام ياسر فتحى امين على سلمى السيد عبدالعليم محمد الشربينى قسم المعلوماتية الحيوية ابراهيم محمد ابراهيم احمد الماريه شهد عبد الغفار كمال عبد الغفار الزناتى ريم محمد الحسينى السعيد ياسين محمود عرفه احمد محمد ابوالخير بسمه رضا الششتاوى عبدالنبى الششتاوى نورين ابراهيم عبد الستار ابراهيم القطب احمد السيد محمد ابراهيم سالم خلود محمد حسنين محمد سويدان ساندى ساهر ابراهيم محمد طمان بسمله صلاح قطب قطب حسين آلاء محمد ابوزيد ابراهيم جلهوم نيبال طارق ابراهيم احمد الشوبري آلاء أيمن مروان لاشين مازن خالد حسن على ابراهيم ريماس سعد محمود ابوالحسن سليمان قسم تأمين البيانات جنا محمد رضا ابراهيم ابراهيم درويش نور حسام الدين شمس الدين محمد مصطفى ملك شريف محمد الشربينى عبد العزيز الهمشرى احمد رضا محمد لبيب ابوليله طارق تامر ابراهيم الحسينى دره أسامة ابراهيم مصطفى شبانة محمد حسام عبد الهادى حسن فرج روان عادل أحمد محمد اميرة ادمو هدير صفوت محمد بسيونى الشناوى على خالد محمد محمد البابلى منصور منه لله جمال فتح لله السيد الجوهرى عبدلله احمد عبد العزيز احمد الليثى مرام ايهاب فؤاد احمد هيبه احمد وليد فصيح سلامه",
+      "images": []
+    }
+  ]
+}

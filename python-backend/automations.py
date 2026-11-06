@@ -83,6 +83,17 @@ DEFAULT_WATCH_DIR = str(Path.home() / "Desktop" / "Nerdo_Watch")
 
 DEFAULT_TEMPLATES = [
     {
+        "id": "auto_delta_lms",
+        "name": "مراقب إعلانات وكويزات جامعة الدلتا (Delta LMS Monitor)",
+        "description": "تسجيل دخول دوري تلقائي لبوابة جامعة الدلتا (42510314) واستخراج أحدث الإعلانات ومواعيد الكويزات وتحليلها وتنبيهك بها فوراً.",
+        "type": "interval",
+        "interval_minutes": 60,
+        "prompt": "أنت المساعد الأكاديمي الذكي لطالب جامعة الدلتا. حلل أحدث إعلانات وتكليفات نظام إدارة التعلم (Delta LMS) المسحوبة للتو، واستخرج أهم المواعيد والتنبيهات العاجلة (الكويزات، التكليفات، ومحاضرات الأونلاين)، مع تحديد الموعد والإجراء المطلوب لكل إعلان.",
+        "model": "Google Gemini (gemini-2.5-flash)",
+        "enabled": True,
+        "action_type": "notify_and_vault"
+    },
+    {
         "id": "tpl_code_reviewer",
         "name": "مراقب ومراجع الأكواد الذكي (Code Reviewer)",
         "description": "يرصد أي تعديل أو إضافة في ملفات الكود بمجلد المشروع، ويراجع الأكواد لاكتشاف الثغرات وتحسين الأداء فوراً.",
@@ -271,6 +282,28 @@ async def execute_automation_task(task_id: str) -> dict:
 
         final_prompt = f"{raw_prompt}\n\n### الملفات المرصودة حديثاً ({len(selected_files)} ملف):\n" + "\n\n".join(files_content_block)
         context_details.append(f"تم رصد {len(selected_files)} ملفات معدلة حديثاً في: {watch_folder}")
+
+    # 1.5 Special Integration: Delta LMS Live Portal Scraper
+    is_delta = (
+        task.get("type") == "delta_lms"
+        or "delta" in task.get("id", "").lower()
+        or "delta" in task.get("name", "").lower()
+        or "دلتا" in task.get("name", "")
+        or "dulms" in raw_prompt.lower()
+    )
+    if is_delta:
+        try:
+            from delta_lms_scraper import fetch_delta_lms_announcements
+            delta_data = fetch_delta_lms_announcements()
+            ann_lines = []
+            for a in delta_data.get("announcements", [])[:15]:
+                img_str = f" [مرفق صورة: {a['images'][0]}]" if a.get("images") else ""
+                ann_lines.append(f"- **{a['subject']}** ({a['type']}) | المحاضر: {a['instructor']} | التاريخ: {a['date']}{img_str}\n  المحتوى: {a['body']}")
+            final_prompt = f"{raw_prompt}\n\n### أحدث إعلانات وتكليفات جامعة الدلتا المستخرجة الآن (إجمالي {delta_data.get('total_count')} إعلان):\n" + "\n\n".join(ann_lines)
+            context_details.append(f"تم سحب {delta_data.get('total_count')} إعلاناً بنجاح من بوابة Delta LMS للطالب {delta_data.get('student_id')}")
+        except Exception as d_err:
+            print(f"[Delta LMS Auto Scrape Warning] {d_err}")
+            context_details.append(f"تنبيه فحص Delta LMS: {d_err}")
 
     # 2. System metrics interpolation
     try:
