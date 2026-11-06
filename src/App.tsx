@@ -1,20 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Sparkles,
-  Cpu,
-  HardDrive,
   ChevronDown,
   LogOut,
   Key,
   Plus,
   Users,
-  Bot,
   Check,
   Sun,
   Moon,
-  Globe,
-  Search,
-  Activity,
   Menu,
 } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
@@ -232,7 +226,6 @@ export const App: React.FC = () => {
   const [activeMedia, setActiveMedia] = useState<MediaItem | null>(null);
 
   // System & Backend Data
-  const [isMetricsMenuOpen, setIsMetricsMenuOpen] = useState(false);
   const [metrics, setMetrics] = useState<SystemMetrics>({
     cpu_usage: 0,
     memory_used_mb: 0,
@@ -536,7 +529,7 @@ export const App: React.FC = () => {
     // Outer Flex is strictly dir="ltr" so Sidebar is ALWAYS anchored to the left of the screen!
     <div
       className={`flex flex-row h-screen w-screen overflow-hidden font-sans transition-colors duration-200 ${
-        isDark ? 'bg-gemini-dark text-gray-100' : 'bg-slate-50 text-slate-800'
+        isDark ? 'bg-[#0e0f12] text-[#EDEDED]' : 'bg-slate-50 text-slate-800'
       }`}
       dir="ltr"
     >
@@ -564,6 +557,7 @@ export const App: React.FC = () => {
         onOpenSettings={() => setIsSettingsOpen(true)}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        metrics={metrics}
         t={t}
         theme={theme}
         lang={lang}
@@ -571,284 +565,147 @@ export const App: React.FC = () => {
 
       {/* 2. Main Workspace (dir adapts for Arabic or English content) */}
       <div
-        className="flex-1 flex flex-col h-full overflow-hidden relative"
+        className="flex-1 flex flex-col h-full overflow-hidden relative bg-[#0e0f12]"
         dir={lang === 'ar' ? 'rtl' : 'ltr'}
       >
-        {/* Top Navigation Bar */}
+        {/* Top Navigation Bar - Ultra-Clean Linear & Gemini Aesthetic */}
         <header
-          className={`px-2 sm:px-4 md:px-6 border-b flex items-center justify-between select-none z-10 transition-colors gap-1.5 sm:gap-2 safe-pt min-h-[calc(3.5rem+env(safe-area-inset-top,0px))] ${
+          className={`h-14 px-3 sm:px-6 border-b flex items-center justify-between select-none z-10 transition-colors gap-2 shrink-0 ${
             isDark
-              ? 'bg-gemini-dark/80 backdrop-blur-md border-gemini-border/70 text-gray-100'
+              ? 'bg-[#0e0f12]/80 backdrop-blur-md border-[#262930] text-[#EDEDED]'
               : 'bg-white/90 backdrop-blur-md border-slate-200 text-slate-800'
           }`}
         >
-          {/* Left section: Sidebar toggle + Model Selector + Search */}
-          <div className="flex items-center gap-2 min-w-0">
-            {/* Sidebar Drawer Toggle (mobile or when sidebar is collapsed) */}
+          {/* Left section: Sidebar toggle + Minimalist Branding */}
+          <div className="flex items-center gap-2.5 min-w-0">
             <button
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className={`p-1.5 sm:p-2 rounded-xl border transition-all shrink-0 ${
+              className={`p-1.5 sm:p-2 rounded-xl transition-all shrink-0 ${
                 isSidebarCollapsed ? 'flex' : 'flex md:hidden'
               } ${
                 isDark
-                  ? 'text-gray-300 hover:text-white bg-[#1a1b1d] hover:bg-[#252628] border-white/10'
-                  : 'text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border-slate-200'
+                  ? 'text-[#8F95A0] hover:text-[#EDEDED] hover:bg-white/5'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
               title={t.toggleSidebar}
             >
               <Menu className="w-4 h-4" />
             </button>
-
-            {/* Model Selector Dropdown Button */}
-            <div className="relative shrink-0">
-              <button
-                onClick={() => setIsModelMenuOpen(!isModelMenuOpen)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium transition-all shadow-sm whitespace-nowrap ${
-                  isChatGpt
-                    ? isDark
-                      ? 'bg-emerald-950/30 hover:bg-emerald-900/40 border-emerald-500/40 text-emerald-300'
-                      : 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-700'
-                    : isDark
-                    ? 'bg-[#1e1f20] hover:bg-[#282a2c] border-gemini-border text-gray-200'
-                    : 'bg-white hover:bg-slate-100 border-slate-300 text-slate-800'
-                }`}
-              >
-                {isChatGpt ? (
-                  <Bot className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                ) : (
-                  <Sparkles className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                )}
-                <span className="font-semibold truncate sm:hidden max-w-[100px]">
-                  {getShortModelName(selectedModel)}
-                </span>
-                <span className="font-semibold truncate hidden sm:inline max-w-[180px]">
-                  {getDisplayModelName(selectedModel)}
-                </span>
-                {((isChatGpt && !hasOpenaiKey) || (!isChatGpt && !hasApiKey)) && (
-                  <span
-                    className="w-2 h-2 rounded-full bg-amber-400 animate-ping shrink-0"
-                    title={lang === 'ar' ? 'مفتاح API غير متوفر' : 'API Key missing'}
-                  />
-                )}
-                <ChevronDown className="w-3 h-3 opacity-60 shrink-0" />
-              </button>
-
-              {/* Models Menu */}
-              {isModelMenuOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setIsModelMenuOpen(false)}
-                  />
-                  <div
-                    dir={lang === 'ar' ? 'rtl' : 'ltr'}
-                    className={`absolute top-full mt-2 w-72 max-w-[calc(100vw-32px)] rounded-2xl shadow-2xl p-2.5 text-xs z-50 space-y-3 animate-in fade-in zoom-in-95 duration-150 border ${
-                      lang === 'ar' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'
-                    } ${
-                      isDark
-                        ? 'bg-[#1e1f20] border-gemini-border text-gray-200'
-                        : 'bg-white border-slate-200 text-slate-800'
-                    }`}
-                  >
-                    {AVAILABLE_MODELS.map((group) => (
-                      <div key={group.category} className="space-y-1">
-                        <div className="px-2 text-[10px] font-semibold opacity-60 uppercase tracking-wider">
-                          {group.category}
-                        </div>
-                        {group.models.map((m) => {
-                          const isSelected = selectedModel === m.id;
-                          return (
-                            <button
-                              key={m.id}
-                              onClick={() => {
-                                setSelectedModel(m.id);
-                                setIsModelMenuOpen(false);
-                              }}
-                              className={`w-full p-2 rounded-xl text-right transition-colors flex items-center justify-between ${
-                                isSelected
-                                  ? isDark
-                                    ? 'bg-white/10 text-white font-medium border border-white/10'
-                                    : 'bg-blue-50 text-blue-700 font-medium border border-blue-200'
-                                  : isDark
-                                  ? 'hover:bg-white/5 text-gray-300'
-                                  : 'hover:bg-slate-100 text-slate-700'
-                              }`}
-                            >
-                              <div className="truncate">
-                                <div className="font-medium text-xs flex items-center gap-1.5">
-                                  <span>{m.name}</span>
-                                  <span className={`text-[9px] px-1.5 py-0.2 rounded font-mono ${
-                                    isDark ? 'bg-black/40 text-gray-400' : 'bg-slate-200 text-slate-600'
-                                  }`}>
-                                    {m.tag}
-                                  </span>
-                                </div>
-                                <div className="text-[10px] opacity-60 truncate mt-0.5">
-                                  {m.desc}
-                                </div>
-                              </div>
-                              {isSelected && <Check className="w-3.5 h-3.5 text-blue-500 shrink-0" />}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Quick Command Palette Spotlight Trigger */}
-            <button
-              onClick={() => setIsCommandPaletteOpen(true)}
-              className={`hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-full border text-xs font-medium transition-all shrink-0 whitespace-nowrap ${
-                isDark
-                  ? 'bg-[#1a1b1d] hover:bg-[#222325] border-white/10 text-gray-400 hover:text-gray-200'
-                  : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-600 hover:text-slate-900'
-              }`}
-              title={t.commandPalette}
-            >
-              <Search className="w-3.5 h-3.5 opacity-60 shrink-0" />
-              <span className="hidden md:inline text-[11px] opacity-80">
-                {lang === 'ar' ? 'بحث أو أوامر' : 'Search or actions'}
-              </span>
-              <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/30 text-gray-400 border border-white/5">
-                Ctrl+K
-              </kbd>
-            </button>
+            <span className="font-semibold text-sm tracking-tight text-[#EDEDED] hidden xs:inline">
+              Nerdo
+            </span>
           </div>
 
-          {/* Right section: System pulse + Update pill (when available) + Lang + Theme + User Menu */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {/* System Performance Pulse Widget */}
-            <div className="relative hidden md:block shrink-0">
-              <button
-                onClick={() => setIsMetricsMenuOpen(!isMetricsMenuOpen)}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs font-mono transition-all hover:border-blue-500/40 shadow-sm whitespace-nowrap ${
-                  isDark
-                    ? 'bg-[#1a1b1d] border-white/10 text-gray-300'
-                    : 'bg-slate-100 border-slate-200 text-slate-700'
-                }`}
-                title={lang === 'ar' ? 'اضغط لعرض تفاصيل استهلاك وموارد الجهاز' : 'System Performance & Resources'}
-              >
-                <span
-                  className={`w-2 h-2 rounded-full shrink-0 ${
-                    metrics.cpu_usage > 85
-                      ? 'bg-rose-500 animate-ping'
-                      : metrics.cpu_usage > 60
-                      ? 'bg-amber-400'
-                      : 'bg-emerald-400 animate-pulse'
-                  }`}
-                />
-                <span dir="ltr" className="font-semibold text-[11px] tracking-tight">
-                  CPU {metrics.cpu_usage.toFixed(0)}% • RAM {metrics.memory_percentage.toFixed(0)}%
-                </span>
-                <ChevronDown className="w-2.5 h-2.5 opacity-50 shrink-0" />
-              </button>
-
-              {/* System Performance Details Popover */}
-              {isMetricsMenuOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setIsMetricsMenuOpen(false)} />
-                  <div
-                    dir={lang === 'ar' ? 'rtl' : 'ltr'}
-                    className={`absolute top-full mt-2 end-0 z-50 w-64 rounded-2xl p-3.5 shadow-2xl border text-xs space-y-3 animate-in fade-in zoom-in-95 duration-150 ${
-                      isDark
-                        ? 'bg-[#1e1f20] border-gemini-border text-gray-200 shadow-black/60'
-                        : 'bg-white border-slate-200 text-slate-800 shadow-slate-300/60'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between pb-2 border-b border-white/10">
-                      <span className="font-bold flex items-center gap-1.5">
-                        <Activity className="w-3.5 h-3.5 text-blue-400" />
-                        {lang === 'ar' ? 'موارد الجهاز ومحرك الذكاء' : 'System & AI Engine'}
-                      </span>
-                      <span className="text-[10px] text-emerald-400 font-mono bg-emerald-500/10 px-1.5 py-0.5 rounded">
-                        {lang === 'ar' ? 'متصل محلياً' : 'Local Connected'}
-                      </span>
-                    </div>
-
-                    {/* CPU Meter */}
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-[11px] opacity-80">
-                        <span className="flex items-center gap-1.5"><Cpu className="w-3 h-3 text-blue-400" />{t.cpu}</span>
-                        <span dir="ltr" className="font-mono font-bold text-blue-400">{metrics.cpu_usage.toFixed(1)}%</span>
-                      </div>
-                      <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
-                        <div
-                          className="h-full bg-blue-500 rounded-full transition-all duration-300"
-                          style={{ width: `${Math.min(100, metrics.cpu_usage)}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* RAM Meter */}
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-[11px] opacity-80">
-                        <span>{t.ram} ({((metrics.memory_used_mb || 0) / 1024).toFixed(1)} / {((metrics.memory_total_mb || 1) / 1024).toFixed(1)} GB)</span>
-                        <span dir="ltr" className="font-mono font-bold text-purple-400">{metrics.memory_percentage.toFixed(0)}%</span>
-                      </div>
-                      <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
-                        <div
-                          className="h-full bg-purple-500 rounded-full transition-all duration-300"
-                          style={{ width: `${Math.min(100, metrics.memory_percentage)}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Disk Free */}
-                    <div className="flex justify-between items-center pt-1.5 text-[11px] border-t border-white/10">
-                      <span className="opacity-70 flex items-center gap-1">
-                        <HardDrive className="w-3 h-3 text-cyan-400" />
-                        {t.diskFree}
-                      </span>
-                      <span dir="ltr" className="font-mono font-bold text-cyan-400">
-                        {metrics.disk_free_gb.toFixed(0)} GB
-                      </span>
-                    </div>
-                  </div>
-                </>
+          {/* Center: Clean, pill-shaped Model Selector with translucent #1e2026 */}
+          <div className="relative shrink-0">
+            <button
+              onClick={() => setIsModelMenuOpen(!isModelMenuOpen)}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-medium transition-all shadow-sm whitespace-nowrap active:scale-95 ${
+                isDark
+                  ? 'bg-[#1e2026] hover:bg-[#252830] border-[#2a2d36] text-[#EDEDED]'
+                  : 'bg-white hover:bg-slate-100 border-slate-300 text-slate-800'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#8ab4f8] shrink-0" />
+              <span className="font-semibold truncate sm:hidden max-w-[100px]">
+                {getShortModelName(selectedModel)}
+              </span>
+              <span className="font-semibold truncate hidden sm:inline max-w-[180px]">
+                {getDisplayModelName(selectedModel)}
+              </span>
+              <ChevronDown className="w-3 h-3 text-[#8F95A0] shrink-0" />
+              {((isChatGpt && !hasOpenaiKey) || (!isChatGpt && !hasApiKey)) && (
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" title="API Key missing" />
               )}
-            </div>
+            </button>
 
-            {/* GitHub Release Update Button - ONLY shown if an update is available! */}
-            {releaseInfo?.has_update && (
-              <button
-                onClick={() => setIsUpdateModalOpen(true)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md shadow-purple-500/25 animate-pulse hover:opacity-90 transition-all shrink-0 whitespace-nowrap"
-                title={lang === 'ar' ? `تحديث جديد متوفر: ${releaseInfo.tag_name}` : `New Update: ${releaseInfo.tag_name}`}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin" />
-                <span className="hidden sm:inline">{lang === 'ar' ? 'تحديث متاح' : 'Update'}</span>
-                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-white/20">
-                  {releaseInfo.tag_name}
-                </span>
-              </button>
+            {/* Models Menu */}
+            {isModelMenuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsModelMenuOpen(false)}
+                />
+                <div
+                  dir={lang === 'ar' ? 'rtl' : 'ltr'}
+                  className={`absolute top-full mt-2 w-72 max-w-[calc(100vw-32px)] rounded-2xl shadow-2xl p-2 text-xs z-50 space-y-2 border animate-in fade-in zoom-in-95 duration-150 ${
+                    lang === 'ar' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'
+                  } ${
+                    isDark
+                      ? 'bg-[#16181d] border-[#262930] text-[#EDEDED]'
+                      : 'bg-white border-slate-200 text-slate-800'
+                  }`}
+                >
+                  {AVAILABLE_MODELS.map((group) => (
+                    <div key={group.category} className="space-y-1">
+                      <div className="px-2 text-[10px] font-semibold text-[#8F95A0] uppercase tracking-wider">
+                        {group.category}
+                      </div>
+                      {group.models.map((m) => {
+                        const isSelected = selectedModel === m.id;
+                        return (
+                          <button
+                            key={m.id}
+                            onClick={() => {
+                              setSelectedModel(m.id);
+                              setIsModelMenuOpen(false);
+                            }}
+                            className={`w-full p-2 rounded-xl text-start transition-colors flex items-center justify-between ${
+                              isSelected
+                                ? isDark
+                                  ? 'bg-[#1e2026] text-[#EDEDED] font-medium'
+                                  : 'bg-blue-50 text-blue-700 font-medium'
+                                : isDark
+                                ? 'hover:bg-white/[0.04] text-[#8F95A0]'
+                                : 'hover:bg-slate-100 text-slate-700'
+                            }`}
+                          >
+                            <div className="truncate">
+                              <div className="font-medium text-xs flex items-center gap-1.5 text-[#EDEDED]">
+                                <span>{m.name}</span>
+                                <span className="text-[9px] px-1.5 py-0.2 rounded font-mono bg-black/40 text-[#8F95A0]">
+                                  {m.tag}
+                                </span>
+                              </div>
+                              <div className="text-[10px] text-[#8F95A0] truncate mt-0.5">
+                                {m.desc}
+                              </div>
+                            </div>
+                            {isSelected && <Check className="w-3.5 h-3.5 text-[#8ab4f8] shrink-0" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
+          </div>
 
+          {/* Right section: Minimal quick-actions: Language, Theme, User Avatar */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {/* Language Switch Button */}
             <button
               onClick={toggleLanguage}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs font-semibold transition-all shrink-0 whitespace-nowrap ${
+              className={`px-2.5 py-1.5 rounded-full text-xs font-medium transition-all shrink-0 whitespace-nowrap ${
                 isDark
-                  ? 'bg-[#1a1b1d] hover:bg-[#252629] border-white/10 text-gray-200'
-                  : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-800'
+                  ? 'text-[#8F95A0] hover:text-[#EDEDED] hover:bg-white/5'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
               title={lang === 'ar' ? 'Switch to English' : 'التحويل إلى العربية'}
             >
-              <Globe className="w-3.5 h-3.5 text-blue-400 shrink-0" />
               <span>{lang === 'ar' ? 'EN' : 'عربي'}</span>
             </button>
 
             {/* Theme Switch Button */}
             <button
               onClick={toggleTheme}
-              className={`p-1.5 rounded-full border transition-all shrink-0 ${
+              className={`p-2 rounded-full transition-all shrink-0 ${
                 isDark
-                  ? 'bg-[#1a1b1d] hover:bg-[#252629] border-white/10 text-amber-400'
-                  : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-purple-600'
+                  ? 'text-[#8F95A0] hover:text-[#EDEDED] hover:bg-white/5'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
-              title={lang === 'ar' ? 'تبديل المظهر (فاتح / داكن)' : 'Toggle Theme (Light / Dark)'}
+              title={lang === 'ar' ? 'تبديل المظهر' : 'Toggle Theme'}
             >
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
@@ -857,21 +714,14 @@ export const App: React.FC = () => {
             <div className="relative shrink-0">
               <button
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className={`flex items-center gap-1.5 pl-2 pr-2.5 py-1 rounded-full border transition-colors text-xs shrink-0 whitespace-nowrap ${
-                  isDark
-                    ? 'bg-[#1e1f20] hover:bg-[#282a2c] border-gemini-border'
-                    : 'bg-slate-100 hover:bg-slate-200 border-slate-300'
-                }`}
+                className="flex items-center gap-1.5 p-1 rounded-full border border-[#262930] hover:border-[#8ab4f8]/50 transition-colors"
               >
                 <img
                   src={currentPicture}
                   alt={currentDisplayName}
-                  className="w-6 h-6 rounded-full border border-blue-500 object-cover shrink-0"
+                  className="w-6 h-6 rounded-full object-cover shrink-0"
                 />
-                <span className="font-medium max-w-[110px] truncate hidden md:inline">
-                  {currentDisplayName}
-                </span>
-                <ChevronDown className="w-3 h-3 opacity-60" />
+                <ChevronDown className="w-3 h-3 text-[#8F95A0] shrink-0" />
               </button>
 
               {isUserMenuOpen && (

@@ -299,101 +299,69 @@ export const ChatCanvas: React.FC<ChatCanvasProps> = ({
         </div>
       )}
 
-      {/* Welcome Screen when Empty */}
+      {/* Welcome Screen when Empty (Clean Gemini + Linear Aesthetic) */}
       {messages.length === 0 && (
-        <div className="min-h-[58vh] flex flex-col items-center justify-center text-center space-y-6 relative overflow-hidden select-none py-8">
-          {/* Claude AI Inspired Warm Refined Ambient Glow */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-0">
-            <div className="w-[520px] h-[520px] rounded-full bg-gradient-to-tr from-amber-500/10 via-purple-500/10 to-blue-500/10 blur-3xl animate-claude-ambient" />
-          </div>
-
-          {/* App Logo Badge with Refined Glow */}
-          <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-xl shadow-purple-900/20 ring-1 ring-white/20 relative z-10 transition-transform hover:scale-105 duration-300">
-            <img src="/app-icon.png" alt="R3" className="w-full h-full object-cover" />
-          </div>
-
-          {/* Claude AI Editorial Greeting Title */}
-          <div className="relative z-10 space-y-1">
-            <h2 className="flex flex-col items-center justify-center">
-              <span
-                className="text-lg md:text-xl font-medium tracking-wide text-amber-200/90 font-serif"
-              >
-                {lang === 'ar' ? 'مرحباً بك في' : 'Welcome to'}
-              </span>
-              <span
-                className="text-4xl md:text-6xl font-semibold font-claude-serif text-claude-gradient tracking-tight mt-1 select-none"
-              >
-                Nerdo AI Studio
-              </span>
-            </h2>
-            <p
-              className={`mt-2 max-w-md text-xs md:text-sm leading-relaxed ${
-                isDark ? 'text-gray-400' : 'text-slate-600'
-              }`}
-              dir="auto"
-            >
-              {t.welcomeDesc}
+        <div className="min-h-[58vh] flex flex-col items-center justify-center text-center py-10 space-y-6 select-none animate-in fade-in duration-300">
+          {/* Centered Greeting: Vibrant Gradient Sparkle Icon + Heading */}
+          <div className="flex flex-col items-center space-y-3">
+            <div className="p-3.5 rounded-2xl bg-[#16181d] border border-[#262930] shadow-sm">
+              <Sparkles className="w-8 h-8 text-[#8ab4f8]" />
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#EDEDED]">
+              {lang === 'ar' ? 'كيف يمكنني مساعدتك اليوم؟' : 'How can I help you today?'}
+            </h1>
+            <p className="text-xs sm:text-sm text-[#8F95A0] max-w-md leading-relaxed">
+              {lang === 'ar'
+                ? 'اطرح أسئلة برمجية معقدة، حلل تقارير وأوراق عمل، أو استكشف أفكاراً جديدة'
+                : 'Ask questions, review complex code, analyze reports, or brainstorm high-level concepts.'}
             </p>
           </div>
 
-          {/* Interactive Quick Prompts Section */}
-          <div className="w-full max-w-xl space-y-2 pt-2">
-            <div
-              className={`text-[11px] font-semibold opacity-60 uppercase tracking-wider ${
-                lang === 'ar' ? 'text-right' : 'text-left'
-              }`}
-            >
-              {t.quickPromptsTitle}
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {[
-                {
-                  text: t.chipReport,
-                  icon: '📝',
-                  prompt:
-                    lang === 'ar'
-                      ? 'اكتب تقريراً تحليلياً مفصلاً ومنسقاً بصيغة تقرير احترافي جاهز للتحميل كـ PDF عن: '
-                      : 'Write a comprehensive analytical report formatted for PDF export about: ',
-                },
-                {
-                  text: t.chipCode,
-                  icon: '💻',
-                  prompt:
-                    lang === 'ar'
-                      ? 'قم بفحص وتحسين الكود البرمجي التالي وشرح أفضل الممارسات: '
-                      : 'Review and optimize this code snippet with best practices: ',
-                },
-                {
-                  text: t.chipDesign,
-                  icon: '🎨',
-                  prompt:
-                    lang === 'ar'
-                      ? 'اقترح تخطيطاً وتوزيع عناصر لواجهة مستخدم (UI/UX) حديثة مع ألوان عصرية: '
-                      : 'Suggest a modern UI/UX layout concept with color palettes for: ',
-                },
-                {
-                  text: t.chipPdf,
-                  icon: '📊',
-                  prompt:
-                    lang === 'ar'
-                      ? 'لخص النقاط الجوهرية والقرارات الأساسية في موضوع: '
-                      : 'Summarize the core takeaways and action items regarding: ',
-                },
-              ].map((chip, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => onPromptSelect && onPromptSelect(chip.prompt)}
-                  className={`p-3 rounded-2xl border text-right transition-all flex items-start gap-2.5 shadow-sm hover:scale-[1.01] active:scale-[0.99] ${
-                    isDark
-                      ? 'bg-[#18191c]/80 hover:bg-[#222428] border-gemini-border/70 hover:border-blue-500/40 text-gray-200'
-                      : 'bg-white hover:bg-slate-50 border-slate-200 hover:border-blue-400 text-slate-800'
-                  }`}
-                >
-                  <span className="text-base shrink-0">{chip.icon}</span>
-                  <span className="text-xs font-medium leading-relaxed">{chip.text}</span>
-                </button>
-              ))}
-            </div>
+          {/* Quick Prompt Chips (4 compact, horizontal pill-shaped chips) */}
+          <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2 max-w-xl">
+            {[
+              {
+                text: lang === 'ar' ? 'تحليل التقرير' : 'Analyze Report',
+                icon: '📊',
+                prompt:
+                  lang === 'ar'
+                    ? 'اكتب تقريراً تحليلياً مفصلاً ومنسقاً بصيغة تقرير احترافي جاهز للتحميل كـ PDF عن: '
+                    : 'Write a comprehensive analytical report formatted for PDF export about: ',
+              },
+              {
+                text: lang === 'ar' ? 'مراجعة الكود' : 'Code Review',
+                icon: '💻',
+                prompt:
+                  lang === 'ar'
+                    ? 'قم بفحص وتحسين الكود البرمجي التالي وشرح أفضل الممارسات: '
+                    : 'Review and optimize this code snippet with best practices: ',
+              },
+              {
+                text: lang === 'ar' ? 'تصميم UI/UX' : 'UI/UX Design',
+                icon: '🎨',
+                prompt:
+                  lang === 'ar'
+                    ? 'اقترح تخطيطاً وتوزيع عناصر لواجهة مستخدم (UI/UX) حديثة مع ألوان عصرية: '
+                    : 'Suggest a modern UI/UX layout concept with color palettes for: ',
+              },
+              {
+                text: lang === 'ar' ? 'تلخيص المستند' : 'Summarize Doc',
+                icon: '✨',
+                prompt:
+                  lang === 'ar'
+                    ? 'لخص النقاط الجوهرية والقرارات الأساسية في موضوع: '
+                    : 'Summarize the core takeaways and action items regarding: ',
+              },
+            ].map((chip, idx) => (
+              <button
+                key={idx}
+                onClick={() => onPromptSelect && onPromptSelect(chip.prompt)}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#16181d] hover:bg-[#1e2026] border border-[#262930] hover:border-[#8ab4f8]/50 text-[#8F95A0] hover:text-[#EDEDED] text-xs font-medium transition-all shadow-sm active:scale-95"
+              >
+                <span>{chip.icon}</span>
+                <span>{chip.text}</span>
+              </button>
+            ))}
           </div>
         </div>
       )}

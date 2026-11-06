@@ -10,7 +10,6 @@ import {
   Loader2,
   Mic,
   MicOff,
-  Sparkles,
 } from 'lucide-react';
 import { AttachedFile } from '../types';
 import { api } from '../services/api';
@@ -218,12 +217,12 @@ export const InputBar: React.FC<InputBarProps> = ({
           setIsDragging(false);
           handleFiles(e.dataTransfer.files);
         }}
-        className={`relative rounded-2xl sm:rounded-3xl p-2 sm:p-3 border transition-all duration-200 shadow-xl backdrop-blur-xl ${
+        className={`relative rounded-3xl p-2 sm:p-3 border transition-all duration-200 shadow-2xl ${
           isDragging
             ? 'border-blue-500 bg-blue-500/10 ring-4 ring-blue-500/20'
             : isDark
-            ? 'bg-[#18191c]/90 border-gemini-border focus-within:border-blue-500/50 hover:border-gray-600 shadow-black/40'
-            : 'bg-white/95 border-slate-200 focus-within:border-blue-500 hover:border-slate-300 shadow-slate-200/50'
+            ? 'bg-[#16181d] border-[#2a2d36] focus-within:border-[#8ab4f8]/60 focus-within:ring-1 focus-within:ring-[#8ab4f8]/20 hover:border-[#3c404c]'
+            : 'bg-white/95 border-slate-200 focus-within:border-blue-500 hover:border-slate-300'
         }`}
       >
         {/* Render Attachments Chips */}
@@ -294,11 +293,11 @@ export const InputBar: React.FC<InputBarProps> = ({
           onKeyDown={handleKeyDown}
           dir="auto"
           style={{ unicodeBidi: 'plaintext' }}
-          placeholder={lang === 'ar' ? 'اسأل Nerdo أي شيء، أو تحدث صوتياً...' : 'Ask Nerdo anything or speak...'}
+          placeholder={lang === 'ar' ? 'اسأل Nerdo أي شيء...' : 'Ask Nerdo anything...'}
           rows={1}
           className={`w-full bg-transparent text-xs sm:text-sm md:text-base outline-none resize-none px-2 sm:px-3 py-1.5 sm:py-2 min-h-[38px] max-h-28 sm:max-h-48 leading-relaxed font-sans ${
             isDark
-              ? 'text-gray-100 placeholder-gray-500'
+              ? 'text-[#EDEDED] placeholder-[#8F95A0]'
               : 'text-slate-900 placeholder-slate-400'
           }`}
         />
@@ -319,7 +318,7 @@ export const InputBar: React.FC<InputBarProps> = ({
               type="button"
               onClick={() => fileInputRef.current?.click()}
               className={`p-2 rounded-full transition-colors ${
-                isDark ? 'text-gray-400 hover:text-white hover:bg-white/5' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                isDark ? 'text-[#8F95A0] hover:text-[#EDEDED] hover:bg-white/5' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
               }`}
               title={lang === 'ar' ? 'إرفاق ملفات أو صور للتحليل' : 'Attach files or images for analysis'}
             >
@@ -334,7 +333,7 @@ export const InputBar: React.FC<InputBarProps> = ({
                 isListening
                   ? 'bg-red-500 text-white animate-bounce shadow-lg shadow-red-500/30'
                   : isDark
-                  ? 'text-gray-400 hover:text-purple-400 hover:bg-white/5'
+                  ? 'text-[#8F95A0] hover:text-[#8ab4f8] hover:bg-white/5'
                   : 'text-slate-500 hover:text-purple-600 hover:bg-slate-100'
               }`}
               title={t.voiceInput}
@@ -348,20 +347,20 @@ export const InputBar: React.FC<InputBarProps> = ({
             {isGenerating ? (
               <button
                 onClick={onStop}
-                className="w-8 h-8 rounded-full bg-red-600 hover:bg-red-500 text-white flex items-center justify-center transition-all shadow-md active:scale-95"
+                className="w-9 h-9 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center transition-all shadow-md active:scale-95"
                 title={t.stop}
               >
-                <Square className="w-3.5 h-3.5" />
+                <Square className="w-3.5 h-3.5 fill-current" />
               </button>
             ) : (
               <button
                 onClick={handleSubmit}
                 disabled={!text.trim() && attachments.length === 0}
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
                   text.trim() || attachments.length > 0
-                    ? 'bg-gradient-to-tr from-blue-600 to-purple-600 text-white hover:opacity-95 shadow-lg shadow-blue-500/20 cursor-pointer active:scale-95'
+                    ? 'bg-[#8ab4f8] text-[#0e0f12] hover:bg-[#a6c8ff] shadow-md shadow-[#8ab4f8]/25 cursor-pointer active:scale-95'
                     : isDark
-                    ? 'bg-white/10 text-gray-500 cursor-not-allowed'
+                    ? 'bg-transparent text-[#8F95A0] opacity-40 cursor-not-allowed'
                     : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                 }`}
                 title={t.send}
@@ -374,12 +373,11 @@ export const InputBar: React.FC<InputBarProps> = ({
       </div>
 
       {/* Footer Info Pill */}
-      <div className="hidden lg:flex text-center mt-2 text-[10px] opacity-60 items-center justify-center gap-1.5 font-medium select-none">
-        <Sparkles className="w-3 h-3 text-blue-400" />
+      <div className="flex text-center mt-2.5 text-[11px] text-[#8F95A0] items-center justify-center gap-1.5 font-normal select-none">
         <span>
           {lang === 'ar'
-            ? 'Nerdo AI Workstation · مدعوم بأحدث نماذج Gemini و ChatGPT وتوليد PDF الاحترافي'
-            : 'Nerdo AI Workstation · Powered by Gemini, ChatGPT & Direct PDF Engine'}
+            ? 'Nerdo AI Workstation • يتم الحفظ محلياً على جهازك'
+            : 'Nerdo AI Workstation • Auto-saved locally'}
         </span>
       </div>
     </div>

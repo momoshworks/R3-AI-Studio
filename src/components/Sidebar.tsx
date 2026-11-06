@@ -12,7 +12,7 @@ import {
   Menu,
   BookOpen,
 } from 'lucide-react';
-import { DriveStatus, Session, SidebarTab } from '../types';
+import { DriveStatus, Session, SidebarTab, SystemMetrics } from '../types';
 import { USEFUL_WEBSITES } from '../data/usefulWebsites';
 import { Translations, Theme, Language } from '../utils/translations';
 
@@ -28,6 +28,7 @@ interface SidebarProps {
   onOpenSettings: () => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  metrics?: SystemMetrics;
   t: Translations;
   theme: Theme;
   lang: Language;
@@ -45,6 +46,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenSettings,
   isCollapsed,
   onToggleCollapse,
+  metrics,
   t,
   theme,
   lang,
@@ -114,7 +116,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         isCollapsed ? 'hidden md:flex md:w-16' : 'fixed inset-y-0 start-0 z-50 w-72 max-w-[85vw] shadow-2xl md:static md:w-[260px] md:shadow-none'
       } ${
         isDark
-          ? 'bg-gemini-sidebar border-gemini-border text-gray-100'
+          ? 'bg-[#16181d] border-[#262930] text-[#EDEDED]'
           : 'bg-white border-slate-200 text-slate-800'
       }`}
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
@@ -122,7 +124,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Top Header: Hamburger Menu Button & App Brand */}
       <div
         className={`h-14 flex items-center border-b transition-colors ${
-          isDark ? 'border-gemini-border/60' : 'border-slate-200'
+          isDark ? 'border-[#262930]/60' : 'border-slate-200'
         } ${isCollapsed ? 'px-1 sm:px-2 justify-center' : 'px-3 justify-between'}`}
       >
         <button
@@ -154,160 +156,95 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
 
-      {/* "New Chat" Button */}
-      <div className="p-2.5 flex justify-center">
+      {/* "New Chat" Pill Button */}
+      <div className="p-3 shrink-0">
         <button
           onClick={() => {
             handleSelectTab('chats');
             handleNewChat();
           }}
-          className={`group relative overflow-hidden transition-all duration-300 border ${
+          className={`group w-full flex items-center justify-between px-3.5 py-2.5 rounded-full transition-all duration-200 border ${
             isDark
-              ? 'border-white/10 hover:border-blue-400/50 bg-[#1a1b1d] hover:bg-[#252628]'
-              : 'border-slate-200 hover:border-blue-500 bg-slate-100 hover:bg-slate-200'
-          } shadow-sm ${
-            isCollapsed
-              ? 'w-10 h-10 rounded-full flex items-center justify-center p-0'
-              : 'w-full rounded-full py-2.5 px-4 flex items-center justify-start space-x-3 space-x-reverse'
+              ? 'bg-[#1e2026] hover:bg-[#252830] border-[#2a2d36] hover:border-[#8ab4f8]/50 text-[#EDEDED] shadow-sm hover:shadow-[#8ab4f8]/10'
+              : 'bg-slate-100 hover:bg-slate-200 border-slate-200 hover:border-blue-500 text-slate-800'
           }`}
           title={t.newChat}
         >
-          <Plus className="w-4 h-4 text-purple-400 group-hover:rotate-90 transition-transform duration-300 shrink-0" />
+          <div className="flex items-center gap-2">
+            <Plus className="w-4 h-4 text-[#8ab4f8] group-hover:rotate-90 transition-transform duration-200 shrink-0" />
+            {!isCollapsed && (
+              <span className="text-xs font-medium tracking-tight">
+                {t.newChat}
+              </span>
+            )}
+          </div>
           {!isCollapsed && (
-            <span
-              className={`text-sm font-medium ${
-                isDark ? 'text-gray-200 group-hover:text-white' : 'text-slate-700 group-hover:text-slate-900'
-              }`}
-            >
-              {t.newChat}
-            </span>
+            <kbd className="text-[10px] font-mono text-[#8F95A0] px-1.5 py-0.5 rounded bg-black/30 border border-white/5">
+              ⌘K
+            </kbd>
           )}
         </button>
       </div>
 
-      {/* Navigation Hub Tabs: 2-Column Grid When Open, Vertical Icons When Collapsed */}
+      {/* Clean Linear-style Navigation List (Simple icon + label, no heavy boxed tiles) */}
       <div
-        className={`border-b ${
-          isDark ? 'border-gemini-border/50' : 'border-slate-200'
-        } transition-all ${
-          isCollapsed
-            ? 'flex flex-col items-center py-2.5 space-y-2 px-1'
-            : 'grid grid-cols-2 gap-2 p-2.5'
+        className={`px-3 py-1 space-y-0.5 border-b shrink-0 ${
+          isDark ? 'border-[#262930]/60' : 'border-slate-200'
         }`}
       >
-        {/* 1. Chats Tab */}
-        <button
-          onClick={() => handleSelectTab('chats')}
-          className={`rounded-2xl transition-all ${
-            isCollapsed
-              ? 'w-10 h-10 flex items-center justify-center'
-              : 'p-3 flex flex-col items-center justify-center gap-1.5 border'
-          } ${
-            currentTab === 'chats'
-              ? 'text-blue-500 bg-blue-500/15 font-semibold border-blue-500/40 shadow-sm shadow-blue-500/10'
-              : isDark
-              ? 'text-gray-300 hover:text-white bg-[#1a1b1d] hover:bg-[#252628] border-white/5'
-              : 'text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200'
-          }`}
-          title={t.chat}
-        >
-          <MessageSquare className="w-5 h-5 shrink-0 text-blue-400" />
-          {!isCollapsed && <span className="text-xs font-medium">{t.chat}</span>}
-        </button>
-
-        {/* 2. Useful Tools & Websites Tab */}
-        <button
-          onClick={() => handleSelectTab('tools')}
-          className={`rounded-2xl transition-all ${
-            isCollapsed
-              ? 'w-10 h-10 flex items-center justify-center'
-              : 'p-3 flex flex-col items-center justify-center gap-1.5 border'
-          } ${
-            currentTab === 'tools'
-              ? 'text-purple-500 bg-purple-500/15 font-semibold border-purple-500/40 shadow-sm shadow-purple-500/10'
-              : isDark
-              ? 'text-gray-300 hover:text-white bg-[#1a1b1d] hover:bg-[#252628] border-white/5'
-              : 'text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200'
-          }`}
-          title={t.tools}
-        >
-          <Globe className="w-5 h-5 shrink-0 text-purple-400" />
-          {!isCollapsed && <span className="text-xs font-medium">{t.tools}</span>}
-        </button>
-
-        {/* 3. Local Media Vault Tab */}
-        <button
-          onClick={() => handleSelectTab('media')}
-          className={`rounded-2xl transition-all ${
-            isCollapsed
-              ? 'w-10 h-10 flex items-center justify-center'
-              : 'p-3 flex flex-col items-center justify-center gap-1.5 border'
-          } ${
-            currentTab === 'media'
-              ? 'text-cyan-500 bg-cyan-500/15 font-semibold border-cyan-500/40 shadow-sm shadow-cyan-500/10'
-              : isDark
-              ? 'text-gray-300 hover:text-white bg-[#1a1b1d] hover:bg-[#252628] border-white/5'
-              : 'text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200'
-          }`}
-          title={t.media}
-        >
-          <Film className="w-5 h-5 shrink-0 text-cyan-400" />
-          {!isCollapsed && <span className="text-xs font-medium">{t.media}</span>}
-        </button>
-
-        {/* 4. Google Drive Tab */}
-        <button
-          onClick={() => handleSelectTab('drive')}
-          className={`rounded-2xl transition-all ${
-            isCollapsed
-              ? 'w-10 h-10 flex items-center justify-center'
-              : 'p-3 flex flex-col items-center justify-center gap-1.5 border'
-          } ${
-            currentTab === 'drive'
-              ? 'text-emerald-500 bg-emerald-500/15 font-semibold border-emerald-500/40 shadow-sm shadow-emerald-500/10'
-              : isDark
-              ? 'text-gray-300 hover:text-white bg-[#1a1b1d] hover:bg-[#252628] border-white/5'
-              : 'text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200'
-          }`}
-          title={t.drive}
-        >
-          <Cloud className="w-5 h-5 shrink-0 text-emerald-400" />
-          {!isCollapsed && <span className="text-xs font-medium">{t.drive}</span>}
-        </button>
-
-        {/* 5. NotebookLM / Research Studio Tab (Spans both columns for full visibility) */}
-        <button
-          onClick={() => handleSelectTab('notebook')}
-          className={`rounded-2xl transition-all ${
-            isCollapsed
-              ? 'w-10 h-10 flex items-center justify-center'
-              : 'col-span-2 p-3 flex items-center justify-between border'
-          } ${
-            currentTab === 'notebook'
-              ? 'text-amber-400 bg-amber-500/15 font-semibold border-amber-500/40 shadow-sm shadow-amber-500/10'
-              : isDark
-              ? 'text-gray-200 hover:text-white bg-gradient-to-r from-[#1a1b1d] to-[#202124] hover:bg-[#252628] border-white/10'
-              : 'text-slate-700 hover:text-slate-900 bg-gradient-to-r from-slate-50 to-slate-100 hover:bg-slate-200 border-slate-200'
-          }`}
-          title={t.notebookStudio}
-        >
-          <div className="flex items-center space-x-2.5 space-x-reverse">
-            <div className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
-              <BookOpen className="w-4 h-4 shrink-0" />
-            </div>
-            {!isCollapsed && (
-              <div className="text-right">
-                <div className="text-xs font-bold leading-none">Google NotebookLM</div>
-                <div className="text-[10px] opacity-60 mt-0.5">{lang === 'ar' ? 'الخدمة الرسمية · البودكاست' : 'Official Studio · Audio Pods'}</div>
+        {[
+          { id: 'chats', label: t.chat, icon: MessageSquare },
+          { id: 'tools', label: t.tools, icon: Globe },
+          { id: 'media', label: t.media, icon: Film },
+          { id: 'drive', label: t.drive, icon: Cloud },
+          {
+            id: 'notebook',
+            label: 'NotebookLM',
+            icon: BookOpen,
+            badge: 'Google',
+          },
+        ].map((item) => {
+          const Icon = item.icon;
+          const isActive = currentTab === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => handleSelectTab(item.id as SidebarTab)}
+              className={`w-full flex items-center justify-between rounded-xl transition-all ${
+                isCollapsed
+                  ? 'w-10 h-10 p-0 justify-center mx-auto'
+                  : 'px-3 py-2 text-xs font-medium'
+              } ${
+                isActive
+                  ? isDark
+                    ? 'bg-[#1e2026] text-[#EDEDED] font-semibold'
+                    : 'bg-blue-50 text-blue-600 font-semibold'
+                  : isDark
+                  ? 'text-[#8F95A0] hover:text-[#EDEDED] hover:bg-white/[0.04]'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+              title={item.label}
+            >
+              <div className="flex items-center gap-2.5">
+                <Icon
+                  className={`w-4 h-4 shrink-0 ${
+                    isActive
+                      ? isDark
+                        ? 'text-[#8ab4f8]'
+                        : 'text-blue-600'
+                      : 'text-[#8F95A0]'
+                  }`}
+                />
+                {!isCollapsed && <span>{item.label}</span>}
               </div>
-            )}
-          </div>
-          {!isCollapsed && (
-            <span className="text-[9px] font-mono bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded-md border border-purple-500/30">
-              Webview 2.0
-            </span>
-          )}
-        </button>
+              {!isCollapsed && item.badge && (
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 font-mono">
+                  {item.badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Main Tab Content */}
@@ -524,21 +461,30 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
 
-      {/* Offline Status Badge */}
-      {!isCollapsed && (
-        <div className="px-3 py-1.5 flex items-center justify-between text-[10px] text-gray-500 font-mono border-t border-white/5">
-          <span className="flex items-center gap-1.5 text-emerald-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>{lang === 'ar' ? 'حفظ محلي فوري (Offline-First)' : 'Offline Auto-Saved'}</span>
-          </span>
-          <span className="text-[9px] opacity-60">SQLite / IDB</span>
+      {/* Compact System Metrics Status Indicator */}
+      {!isCollapsed && metrics && (
+        <div className="px-3 py-1.5 flex items-center justify-between text-[11px] font-mono text-[#8F95A0] border-t border-[#262930] bg-[#141519] select-none">
+          <div className="flex items-center gap-1.5">
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                metrics.cpu_usage > 80
+                  ? 'bg-rose-500 animate-ping'
+                  : metrics.cpu_usage > 50
+                  ? 'bg-amber-400'
+                  : 'bg-emerald-400'
+              }`}
+            />
+            <span>CPU {metrics.cpu_usage.toFixed(0)}%</span>
+          </div>
+          <span>RAM {metrics.memory_percentage.toFixed(0)}%</span>
+          <span>{metrics.disk_free_gb.toFixed(0)}GB Free</span>
         </div>
       )}
 
       {/* Footer Settings Button */}
       <div
         className={`p-3 border-t ${
-          isDark ? 'border-gemini-border/60' : 'border-slate-200'
+          isDark ? 'border-[#262930]' : 'border-slate-200'
         }`}
       >
         <button
