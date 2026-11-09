@@ -37,7 +37,20 @@ export const LocalChatbot: React.FC<LocalChatbotProps> = ({ theme, lang }) => {
   const isAr = lang === 'ar';
 
   const [status, setStatus] = useState<LocalLLMStatus | null>(null);
-  const [selectedModel, setSelectedModel] = useState<string>('antigravity-rust-core');
+  const [selectedModel, setSelectedModel] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem('ANTIGRAVITY_LOCAL_MODEL');
+      if (saved) return saved;
+    } catch {}
+    return 'qwen2.5:3b';
+  });
+
+  const handleSelectModel = (modelId: string) => {
+    setSelectedModel(modelId);
+    try {
+      localStorage.setItem('ANTIGRAVITY_LOCAL_MODEL', modelId);
+    } catch {}
+  };
   const [messages, setMessages] = useState<LocalMessage[]>(() => {
     try {
       const saved = localStorage.getItem('ANTIGRAVITY_LOCAL_CHAT_MESSAGES');
@@ -84,8 +97,14 @@ export const LocalChatbot: React.FC<LocalChatbotProps> = ({ theme, lang }) => {
       const s = await api.checkLocalLLMStatus();
       if (s) {
         setStatus(s);
-        if (s.active_model) {
+        const saved = localStorage.getItem('ANTIGRAVITY_LOCAL_MODEL');
+        if (saved && s.models?.some((m: any) => m.id === saved)) {
+          setSelectedModel(saved);
+        } else if (s.active_model) {
           setSelectedModel(s.active_model);
+          try {
+            localStorage.setItem('ANTIGRAVITY_LOCAL_MODEL', s.active_model);
+          } catch {}
         }
       }
     } catch (err) {
@@ -243,7 +262,7 @@ export const LocalChatbot: React.FC<LocalChatbotProps> = ({ theme, lang }) => {
           <div className="relative flex items-center">
             <select
               value={selectedModel}
-              onChange={(e) => setSelectedModel(e.target.value)}
+              onChange={(e) => handleSelectModel(e.target.value)}
               className={`text-xs font-mono px-3 py-1.5 rounded-xl border appearance-none pe-7 cursor-pointer outline-none transition-all ${
                 isDark
                   ? 'bg-[#1e2026] border-[#2a2d36] text-[#EDEDED] hover:border-[#8ab4f8]/50'
@@ -251,11 +270,10 @@ export const LocalChatbot: React.FC<LocalChatbotProps> = ({ theme, lang }) => {
               }`}
             >
               {(status?.models && status.models.length > 0 ? status.models : [
+                { id: 'qwen2.5:3b', name: 'qwen2.5:3b (Ollama Local 1.9 GB)' },
+                { id: 'qwen2.5:1.5b', name: 'qwen2.5:1.5b (Ollama Local 986 MB)' },
                 { id: 'antigravity-rust-core', name: 'Antigravity Rust Core (Offline)' },
                 { id: 'antigravity-code-expert', name: 'Antigravity Code Expert (Offline)' },
-                { id: 'llama3.2', name: 'Ollama: Llama 3.2' },
-                { id: 'mistral', name: 'Ollama: Mistral' },
-                { id: 'deepseek-r1', name: 'Ollama: DeepSeek R1' },
               ]).map((m) => (
                 <option key={m.id} value={m.id} className={isDark ? 'bg-[#16181d] text-white' : 'bg-white text-black'}>
                   {m.name}

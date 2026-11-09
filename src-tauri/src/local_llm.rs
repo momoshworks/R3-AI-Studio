@@ -29,11 +29,32 @@ pub struct QueryLocalLLMResponse {
     pub tokens_approx: usize,
 }
 
+fn ensure_ollama_started() {
+    if let Some(local_app_data) = std::env::var_os("LOCALAPPDATA") {
+        let ollama_path = std::path::PathBuf::from(local_app_data)
+            .join("Programs")
+            .join("Ollama")
+            .join("ollama.exe");
+        if ollama_path.exists() {
+            #[cfg(target_os = "windows")]
+            {
+                use std::os::windows::process::CommandExt;
+                let _ = std::process::Command::new(&ollama_path)
+                    .arg("serve")
+                    .creation_flags(0x08000000)
+                    .spawn();
+            }
+        }
+    }
+}
+
 /// Checks local LLM servers (Ollama, LM Studio) or falls back to the embedded Rust local engine
 #[tauri::command]
 pub async fn check_local_llm_status() -> Result<LocalLLMStatus, String> {
+    ensure_ollama_started();
+
     let client = reqwest::Client::builder()
-        .timeout(std::time::Duration::from_millis(1500))
+        .timeout(std::time::Duration::from_millis(2000))
         .build()
         .map_err(|e| e.to_string())?;
 

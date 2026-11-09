@@ -77,12 +77,11 @@ const AVAILABLE_MODELS = [
     ],
   },
   {
-    category: 'Local Offline AI (On-Device)',
+    category: 'Local Offline AI (Ollama)',
     models: [
-      { id: 'antigravity-rust-core', name: 'Antigravity Rust Core', desc: 'محرك محلي فائق الخفة مدمج عبر لغة Rust بدون إنترنت', tag: 'Offline' },
-      { id: 'antigravity-code-expert', name: 'Antigravity Code Expert', desc: 'تدقيق الأكواد، فحص الأخطاء، وهندسة البرمجيات محلياً', tag: 'Code' },
-      { id: 'llama3.2', name: 'Ollama: Llama 3.2', desc: 'نموذج محلي عبر خادم Ollama على المنفذ 11434', tag: 'Ollama' },
-      { id: 'deepseek-r1', name: 'Ollama: DeepSeek R1', desc: 'استدلال محلي وتفكير عميق عبر Ollama', tag: 'Reasoning' },
+      { id: 'qwen2.5:3b', name: 'Qwen 2.5 (3B)', desc: 'نموذج Qwen 2.5 المثبت على جهازك محلياً (1.9 GB)', tag: 'أوفلاين • مثبت' },
+      { id: 'qwen2.5:1.5b', name: 'Qwen 2.5 (1.5B)', desc: 'نموذج Qwen 2.5 السريع المثبت محلياً (986 MB)', tag: 'سريع • مثبت' },
+      { id: 'antigravity-rust-core', name: 'Antigravity Rust Core', desc: 'محرك محلي فائق الخفة مدمج عبر لغة Rust بدون إنترنت', tag: 'Embedded' },
     ],
   },
 ];

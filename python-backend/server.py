@@ -470,11 +470,106 @@ async def stream_openai(chat_request: ChatRequest, queue: asyncio.Queue):
 
     await queue.put({"type": "done"})
 
+def ensure_ollama_running():
+    try:
+        import socket
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(0.2)
+            if s.connect_ex(('127.0.0.1', 11434)) == 0:
+                return True
+    except Exception:
+        pass
+
+    ollama_paths = [
+        Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "Ollama" / "ollama.exe",
+        Path("C:/Users/momos/AppData/Local/Programs/Ollama/ollama.exe"),
+        Path(shutil.which("ollama") or "")
+    ]
+    ollama_bin = next((p for p in ollama_paths if p and Path(p).exists()), None)
+    if ollama_bin:
+        try:
+            subprocess.Popen(
+                [str(ollama_bin), "serve"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=0x08000000 if os.name == 'nt' else 0
+            )
+            time.sleep(0.6)
+            return True
+        except Exception as e:
+            logger.warning(f"Could not auto-start Ollama: {e}")
+    return False
+
+async def stream_ollama(chat_request: ChatRequest, queue: asyncio.Queue):
+    ensure_ollama_running()
+    model = chat_request.model or "qwen2.5:3b"
+    m_clean = model.lower()
+    if "1.5b" in m_clean:
+        target_model = "qwen2.5:1.5b"
+    elif "3b" in m_clean or "qwen" in m_clean:
+        target_model = "qwen2.5:3b"
+    elif "deepseek" in m_clean:
+        target_model = "deepseek-r1"
+    elif "llama" in m_clean:
+        target_model = "llama3.2"
+    else:
+        target_model = model.strip()
+
+    messages = []
+    sys_prompt = chat_request.system_instruction or "أنت Antigravity Local AI، مساعد ذكي ومباشر يعمل محلياً بالكامل على عتاد الجهاز. قدم إجابات دقيقة واحترافية بتنسيق Markdown."
+    messages.append({"role": "system", "content": sys_prompt})
+    for m in chat_request.messages:
+        messages.append({"role": m.role, "content": m.content})
+
+    try:
+        async with httpx.AsyncClient(timeout=180.0) as client:
+            async with client.stream(
+                "POST",
+                "http://127.0.0.1:11434/api/chat",
+                json={
+                    "model": target_model,
+                    "messages": messages,
+                    "stream": True
+                }
+            ) as response:
+                if response.status_code != 200:
+                    err_bytes = await response.aread()
+                    await queue.put({
+                        "type": "content_chunk",
+                        "delta": f"⚠️ خطأ في تشغيل نموذج Ollama ({target_model}): {err_bytes.decode('utf-8', errors='ignore')}"
+                    })
+                    await queue.put({"type": "done"})
+                    return
+
+                async for line in response.aiter_lines():
+                    if line:
+                        try:
+                            data = json.loads(line)
+                            chunk = data.get("message", {}).get("content", "")
+                            if chunk:
+                                await queue.put({
+                                    "type": "content_chunk",
+                                    "delta": chunk
+                                })
+                            if data.get("done"):
+                                break
+                        except Exception:
+                            continue
+    except Exception as e:
+        await queue.put({
+            "type": "content_chunk",
+            "delta": f"⚠️ تعذر الاتصال بنموذج Ollama المحلي ({target_model}): {str(e)}"
+        })
+
+    await queue.put({"type": "done"})
+
 @app.post("/api/chat/stream")
 async def chat_stream_endpoint(request: ChatRequest):
     queue: asyncio.Queue = asyncio.Queue()
     m_lower = request.model.lower()
-    if any(k in m_lower for k in ["gpt", "chatgpt", "openai", "o1", "o3"]):
+    if any(k in m_lower for k in ["qwen", "llama", "deepseek", "mistral", "phi3", "ollama", "antigravity-rust", "antigravity-code"]):
+        asyncio.create_task(stream_ollama(request, queue))
+    elif any(k in m_lower for k in ["gpt", "chatgpt", "openai", "o1", "o3"]):
         asyncio.create_task(stream_openai(request, queue))
     else:
         asyncio.create_task(stream_gemini(request, queue))
@@ -1536,7 +1631,8 @@ class LocalChatRequest(BaseModel):
 
 @app.get("/api/local_llm/status")
 async def local_llm_status():
-    async with httpx.AsyncClient(timeout=1.5) as client:
+    ensure_ollama_running()
+    async with httpx.AsyncClient(timeout=2.0) as client:
         # 1. Check Ollama on port 11434
         try:
             res = await client.get("http://127.0.0.1:11434/api/tags")
