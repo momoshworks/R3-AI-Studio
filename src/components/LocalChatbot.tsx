@@ -40,9 +40,9 @@ export const LocalChatbot: React.FC<LocalChatbotProps> = ({ theme, lang }) => {
   const [selectedModel, setSelectedModel] = useState<string>(() => {
     try {
       const saved = localStorage.getItem('ANTIGRAVITY_LOCAL_MODEL');
-      if (saved) return saved;
+      if (saved && !saved.includes('rust-core')) return saved;
     } catch {}
-    return 'qwen2.5:3b';
+    return 'momo1:latest';
   });
 
   const handleSelectModel = (modelId: string) => {
@@ -61,11 +61,11 @@ export const LocalChatbot: React.FC<LocalChatbotProps> = ({ theme, lang }) => {
         id: 'msg_welcome',
         role: 'assistant',
         content: isAr
-          ? '### مرحباً بك في الشات بوت المحلي (Antigravity Local AI)\n\nيعمل هذا الشات بوت بالكامل **على عتاد جهازك محلياً** عبر محرك Rust المدمج، أو من خلال خوادم **Ollama** و **LM Studio** المثبتة لديك.\n\n* **100% خصوصية:** لا تخرج أي رسائل أو أكواد خارج حاسوبك.\n* **بدون اتصال بالإنترنت:** استجابة سريعة وتوليد أكواد وتدقيق أمني أوفلاين بالكامل.\n* **دعم النماذج:** يمكنك الاختيار بين محرك Rust المدمج أو أي نموذج قمت بتحميله في Ollama.'
-          : '### Welcome to Antigravity Local AI\n\nThis chatbot runs completely **on your local hardware** powered by the native Rust engine and your local **Ollama** / **LM Studio** setup.\n\n* **100% Private:** Zero telemetry or messages leave your device.\n* **Fully Offline:** Works seamlessly without internet connection.\n* **Model Agnostic:** Seamlessly switch between built-in Rust core or downloaded Ollama models.',
+          ? '### مرحباً بك! أنا MOMO1، المساعد الذكي المحلي على جهازك\n\nأعمل بالكامل **على عتاد جهازك محلياً أوفلاين** بخصوصية تامة 100% وبدون الحاجة لأي اتصال بالإنترنت.\n\n* **خصوصية مطلقة:** لا يتم إرسال أي بايت أو كود خارج حاسوبك.\n* **سرعة فائقة:** استجابة سريعة ومعالجة للأكواد واستفسارات البرمجة مباشرة.\n* **النموذج النشط:** MOMO1 (يعمل بتقنيات Ollama و Rust محلياً).'
+          : '### Welcome! I am MOMO1, your local AI assistant\n\nI run completely **on your local machine hardware offline** with 100% privacy and zero internet requirement.\n\n* **100% Private:** No telemetry or data leaves your device.\n* **Fast & Offline:** Instant responses and local code analysis.\n* **Active Model:** MOMO1 (Powered locally via Ollama & Rust).',
         timestamp: Date.now(),
-        modelUsed: 'Antigravity Rust Core',
-        source: 'rust_builtin',
+        modelUsed: 'MOMO1',
+        source: 'ollama',
       },
     ];
   });
@@ -98,8 +98,14 @@ export const LocalChatbot: React.FC<LocalChatbotProps> = ({ theme, lang }) => {
       if (s) {
         setStatus(s);
         const saved = localStorage.getItem('ANTIGRAVITY_LOCAL_MODEL');
-        if (saved && s.models?.some((m: any) => m.id === saved)) {
+        const momoModel = s.models?.find((m: any) => m.id.toLowerCase().includes('momo') || m.id.toLowerCase().includes('qwen2.5:3b'));
+        if (saved && !saved.includes('rust-core') && s.models?.some((m: any) => m.id === saved)) {
           setSelectedModel(saved);
+        } else if (momoModel) {
+          setSelectedModel(momoModel.id);
+          try {
+            localStorage.setItem('ANTIGRAVITY_LOCAL_MODEL', momoModel.id);
+          } catch {}
         } else if (s.active_model) {
           setSelectedModel(s.active_model);
           try {
@@ -241,11 +247,11 @@ export const LocalChatbot: React.FC<LocalChatbotProps> = ({ theme, lang }) => {
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-bold tracking-tight">
-                {isAr ? 'الشات بوت المحلي (Antigravity Local AI)' : 'Antigravity Local AI Chatbot'}
+                {isAr ? 'MOMO1 — الشات بوت المحلي (Antigravity)' : 'MOMO1 — Local AI Chatbot'}
               </h2>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3" />
-                100% Offline
+                MOMO1 Offline
               </span>
             </div>
             <p className="text-[11px] text-[#8F95A0] mt-0.5 flex items-center gap-1.5 font-mono">
@@ -269,16 +275,26 @@ export const LocalChatbot: React.FC<LocalChatbotProps> = ({ theme, lang }) => {
                   : 'bg-white border-slate-300 text-slate-800 hover:border-blue-500'
               }`}
             >
-              {(status?.models && status.models.length > 0 ? status.models : [
-                { id: 'qwen2.5:3b', name: 'qwen2.5:3b (Ollama Local 1.9 GB)' },
-                { id: 'qwen2.5:1.5b', name: 'qwen2.5:1.5b (Ollama Local 986 MB)' },
-                { id: 'antigravity-rust-core', name: 'Antigravity Rust Core (Offline)' },
-                { id: 'antigravity-code-expert', name: 'Antigravity Code Expert (Offline)' },
-              ]).map((m) => (
-                <option key={m.id} value={m.id} className={isDark ? 'bg-[#16181d] text-white' : 'bg-white text-black'}>
-                  {m.name}
-                </option>
-              ))}
+              {(status?.models && status.models.length > 0
+                ? status.models.map((m) => {
+                    const isMomo = m.id.toLowerCase().includes('momo') || m.id.toLowerCase().includes('qwen2.5:3b');
+                    const label = isMomo ? 'MOMO1 (3B Local)' : m.name;
+                    return (
+                      <option key={m.id} value={m.id} className={isDark ? 'bg-[#16181d] text-white' : 'bg-white text-black'}>
+                        {label}
+                      </option>
+                    );
+                  })
+                : [
+                    { id: 'momo1', name: 'MOMO1 (3B Local • 1.9 GB)' },
+                    { id: 'qwen2.5:1.5b', name: 'MOMO1 Lite (1.5B • 986 MB)' },
+                    { id: 'antigravity-rust-core', name: 'MOMO1 Rust Core (Offline)' },
+                  ].map((m) => (
+                    <option key={m.id} value={m.id} className={isDark ? 'bg-[#16181d] text-white' : 'bg-white text-black'}>
+                      {m.name}
+                    </option>
+                  ))
+              )}
             </select>
           </div>
 
@@ -481,8 +497,8 @@ export const LocalChatbot: React.FC<LocalChatbotProps> = ({ theme, lang }) => {
                 onKeyDown={handleKeyDown}
                 placeholder={
                   isAr
-                    ? 'اكتب رسالتك للشات بوت المحلي (Enter للإرسال، Shift+Enter لسطر جديد)...'
-                    : 'Ask Antigravity Local AI anything offline (Enter to send)...'
+                    ? 'اكتب رسالتك لـ MOMO1 (Enter للإرسال، Shift+Enter لسطر جديد)...'
+                    : 'Ask MOMO1 anything offline (Enter to send)...'
                 }
                 rows={1}
                 className="w-full bg-transparent resize-none outline-none text-xs sm:text-sm py-2 px-1 max-h-40 leading-relaxed placeholder:text-[#8F95A0]/60"
@@ -508,8 +524,8 @@ export const LocalChatbot: React.FC<LocalChatbotProps> = ({ theme, lang }) => {
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
             <span>
               {isAr
-                ? 'معالجة آمنة محلية 100% عبر عتاد حاسوبك • لا يتم إرسال أي بايت عبر الإنترنت'
-                : '100% Local On-Device Execution • Zero internet data transfer'}
+                ? 'MOMO1 يعالج البيانات محلياً 100% عبر عتاد حاسوبك • لا يتم إرسال أي بايت عبر الإنترنت'
+                : 'MOMO1 running 100% On-Device • Zero internet data transfer'}
             </span>
           </div>
         </div>

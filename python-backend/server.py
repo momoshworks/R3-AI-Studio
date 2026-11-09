@@ -163,6 +163,7 @@ class ChatRequest(BaseModel):
     model: str = "Google Gemini (gemini-3.5-flash)"
     api_key: Optional[str] = None
     stream: bool = True
+    system_instruction: Optional[str] = None
 
 # File Upload Endpoint
 @app.post("/api/upload")
@@ -502,12 +503,12 @@ def ensure_ollama_running():
 
 async def stream_ollama(chat_request: ChatRequest, queue: asyncio.Queue):
     ensure_ollama_running()
-    model = chat_request.model or "qwen2.5:3b"
+    model = chat_request.model or "momo1"
     m_clean = model.lower()
     if "1.5b" in m_clean:
         target_model = "qwen2.5:1.5b"
-    elif "3b" in m_clean or "qwen" in m_clean:
-        target_model = "qwen2.5:3b"
+    elif "momo" in m_clean or "3b" in m_clean or "qwen" in m_clean:
+        target_model = "momo1"
     elif "deepseek" in m_clean:
         target_model = "deepseek-r1"
     elif "llama" in m_clean:
@@ -516,7 +517,7 @@ async def stream_ollama(chat_request: ChatRequest, queue: asyncio.Queue):
         target_model = model.strip()
 
     messages = []
-    sys_prompt = chat_request.system_instruction or "أنت Antigravity Local AI، مساعد ذكي ومباشر يعمل محلياً بالكامل على عتاد الجهاز. قدم إجابات دقيقة واحترافية بتنسيق Markdown."
+    sys_prompt = getattr(chat_request, "system_instruction", None) or "أنت MOMO1، المساعد الذكي الخارق والمحلي الخاص بمحمد شعبان. تعمل بكفاءة وخصوصية تامة 100% على عتاد الجهاز أوفلاين. إجاباتك مباشرة، عملية، واحترافية بدون مقدمات زائدة."
     messages.append({"role": "system", "content": sys_prompt})
     for m in chat_request.messages:
         messages.append({"role": m.role, "content": m.content})
@@ -567,7 +568,7 @@ async def stream_ollama(chat_request: ChatRequest, queue: asyncio.Queue):
 async def chat_stream_endpoint(request: ChatRequest):
     queue: asyncio.Queue = asyncio.Queue()
     m_lower = request.model.lower()
-    if any(k in m_lower for k in ["qwen", "llama", "deepseek", "mistral", "phi3", "ollama", "antigravity-rust", "antigravity-code"]):
+    if any(k in m_lower for k in ["momo", "qwen", "llama", "deepseek", "mistral", "phi3", "ollama", "antigravity-rust", "antigravity-code"]):
         asyncio.create_task(stream_ollama(request, queue))
     elif any(k in m_lower for k in ["gpt", "chatgpt", "openai", "o1", "o3"]):
         asyncio.create_task(stream_openai(request, queue))
@@ -1643,21 +1644,28 @@ async def local_llm_status():
                     name = item.get("name", "unknown")
                     size_bytes = item.get("size", 0)
                     size_human = f"{size_bytes / 1e9:.1f} GB" if size_bytes > 1e9 else f"{size_bytes / 1e6:.1f} MB"
+                    display_name = name
+                    if "momo1" in name.lower():
+                        display_name = "MOMO1 (3B Local • 1.9 GB)"
+                    elif "qwen2.5:3b" in name.lower():
+                        display_name = "MOMO1 Base (Qwen 3B • 1.9 GB)"
+                    elif "qwen2.5:1.5b" in name.lower():
+                        display_name = "MOMO1 Lite (1.5B • 986 MB)"
                     models.append({
                         "id": name,
-                        "name": name,
+                        "name": display_name,
                         "size_human": size_human,
-                        "details": f"Ollama Local Model ({name})",
+                        "details": f"نموذج MOMO1 المحلي أوفلاين ({name})",
                         "is_running": True
                     })
-                active = models[0]["id"] if models else "llama3.2"
+                active = "momo1:latest" if any(m["id"] == "momo1:latest" for m in models) else (models[0]["id"] if models else "momo1")
                 return {
                     "available": True,
                     "server_type": "ollama",
                     "endpoint": "http://127.0.0.1:11434",
                     "active_model": active,
                     "models": models,
-                    "message": "خادم Ollama متصل وجاهز للعمل محلياً بالكامل"
+                    "message": "خادم Ollama وموديل MOMO1 متصل وجاهز للعمل محلياً بالكامل"
                 }
         except Exception:
             pass
@@ -1716,15 +1724,24 @@ async def local_llm_status():
 
 @app.post("/api/local_llm/chat")
 async def local_llm_chat(req: LocalChatRequest):
+    ensure_ollama_running()
     start = time.time()
     prompt = req.prompt.strip()
-    model = req.model or "antigravity-rust-core"
-    system_prompt = req.system_prompt or "أنت Antigravity Local AI، مساعد برمجي ذكي وسريع يعمل أوفلاين 100%. التزم بتقديم حلول عملية مباشرة بدون مقدمات."
+    model = req.model or "momo1"
+    system_prompt = req.system_prompt or "أنت MOMO1، المساعد الذكي الخارق والمحلي على جهاز المستخدم. تعمل بكفاءة وخصوصية تامة 100% على عتاد الجهاز أوفلاين بدون أي اتصال بالإنترنت. إجاباتك ذكية ومباشرة وعملية واحترافية بتنسيق Markdown."
 
     async with httpx.AsyncClient(timeout=60.0) as client:
         # Try Ollama
         try:
-            m_target = "llama3.2" if model.startswith("antigravity-") else model
+            m_lower = model.lower()
+            if "momo" in m_lower or "3b" in m_lower or "qwen" in m_lower:
+                m_target = "momo1"
+            elif "1.5b" in m_lower:
+                m_target = "qwen2.5:1.5b"
+            elif model.startswith("antigravity-"):
+                m_target = "momo1"
+            else:
+                m_target = model
             res = await client.post("http://127.0.0.1:11434/api/generate", json={
                 "model": m_target,
                 "prompt": prompt,
@@ -1737,7 +1754,7 @@ async def local_llm_chat(req: LocalChatRequest):
                 latency = int((time.time() - start) * 1000)
                 return {
                     "reply": reply,
-                    "model_used": f"Ollama ({model})",
+                    "model_used": "MOMO1 (3B Local)",
                     "source": "ollama",
                     "latency_ms": latency,
                     "tokens_approx": len(reply.split())
@@ -1806,18 +1823,19 @@ async def local_llm_chat(req: LocalChatRequest):
         )
     else:
         reply = (
-            f"### إجابة المساعد الذكي المحلي (Antigravity Local Bot)\n\n"
-            f"تمت معالجة استفسارك محلياً على جهازك:\n\n"
-            f"* **الاستفسار:** \"{prompt}\"\n"
-            f"* **وضع التشغيل:** Local Offline Engine (بدون اتصال بالإنترنت - خصوصية تامة)\n"
-            f"* **الخطوة العملية:** يمكنك استخدام الشات بوت المحلي لكتابة الأكواد، تحليل النصوص، أو ربطه بنماذج متقدمة مثل `llama3` و `deepseek-r1` عبر تشغيل Ollama محلياً."
+            f"### إجابة المساعد الذكي المحلي MOMO1\n\n"
+            f"أنا **MOMO1**، مساعدك الذكي المحلي على جهازك.\n\n"
+            f"تمت معالجة استفسارك محلياً على عتاد جهازك بدون إنترنت وبخصوصية تامة 100%:\n\n"
+            f"* **الاستفسار:** \"{prompt}\"\n\n"
+            f"* **النموذج:** MOMO1 (On-Device Inference)\n"
+            f"* **الخصوصية:** معزول تماماً ومحلي على الجهاز."
         )
 
     latency = int((time.time() - start) * 1000)
     return {
         "reply": reply,
-        "model_used": "Antigravity Rust Core (Local Offline)",
-        "source": "rust_builtin",
+        "model_used": "MOMO1 Local Core",
+        "source": "builtin",
         "latency_ms": latency,
         "tokens_approx": len(reply.split())
     }

@@ -64,7 +64,7 @@ export const AntigravityStatusBar: React.FC<AntigravityStatusBarProps> = ({
           title={isAr ? 'فتح الشات بوت المحلي' : 'Open Local Chatbot'}
         >
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span>{isAr ? 'المحرك المحلي: جاهز' : 'Local Bot: Ready'}</span>
+          <span>{isAr ? 'MOMO1: جاهز' : 'MOMO1: Ready'}</span>
         </button>
       </div>
 

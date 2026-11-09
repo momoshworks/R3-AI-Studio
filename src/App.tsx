@@ -77,11 +77,11 @@ const AVAILABLE_MODELS = [
     ],
   },
   {
-    category: 'Local Offline AI (Ollama)',
+    category: 'Local Offline AI (On-Device)',
     models: [
-      { id: 'qwen2.5:3b', name: 'Qwen 2.5 (3B)', desc: 'نموذج Qwen 2.5 المثبت على جهازك محلياً (1.9 GB)', tag: 'أوفلاين • مثبت' },
-      { id: 'qwen2.5:1.5b', name: 'Qwen 2.5 (1.5B)', desc: 'نموذج Qwen 2.5 السريع المثبت محلياً (986 MB)', tag: 'سريع • مثبت' },
-      { id: 'antigravity-rust-core', name: 'Antigravity Rust Core', desc: 'محرك محلي فائق الخفة مدمج عبر لغة Rust بدون إنترنت', tag: 'Embedded' },
+      { id: 'momo1', name: 'MOMO1', desc: 'النموذج الذكي المحلي فائق السرعة على جهازك (Offline • 3B)', tag: 'MOMO1 • أوفلاين' },
+      { id: 'qwen2.5:1.5b', name: 'MOMO1 Lite (1.5B)', desc: 'نسخة MOMO1 الخفيفة فائقة السرعة المثبتة محلياً (986 MB)', tag: 'سريع • مثبت' },
+      { id: 'antigravity-rust-core', name: 'MOMO1 Rust Core', desc: 'محرك محلي فائق الخفة مدمج عبر لغة Rust بدون إنترنت', tag: 'Embedded' },
     ],
   },
 ];
@@ -766,10 +766,10 @@ export const App: React.FC = () => {
                   ? 'bg-[#16181d] border-[#262930] hover:border-emerald-500/40 text-[#8F95A0] hover:text-emerald-400'
                   : 'bg-white border-slate-300 hover:border-emerald-600 text-slate-700 hover:text-emerald-700'
               }`}
-              title={lang === 'ar' ? 'فتح الشات بوت المحلي (Offline)' : 'Open Local Chatbot (Offline)'}
+              title={lang === 'ar' ? 'فتح شات بوت MOMO1 المحلي (Offline)' : 'Open MOMO1 Local Bot (Offline)'}
             >
               <Cpu className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{lang === 'ar' ? 'بوت محلي' : 'Local Bot'}</span>
+              <span>{lang === 'ar' ? 'بوت MOMO1' : 'MOMO1 Bot'}</span>
             </button>
 
             {/* Antigravity Theme Switcher Button */}

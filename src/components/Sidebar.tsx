@@ -212,7 +212,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         {[
           { id: 'chats', label: t.chat, icon: MessageSquare },
-          { id: 'local_chat', label: lang === 'ar' ? 'شات بوت محلي' : 'Local AI Bot', icon: Cpu, badge: 'OFFLINE' },
+          { id: 'local_chat', label: lang === 'ar' ? 'بوت MOMO1 المحلي' : 'MOMO1 Local Bot', icon: Cpu, badge: 'OFFLINE' },
           { id: 'automations', label: lang === 'ar' ? 'الأتمتة والمهام' : 'Automations', icon: Zap, badge: 'AI' },
           { id: 'tools', label: t.tools, icon: Globe },
           { id: 'media', label: t.media, icon: Film },
