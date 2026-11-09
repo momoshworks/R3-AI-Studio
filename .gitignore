@@ -37,3 +37,6 @@ BACKUP/
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+src-tauri/target/
+target/

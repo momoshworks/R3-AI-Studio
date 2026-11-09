@@ -70,7 +70,32 @@ export interface SettingsState {
   raw_openai_key?: string;
 }
 
-export type SidebarTab = 'chats' | 'tools' | 'drive' | 'media' | 'notebook' | 'automations';
+export type SidebarTab = 'chats' | 'local_chat' | 'automations' | 'tools' | 'media' | 'drive' | 'notebook';
+
+export interface LocalModelInfo {
+  id: string;
+  name: string;
+  size_human: string;
+  details: string;
+  is_running: boolean;
+}
+
+export interface LocalLLMStatus {
+  available: boolean;
+  server_type: string; // 'ollama' | 'lmstudio' | 'rust_builtin'
+  endpoint: string;
+  active_model: string;
+  models: LocalModelInfo[];
+  message: string;
+}
+
+export interface LocalChatResponse {
+  reply: string;
+  model_used: string;
+  source: string;
+  latency_ms: number;
+  tokens_approx: number;
+}
 
 export interface MediaItem {
   id: string;

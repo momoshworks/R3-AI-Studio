@@ -2,11 +2,13 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod downloader;
+mod local_llm;
 mod sidecar;
 mod system_monitor;
 
 use std::sync::Arc;
 use downloader::{download_binary_tool, list_installed_tools};
+use local_llm::{check_local_llm_status, query_local_llm};
 use sidecar::SidecarManager;
 use system_monitor::{get_system_telemetry, SystemMonitor};
 use tauri::{Manager, RunEvent, WindowEvent};
@@ -36,6 +38,8 @@ fn main() {
             list_installed_tools,
             get_system_telemetry,
             open_notebooklm_window,
+            check_local_llm_status,
+            query_local_llm,
         ])
         .setup(move |app| {
             let handle = app.handle().clone();

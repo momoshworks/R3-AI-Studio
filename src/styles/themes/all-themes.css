@@ -1,0 +1,15 @@
+/* ============================================================================
+   ANTIGRAVITY THEMES SUITE - ALL 5 THEMES COMPILED
+   Themes: phantom | matcha | doodle | pixel | glass
+   Usage: Set attribute data-theme="<name>" or class .theme-<name> on <html> or <body>
+   ============================================================================ */
+@import "./phantom-web.css";
+@import "./matcha-web.css";
+@import "./doodle-web.css";
+@import "./pixel-web.css";
+@import "./glass-web.css";
+
+/* Universal Transition for theme switching */
+body, [data-theme] {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}

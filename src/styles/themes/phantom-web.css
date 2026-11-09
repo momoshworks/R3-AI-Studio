@@ -1,0 +1,79 @@
+/* ============================================================================
+   PHANTOM THEME - WEB & APP STYLESHEET (Persona 5 Bold Pop-Art Style)
+   ============================================================================ */
+:root[data-theme="phantom"], .theme-phantom {
+  --theme-name: "phantom";
+  --bg-primary: #0D0D10;
+  --bg-surface: #1B1B22;
+  --bg-card: #262630;
+  --text-primary: #F5F5F5;
+  --text-muted: #9E9EA7;
+  --accent-red: #D81124;
+  --accent-crimson: #E60012;
+  --accent-yellow: #FFD500;
+  --border-color: #D81124;
+  --border-width: 2px;
+  --radius: 0px;
+  --font-family: 'Impact', 'Arial Black', system-ui, sans-serif;
+  --shadow-pop: 4px 4px 0px #000000;
+}
+
+.theme-phantom-light, [data-theme="phantom-light"] {
+  --bg-primary: #F5F5F5;
+  --bg-surface: #FFFFFF;
+  --bg-card: #EBEBEB;
+  --text-primary: #0D0D10;
+  --text-muted: #555555;
+  --accent-red: #D81124;
+  --accent-yellow: #FFD500;
+  --border-color: #0D0D10;
+  --shadow-pop: 4px 4px 0px #D81124;
+}
+
+/* Phantom Components */
+.phantom-btn {
+  background: var(--accent-red);
+  color: #FFF;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.6rem 1.4rem;
+  border: 2px solid #000;
+  box-shadow: 4px 4px 0 #000;
+  transform: skew(-4deg);
+  display: inline-block;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.phantom-btn:hover {
+  background: var(--accent-yellow);
+  color: #000;
+  box-shadow: 6px 6px 0 var(--accent-red);
+  transform: skew(-4deg) translate(-2px, -2px);
+}
+.phantom-card {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
+  box-shadow: var(--shadow-pop);
+  padding: 1.5rem;
+  position: relative;
+}
+.phantom-badge {
+  background: var(--accent-yellow);
+  color: #000;
+  font-weight: 900;
+  padding: 0.2rem 0.6rem;
+  display: inline-block;
+  transform: rotate(-3deg);
+  border: 1px solid #000;
+}
+.phantom-stripe-bg {
+  background: repeating-linear-gradient(
+    -45deg,
+    #D81124,
+    #D81124 10px,
+    #B30C1C 10px,
+    #B30C1C 20px
+  );
+}

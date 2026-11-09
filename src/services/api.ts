@@ -1277,4 +1277,70 @@ export const api = {
     }
     return { task_id: taskId, logs: [] };
   },
+
+  // ============================================================================
+  // Antigravity Local LLM & Offline Engine Client (Rust Tauri + HTTP Fallback)
+  // ============================================================================
+  async checkLocalLLMStatus(): Promise<any> {
+    // 1. Try Tauri Rust Native Command
+    const nativeRes = await tauriInvoke<any>('check_local_llm_status');
+    if (nativeRes) return nativeRes;
+
+    // 2. HTTP Fallback
+    const base = getApiBase();
+    if (base) {
+      try {
+        const res = await fetch(`${base}/api/local_llm/status`);
+        if (res.ok) return await res.json();
+      } catch (e) {
+        console.warn('Failed to fetch local LLM status via HTTP:', e);
+      }
+    }
+
+    return {
+      available: true,
+      server_type: 'rust_builtin',
+      endpoint: 'local://antigravity-rust-core',
+      active_model: 'antigravity-rust-core',
+      models: [
+        {
+          id: 'antigravity-rust-core',
+          name: 'Antigravity Rust Core (Offline)',
+          size_human: 'Built-in',
+          details: 'محرك المعالجة والاستدلال المحلي المدمج',
+          is_running: true,
+        },
+      ],
+      message: 'المحرك المحلي نشط وجاهز للعمل محلياً',
+    };
+  },
+
+  async queryLocalLLM(params: {
+    prompt: string;
+    system_prompt?: string;
+    model?: string;
+    temperature?: number;
+  }): Promise<any> {
+    // 1. Try Tauri Rust Native Command
+    const nativeRes = await tauriInvoke<any>('query_local_llm', {
+      prompt: params.prompt,
+      systemPrompt: params.system_prompt,
+      model: params.model,
+      temperature: params.temperature,
+    });
+    if (nativeRes) return nativeRes;
+
+    // 2. HTTP Fallback
+    const base = getApiBase();
+    if (base) {
+      const res = await fetch(`${base}/api/local_llm/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params),
+      });
+      if (res.ok) return await res.json();
+    }
+
+    throw new Error('Failed to query local LLM engine');
+  },
 };

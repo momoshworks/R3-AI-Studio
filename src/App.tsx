@@ -10,10 +10,15 @@ import {
   Sun,
   Moon,
   Menu,
+  Palette,
+  Cpu,
 } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
 import { ChatCanvas } from './components/ChatCanvas';
 import { AutomationsHub } from './components/AutomationsHub';
+import { LocalChatbot } from './components/LocalChatbot';
+import { AntigravityStatusBar } from './components/AntigravityStatusBar';
+import { AntigravityThemePicker, ANTIGRAVITY_THEMES } from './components/AntigravityThemePicker';
 import { InputBar } from './components/InputBar';
 import { UsefulToolsHub } from './components/UsefulToolsHub';
 import { SettingsModal } from './components/SettingsModal';
@@ -71,6 +76,15 @@ const AVAILABLE_MODELS = [
       { id: 'ChatGPT o3-mini (o3-mini)', name: 'ChatGPT o3-mini', desc: 'تفكير واستدلال عميق للأكواد', tag: 'تفكير' },
     ],
   },
+  {
+    category: 'Local Offline AI (On-Device)',
+    models: [
+      { id: 'antigravity-rust-core', name: 'Antigravity Rust Core', desc: 'محرك محلي فائق الخفة مدمج عبر لغة Rust بدون إنترنت', tag: 'Offline' },
+      { id: 'antigravity-code-expert', name: 'Antigravity Code Expert', desc: 'تدقيق الأكواد، فحص الأخطاء، وهندسة البرمجيات محلياً', tag: 'Code' },
+      { id: 'llama3.2', name: 'Ollama: Llama 3.2', desc: 'نموذج محلي عبر خادم Ollama على المنفذ 11434', tag: 'Ollama' },
+      { id: 'deepseek-r1', name: 'Ollama: DeepSeek R1', desc: 'استدلال محلي وتفكير عميق عبر Ollama', tag: 'Reasoning' },
+    ],
+  },
 ];
 
 export const App: React.FC = () => {
@@ -122,6 +136,36 @@ export const App: React.FC = () => {
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
+
+  // Antigravity Theme Engine State
+  const [antigravityTheme, setAntigravityTheme] = useState<string>(() => {
+    try {
+      return localStorage.getItem('ANTIGRAVITY_THEME') || 'antigravity-dark';
+    } catch {
+      return 'antigravity-dark';
+    }
+  });
+  const [isThemePickerOpen, setIsThemePickerOpen] = useState(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ANTIGRAVITY_THEME', antigravityTheme);
+      document.documentElement.setAttribute('data-theme', antigravityTheme);
+
+      // Clean existing theme- classes
+      const currentClasses = document.documentElement.className
+        .split(' ')
+        .filter((c) => !c.startsWith('theme-'));
+      document.documentElement.className = currentClasses.join(' ');
+      document.documentElement.classList.add(`theme-${antigravityTheme}`);
+
+      if (antigravityTheme === 'matcha' || antigravityTheme === 'doodle') {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    } catch {}
+  }, [antigravityTheme]);
 
   // Navigation & UI State
   const [currentTab, setCurrentTab] = useState<SidebarTab>('chats');
@@ -713,6 +757,38 @@ export const App: React.FC = () => {
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
+            {/* Local Bot Quick Pill */}
+            <button
+              onClick={() => setCurrentTab('local_chat')}
+              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono transition-all border shrink-0 ${
+                currentTab === 'local_chat'
+                  ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300 font-semibold shadow-sm shadow-emerald-500/10'
+                  : isDark
+                  ? 'bg-[#16181d] border-[#262930] hover:border-emerald-500/40 text-[#8F95A0] hover:text-emerald-400'
+                  : 'bg-white border-slate-300 hover:border-emerald-600 text-slate-700 hover:text-emerald-700'
+              }`}
+              title={lang === 'ar' ? 'فتح الشات بوت المحلي (Offline)' : 'Open Local Chatbot (Offline)'}
+            >
+              <Cpu className="w-3.5 h-3.5 text-emerald-400" />
+              <span>{lang === 'ar' ? 'بوت محلي' : 'Local Bot'}</span>
+            </button>
+
+            {/* Antigravity Theme Switcher Button */}
+            <button
+              onClick={() => setIsThemePickerOpen(true)}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-all shrink-0 ${
+                isDark
+                  ? 'bg-[#16181d] border-[#262930] hover:border-[#8ab4f8]/50 text-[#8F95A0] hover:text-[#EDEDED]'
+                  : 'bg-white border-slate-300 hover:border-blue-500 text-slate-700'
+              }`}
+              title={lang === 'ar' ? 'تغيير ثيم Antigravity' : 'Antigravity Themes'}
+            >
+              <Palette className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden md:inline font-mono text-[11px]">
+                {ANTIGRAVITY_THEMES.find((t) => t.id === antigravityTheme)?.name.split(' ')[0] || 'Theme'}
+              </span>
+            </button>
+
             {/* User Account Avatar Trigger & Dropdown Menu */}
             <div className="relative shrink-0">
               <button
@@ -921,6 +997,8 @@ export const App: React.FC = () => {
           <UsefulToolsHub theme={theme} lang={lang} />
         ) : currentTab === 'automations' ? (
           <AutomationsHub theme={theme} lang={lang} t={t} />
+        ) : currentTab === 'local_chat' ? (
+          <LocalChatbot theme={theme} lang={lang} />
         ) : currentTab === 'media' ? (
           <MediaVault
             activeMedia={activeMedia}
@@ -966,6 +1044,17 @@ export const App: React.FC = () => {
         )}
 
         </div>
+
+        {/* Antigravity Desktop Status Bar */}
+        <AntigravityStatusBar
+          theme={theme}
+          lang={lang}
+          metrics={metrics}
+          activeThemeName={ANTIGRAVITY_THEMES.find((th) => th.id === antigravityTheme)?.name || 'Antigravity Dark'}
+          onOpenThemeModal={() => setIsThemePickerOpen(true)}
+          onToggleLang={toggleLanguage}
+          onSelectLocalBot={() => setCurrentTab('local_chat')}
+        />
 
         {/* Global Background Media Player (Plays across all tabs & in background!) */}
         <BackgroundMediaPlayer
@@ -1049,6 +1138,15 @@ export const App: React.FC = () => {
         theme={theme}
         lang={lang}
         t={t}
+      />
+
+      {/* Antigravity Theme Picker Modal */}
+      <AntigravityThemePicker
+        isOpen={isThemePickerOpen}
+        onClose={() => setIsThemePickerOpen(false)}
+        currentThemeId={antigravityTheme}
+        onSelectTheme={(thId) => setAntigravityTheme(thId)}
+        lang={lang}
       />
     </div>
   );

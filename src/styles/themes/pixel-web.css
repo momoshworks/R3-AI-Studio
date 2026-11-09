@@ -1,0 +1,86 @@
+/* ============================================================================
+   PIXEL THEME - WEB & APP STYLESHEET (8-Bit Retro Sweetie-16 Arcade Geek)
+   ============================================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen&display=swap');
+
+:root[data-theme="pixel"], .theme-pixel {
+  --theme-name: "pixel";
+  --bg-primary: #1A1C2C;
+  --bg-surface: #14161F;
+  --bg-card: #20233A;
+  --text-primary: #F4F4F4;
+  --text-muted: #94B0C2;
+  --accent-cyan: #73EFF7;
+  --accent-blue: #41A6F6;
+  --accent-green: #A7F070;
+  --accent-yellow: #FFCD75;
+  --accent-red: #B13E53;
+  --border-color: #333C57;
+  --radius: 0px;
+  --font-family: 'Silkscreen', 'Press Start 2P', monospace;
+  --shadow-pixel: 4px 4px 0px #14161F;
+}
+
+.theme-pixel-light, [data-theme="pixel-light"] {
+  --bg-primary: #EEF0F5;
+  --bg-surface: #DDE1EA;
+  --bg-card: #CBD2E0;
+  --text-primary: #1A1C2C;
+  --text-muted: #566C86;
+  --accent-cyan: #1982C4;
+  --accent-blue: #3B5DC9;
+  --accent-green: #38B764;
+  --accent-yellow: #D97706;
+  --accent-red: #B13E53;
+  --border-color: #566C86;
+  --shadow-pixel: 4px 4px 0px #566C86;
+}
+
+/* Pixel Components */
+.pixel-btn {
+  background: var(--accent-cyan);
+  color: #1A1C2C;
+  font-family: var(--font-family);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.6rem 1.2rem;
+  border: 3px solid #14161F;
+  box-shadow: 4px 4px 0 #14161F;
+  display: inline-block;
+  cursor: pointer;
+  image-rendering: pixelated;
+  transition: transform 0.05s steps(2);
+}
+.pixel-btn:hover {
+  background: var(--accent-yellow);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 #14161F;
+}
+.pixel-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #14161F;
+}
+.pixel-card {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 3px solid var(--border-color);
+  box-shadow: var(--shadow-pixel);
+  padding: 1.25rem;
+  image-rendering: pixelated;
+}
+.pixel-badge {
+  background: var(--accent-green);
+  color: #1A1C2C;
+  font-family: var(--font-family);
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border: 2px solid #14161F;
+  display: inline-block;
+}
+.pixel-scanlines {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  );
+  background-size: 100% 4px;
+}

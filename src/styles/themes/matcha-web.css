@@ -1,0 +1,71 @@
+/* ============================================================================
+   MATCHA THEME - WEB & APP STYLESHEET (Japanese Matcha Diary / Cozy Journal)
+   ============================================================================ */
+:root[data-theme="matcha"], .theme-matcha {
+  --theme-name: "matcha";
+  --bg-primary: #141B15;
+  --bg-surface: #1A231C;
+  --bg-card: #212D23;
+  --text-primary: #E2ECE3;
+  --text-muted: #7E9682;
+  --accent-matcha: #4E875B;
+  --accent-neon: #6EE7B7;
+  --accent-yellow: #FBBF24;
+  --border-color: #3A4F3E;
+  --radius: 8px;
+  --shadow-matcha: 3px 3px 0 rgba(0, 0, 0, 0.45);
+}
+
+.theme-matcha-light, [data-theme="matcha-light"] {
+  --bg-primary: #F5F6F0;
+  --bg-surface: #E8EFE3;
+  --bg-card: #DFE8D8;
+  --text-primary: #243326;
+  --text-muted: #5E7260;
+  --accent-matcha: #4E875B;
+  --accent-neon: #3D6F49;
+  --accent-yellow: #F59E0B;
+  --border-color: #304232;
+  --shadow-matcha: 3px 3px 0 rgba(36, 51, 38, 0.2);
+}
+
+/* Matcha Components */
+.matcha-btn {
+  background: var(--accent-matcha);
+  color: #F6F8F3;
+  font-weight: 600;
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border-color);
+  box-shadow: var(--shadow-matcha);
+  display: inline-block;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.matcha-btn:hover {
+  background: #3D6F49;
+  transform: translate(-1px, -1px);
+}
+.matcha-card {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1.5px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--shadow-matcha);
+  padding: 1.5rem;
+  position: relative;
+}
+.matcha-sticker {
+  background: #FFFBEB;
+  color: #78350F;
+  border: 1px dashed #D97706;
+  border-radius: 4px;
+  padding: 0.2rem 0.6rem;
+  display: inline-block;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+  transform: rotate(1deg);
+}
+.matcha-bookmark {
+  border-left: 4px solid var(--accent-matcha);
+  padding-left: 0.75rem;
+}

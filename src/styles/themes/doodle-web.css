@@ -1,0 +1,70 @@
+/* ============================================================================
+   DOODLE THEME - WEB & APP STYLESHEET (Comic Manga Line Art & Ink Sketch)
+   ============================================================================ */
+:root[data-theme="doodle"], .theme-doodle {
+  --theme-name: "doodle";
+  --bg-primary: #18181B;
+  --bg-surface: #202024;
+  --bg-card: #27272A;
+  --text-primary: #F4F4F5;
+  --text-muted: #A1A1AA;
+  --accent-pink: #FF2E93;
+  --accent-yellow: #FFD000;
+  --accent-cyan: #00E5FF;
+  --border-color: #3F3F46;
+  --radius: 2px;
+  --shadow-doodle: 3px 3px 0 #000000;
+}
+
+.theme-doodle-light, [data-theme="doodle-light"] {
+  --bg-primary: #FDFBF7;
+  --bg-surface: #F4EFE6;
+  --bg-card: #EAE3D2;
+  --text-primary: #18181B;
+  --text-muted: #52525B;
+  --accent-pink: #FF2E93;
+  --accent-yellow: #FFD000;
+  --accent-cyan: #0099B8;
+  --border-color: #27272A;
+  --shadow-doodle: 3px 3px 0 #18181B;
+}
+
+/* Doodle Components */
+.doodle-btn {
+  background: var(--accent-pink);
+  color: #FFF;
+  font-weight: 700;
+  padding: 0.5rem 1.2rem;
+  border-radius: var(--radius);
+  border: 2px solid var(--border-color);
+  box-shadow: var(--shadow-doodle);
+  display: inline-block;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+.doodle-btn:hover {
+  background: #FF5CA8;
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 var(--border-color);
+}
+.doodle-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--border-color);
+}
+.doodle-panel {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
+  box-shadow: var(--shadow-doodle);
+  padding: 1.25rem;
+}
+.doodle-stamp {
+  border: 2px solid var(--accent-pink);
+  color: var(--accent-pink);
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  text-transform: uppercase;
+  display: inline-block;
+  transform: rotate(-4deg);
+  border-radius: 3px;
+}
