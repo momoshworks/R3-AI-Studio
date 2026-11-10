@@ -12,6 +12,9 @@ import {
   Menu,
   Palette,
   Cpu,
+  RefreshCw,
+  Download,
+  Trash2,
 } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
 import { ChatCanvas } from './components/ChatCanvas';
@@ -41,7 +44,6 @@ import {
   MediaItem,
   Session,
   SidebarTab,
-  SystemMetrics,
   UserAccount,
 } from './types';
 import { translations, Language, Theme } from './utils/translations';
@@ -136,12 +138,14 @@ export const App: React.FC = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
-  // Antigravity Theme Engine State
+  // Antigravity Theme Engine State (Default: Liquid Frosted Glass Blur)
   const [antigravityTheme, setAntigravityTheme] = useState<string>(() => {
     try {
-      return localStorage.getItem('ANTIGRAVITY_THEME') || 'antigravity-dark';
+      const saved = localStorage.getItem('ANTIGRAVITY_THEME');
+      if (saved && saved !== 'antigravity-dark') return saved;
+      return 'glass';
     } catch {
-      return 'antigravity-dark';
+      return 'glass';
     }
   });
   const [isThemePickerOpen, setIsThemePickerOpen] = useState(false);
@@ -269,15 +273,6 @@ export const App: React.FC = () => {
   // Global Background Media Player State (Persistent across all tabs)
   const [activeMedia, setActiveMedia] = useState<MediaItem | null>(null);
 
-  // System & Backend Data
-  const [metrics, setMetrics] = useState<SystemMetrics>({
-    cpu_usage: 0,
-    memory_used_mb: 0,
-    memory_total_mb: 0,
-    memory_percentage: 0,
-    disk_free_gb: 0,
-    disk_total_gb: 0,
-  });
   const [driveStatus, setDriveStatus] = useState<DriveStatus>({
     authenticated: false,
   });
@@ -315,42 +310,9 @@ export const App: React.FC = () => {
     }
   };
 
-  // Initial load
+  // Initial load - Ultra lightweight (no heavy metrics polling)
   useEffect(() => {
-    const initData = async () => {
-      try {
-        const sys = await api.getSystemMetrics();
-        setMetrics(sys);
-      } catch {}
-      await refreshUserData();
-    };
-    initData();
-
-    // Telemetry pulse: idle-throttled to save CPU when window is inactive
-    const fetchMetrics = async () => {
-      if (document.hidden) return; // Do not consume CPU/disk when tab/window is minimized
-      try {
-        const sys = await api.getSystemMetrics();
-        setMetrics(sys);
-      } catch {}
-    };
-
-    const metricsInterval = setInterval(fetchMetrics, 10000);
-
-    // Refresh immediately when returning to the app window
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        fetchMetrics();
-      }
-    };
-    window.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleVisibilityChange);
-
-    return () => {
-      clearInterval(metricsInterval);
-      window.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleVisibilityChange);
-    };
+    refreshUserData();
   }, []);
 
   const handleGoogleLogout = async () => {
@@ -601,25 +563,31 @@ export const App: React.FC = () => {
         onOpenSettings={() => setIsSettingsOpen(true)}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        metrics={metrics}
         t={t}
         theme={theme}
         lang={lang}
       />
 
-      {/* 2. Main Workspace (dir adapts for Arabic or English content) */}
+      {/* 2. Main Workspace with Frosted Aurora Ambient Mesh for Blur Theme */}
       <div
         className={`flex-1 flex flex-col h-full overflow-hidden relative transition-colors duration-200 ${
-          isDark ? 'bg-[#0e0f12] text-[#EDEDED]' : 'bg-[#f8fafc] text-slate-800'
+          isDark ? 'bg-[#0B0F19] text-[#EDEDED]' : 'bg-[#f8fafc] text-slate-800'
         }`}
         dir={lang === 'ar' ? 'rtl' : 'ltr'}
       >
-        {/* Top Navigation Bar - Ultra-Clean Linear & Gemini Aesthetic */}
+        {/* Ambient Aurora Glow (Behind everything for Frosted Glass Theme) */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+          <div className="absolute -top-32 -left-32 w-[28rem] h-[28rem] bg-cyan-500/[0.12] rounded-full blur-[140px]" />
+          <div className="absolute top-1/3 -right-32 w-[26rem] h-[26rem] bg-pink-500/[0.10] rounded-full blur-[150px]" />
+          <div className="absolute -bottom-32 left-1/3 w-[32rem] h-[32rem] bg-indigo-500/[0.12] rounded-full blur-[160px]" />
+        </div>
+
+        {/* Top Navigation Bar - Ultra-Clean Frosted Glass & Antigravity Aesthetic */}
         <header
-          className={`h-14 px-3 sm:px-6 border-b flex items-center justify-between select-none z-10 transition-colors gap-2 shrink-0 ${
+          className={`h-14 px-3 sm:px-6 border-b flex items-center justify-between select-none z-10 transition-colors gap-2 shrink-0 backdrop-blur-2xl ${
             isDark
-              ? 'bg-[#0e0f12]/80 backdrop-blur-md border-[#262930] text-[#EDEDED]'
-              : 'bg-white/95 backdrop-blur-md border-slate-200 text-slate-800 shadow-sm'
+              ? 'bg-[#0B0F19]/70 border-white/[0.08] text-[#EDEDED]'
+              : 'bg-white/75 backdrop-blur-2xl border-slate-200/80 text-slate-800 shadow-sm'
           }`}
         >
           {/* Left section: Sidebar toggle + Minimalist Branding */}
@@ -642,28 +610,79 @@ export const App: React.FC = () => {
             </span>
           </div>
 
-          {/* Center: Clean, pill-shaped Model Selector with translucent #1e2026 */}
-          <div className="relative shrink-0">
-            <button
-              onClick={() => setIsModelMenuOpen(!isModelMenuOpen)}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-medium transition-all shadow-sm whitespace-nowrap active:scale-95 ${
-                isDark
-                  ? 'bg-[#1e2026] hover:bg-[#252830] border-[#2a2d36] text-[#EDEDED]'
-                  : 'bg-white hover:bg-slate-100 border-slate-300 text-slate-800'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#8ab4f8] shrink-0" />
-              <span className="font-semibold truncate sm:hidden max-w-[100px]">
-                {getShortModelName(selectedModel)}
-              </span>
-              <span className="font-semibold truncate hidden sm:inline max-w-[180px]">
-                {getDisplayModelName(selectedModel)}
-              </span>
-              <ChevronDown className="w-3 h-3 text-[#8F95A0] shrink-0" />
-              {((isChatGpt && !hasOpenaiKey) || (!isChatGpt && !hasApiKey)) && (
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" title="API Key missing" />
-              )}
-            </button>
+          {/* Center: When on local_chat -> MOMO1 Offline Bar in Main Navbar */}
+          {currentTab === 'local_chat' ? (
+            <div className="flex items-center gap-2 animate-in fade-in zoom-in-95 duration-200">
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md shadow-sm">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span className="text-xs font-mono font-bold text-emerald-400 whitespace-nowrap">
+                  MOMO1 (3B Local • 100% أوفلاين)
+                </span>
+              </div>
+
+              {/* Local Actions in Main Top Bar */}
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent('momo1:refresh_status'))}
+                className={`p-1.5 rounded-full border transition-all active:scale-95 ${
+                  isDark
+                    ? 'border-white/10 hover:bg-white/10 text-[#8F95A0] hover:text-white'
+                    : 'border-slate-300 hover:bg-slate-100 text-slate-600'
+                }`}
+                title={lang === 'ar' ? 'إعادة فحص الموديل المحلي' : 'Refresh local MOMO1'}
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
+              </button>
+
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent('momo1:export_chat'))}
+                className={`p-1.5 rounded-full border transition-all active:scale-95 ${
+                  isDark
+                    ? 'border-white/10 hover:bg-white/10 text-[#8F95A0] hover:text-white'
+                    : 'border-slate-300 hover:bg-slate-100 text-slate-600'
+                }`}
+                title={lang === 'ar' ? 'تصدير المحادثة Markdown' : 'Export Chat Markdown'}
+              >
+                <Download className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent('momo1:clear_chat'))}
+                className={`p-1.5 rounded-full border transition-all active:scale-95 ${
+                  isDark
+                    ? 'border-white/10 hover:bg-rose-500/10 text-[#8F95A0] hover:text-rose-400'
+                    : 'border-slate-300 hover:bg-rose-50 text-slate-600 hover:text-rose-600'
+                }`}
+                title={lang === 'ar' ? 'مسح محادثة MOMO1' : 'Clear Chat'}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            /* Center: Clean, pill-shaped Model Selector with translucent #1e2026 */
+            <div className="relative shrink-0">
+              <button
+                onClick={() => setIsModelMenuOpen(!isModelMenuOpen)}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-medium transition-all shadow-sm whitespace-nowrap active:scale-95 ${
+                  isDark
+                    ? 'bg-[#1e2026] hover:bg-[#252830] border-[#2a2d36] text-[#EDEDED]'
+                    : 'bg-white hover:bg-slate-100 border-slate-300 text-slate-800'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#8ab4f8] shrink-0" />
+                <span className="font-semibold truncate sm:hidden max-w-[100px]">
+                  {getShortModelName(selectedModel)}
+                </span>
+                <span className="font-semibold truncate hidden sm:inline max-w-[180px]">
+                  {getDisplayModelName(selectedModel)}
+                </span>
+                <ChevronDown className="w-3 h-3 text-[#8F95A0] shrink-0" />
+                {((isChatGpt && !hasOpenaiKey) || (!isChatGpt && !hasApiKey)) && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" title="API Key missing" />
+                )}
+              </button>
 
             {/* Models Menu */}
             {isModelMenuOpen && (
@@ -727,6 +746,7 @@ export const App: React.FC = () => {
               </>
             )}
           </div>
+        )}
 
           {/* Right section: Minimal quick-actions: Language, Theme, User Avatar */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -1048,8 +1068,7 @@ export const App: React.FC = () => {
         <AntigravityStatusBar
           theme={theme}
           lang={lang}
-          metrics={metrics}
-          activeThemeName={ANTIGRAVITY_THEMES.find((th) => th.id === antigravityTheme)?.name || 'Antigravity Dark'}
+          activeThemeName={ANTIGRAVITY_THEMES.find((th) => th.id === antigravityTheme)?.name || 'Liquid Glass Aurora'}
           onOpenThemeModal={() => setIsThemePickerOpen(true)}
           onToggleLang={toggleLanguage}
           onSelectLocalBot={() => setCurrentTab('local_chat')}

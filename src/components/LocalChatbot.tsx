@@ -5,8 +5,6 @@ import {
   Cpu,
   ShieldCheck,
   Send,
-  Trash2,
-  Download,
   RefreshCw,
   Copy,
   Check,
@@ -89,6 +87,30 @@ export const LocalChatbot: React.FC<LocalChatbotProps> = ({ theme, lang }) => {
       localStorage.setItem('ANTIGRAVITY_LOCAL_CHAT_MESSAGES', JSON.stringify(messages));
     } catch {}
   }, [messages]);
+
+  // Listen to Global Top Bar Actions for MOMO1
+  useEffect(() => {
+    const handleClear = () => clearChat();
+    const handleExport = () => exportChat();
+    const handleRefresh = () => refreshStatus();
+    const handleModelChange = (e: any) => {
+      if (e.detail) {
+        handleSelectModel(e.detail);
+      }
+    };
+
+    window.addEventListener('momo1:clear_chat', handleClear);
+    window.addEventListener('momo1:export_chat', handleExport);
+    window.addEventListener('momo1:refresh_status', handleRefresh);
+    window.addEventListener('momo1:model_changed', handleModelChange);
+
+    return () => {
+      window.removeEventListener('momo1:clear_chat', handleClear);
+      window.removeEventListener('momo1:export_chat', handleExport);
+      window.removeEventListener('momo1:refresh_status', handleRefresh);
+      window.removeEventListener('momo1:model_changed', handleModelChange);
+    };
+  }, [messages, selectedModel]);
 
   // Check Local LLM Status
   const refreshStatus = async () => {
@@ -228,145 +250,43 @@ export const LocalChatbot: React.FC<LocalChatbotProps> = ({ theme, lang }) => {
 
   return (
     <div
-      className={`flex-1 flex flex-col h-full overflow-hidden select-text ${
-        isDark ? 'bg-[#0e0f12] text-[#EDEDED]' : 'bg-[#F6F8F3] text-slate-800'
+      className={`flex-1 flex flex-col h-full overflow-hidden select-text relative backdrop-blur-2xl ${
+        isDark ? 'bg-transparent text-[#EDEDED]' : 'bg-transparent text-slate-800'
       }`}
       dir={isAr ? 'rtl' : 'ltr'}
     >
-      {/* Antigravity Local Top Bar */}
-      <div
-        className={`px-5 py-3.5 border-b shrink-0 flex items-center justify-between gap-4 transition-colors ${
-          isDark ? 'border-[#262930] bg-[#16181d]/80 backdrop-blur-md' : 'border-slate-200 bg-white/80 backdrop-blur-md'
-        }`}
-      >
-        <div className="flex items-center gap-3">
-          <div className="relative p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-            <Cpu className="w-5 h-5" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse border-2 border-[#0e0f12]" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold tracking-tight">
-                {isAr ? 'MOMO1 — الشات بوت المحلي (Antigravity)' : 'MOMO1 — Local AI Chatbot'}
-              </h2>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3" />
-                MOMO1 Offline
-              </span>
-            </div>
-            <p className="text-[11px] text-[#8F95A0] mt-0.5 flex items-center gap-1.5 font-mono">
-              <span>{status?.server_type === 'ollama' ? 'Ollama Server (127.0.0.1:11434)' : status?.server_type === 'lmstudio' ? 'LM Studio (127.0.0.1:1234)' : 'Antigravity Rust Engine (Embedded)'}</span>
-              <span>•</span>
-              <span className="text-emerald-400 font-medium">{status?.message || 'جاهز للاستخدام'}</span>
-            </p>
-          </div>
-        </div>
-
-        {/* Model Selector & Actions */}
-        <div className="flex items-center gap-2">
-          {/* Local Model Dropdown */}
-          <div className="relative flex items-center">
-            <select
-              value={selectedModel}
-              onChange={(e) => handleSelectModel(e.target.value)}
-              className={`text-xs font-mono px-3 py-1.5 rounded-xl border appearance-none pe-7 cursor-pointer outline-none transition-all ${
-                isDark
-                  ? 'bg-[#1e2026] border-[#2a2d36] text-[#EDEDED] hover:border-[#8ab4f8]/50'
-                  : 'bg-white border-slate-300 text-slate-800 hover:border-blue-500'
-              }`}
-            >
-              {(status?.models && status.models.length > 0
-                ? status.models.map((m) => {
-                    const isMomo = m.id.toLowerCase().includes('momo') || m.id.toLowerCase().includes('qwen2.5:3b');
-                    const label = isMomo ? 'MOMO1 (3B Local)' : m.name;
-                    return (
-                      <option key={m.id} value={m.id} className={isDark ? 'bg-[#16181d] text-white' : 'bg-white text-black'}>
-                        {label}
-                      </option>
-                    );
-                  })
-                : [
-                    { id: 'momo1', name: 'MOMO1 (3B Local • 1.9 GB)' },
-                    { id: 'qwen2.5:1.5b', name: 'MOMO1 Lite (1.5B • 986 MB)' },
-                    { id: 'antigravity-rust-core', name: 'MOMO1 Rust Core (Offline)' },
-                  ].map((m) => (
-                    <option key={m.id} value={m.id} className={isDark ? 'bg-[#16181d] text-white' : 'bg-white text-black'}>
-                      {m.name}
-                    </option>
-                  ))
-              )}
-            </select>
-          </div>
-
-          <button
-            onClick={refreshStatus}
-            disabled={isCheckingStatus}
-            className={`p-2 rounded-xl border transition-colors ${
-              isDark ? 'border-[#262930] hover:bg-white/10 text-[#8F95A0] hover:text-white' : 'border-slate-200 hover:bg-slate-100 text-slate-600'
-            }`}
-            title={isAr ? 'فحص خوادم الذكاء الاصطناعي المحلية' : 'Refresh local server probe'}
-          >
-            <RefreshCw className={`w-4 h-4 ${isCheckingStatus ? 'animate-spin text-emerald-400' : ''}`} />
-          </button>
-
-          <button
-            onClick={exportChat}
-            disabled={messages.length === 0}
-            className={`p-2 rounded-xl border transition-colors ${
-              isDark ? 'border-[#262930] hover:bg-white/10 text-[#8F95A0] hover:text-white' : 'border-slate-200 hover:bg-slate-100 text-slate-600'
-            }`}
-            title={isAr ? 'تصدير المحادثة بتنسيق Markdown' : 'Export conversation as Markdown'}
-          >
-            <Download className="w-4 h-4" />
-          </button>
-
-          <button
-            onClick={clearChat}
-            disabled={messages.length === 0}
-            className={`p-2 rounded-xl border transition-colors ${
-              isDark ? 'border-[#262930] hover:bg-rose-500/10 text-[#8F95A0] hover:text-rose-400' : 'border-slate-200 hover:bg-rose-50 text-slate-600 hover:text-rose-600'
-            }`}
-            title={isAr ? 'مسح المحادثة' : 'Clear chat'}
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Messages Canvas */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6 space-y-6">
-        <div className="max-w-4xl mx-auto space-y-6">
+      {/* Messages Canvas - Edge-to-Edge Frosted Canvas */}
+      <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-5 space-y-5">
+        <div className="max-w-4xl mx-auto space-y-5">
           {messages.map((m) => {
             const isUser = m.role === 'user';
             return (
               <div
                 key={m.id}
-                className={`flex gap-3.5 ${isUser ? (isAr ? 'flex-row' : 'flex-row-reverse') : (isAr ? 'flex-row' : 'flex-row')}`}
+                className={`flex gap-3 ${
+                  isUser ? (isAr ? 'justify-start' : 'justify-end') : 'justify-start'
+                }`}
               >
-                {/* Avatar */}
-                <div className="shrink-0 mt-0.5">
-                  {isUser ? (
-                    <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
-                      U
-                    </div>
-                  ) : (
-                    <div className="w-8 h-8 rounded-xl bg-[#1e2026] border border-[#2a2d36] flex items-center justify-center text-emerald-400 shadow-sm">
+                {/* Assistant Avatar Only - User Avatar ('U') Removed Completely */}
+                {!isUser && (
+                  <div className="shrink-0 mt-0.5">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-sm backdrop-blur-md">
                       <Cpu className="w-4 h-4" />
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
 
                 {/* Content Box */}
-                <div className={`flex-1 max-w-[85%] space-y-1.5`}>
+                <div className={`space-y-1.5 ${isUser ? 'max-w-[82%]' : 'flex-1 max-w-[88%]'}`}>
                   <div
-                    className={`p-4 rounded-2xl text-xs sm:text-sm leading-relaxed ${
+                    className={`p-3.5 sm:p-4 rounded-2xl text-xs sm:text-sm leading-relaxed ${
                       isUser
                         ? isDark
-                          ? 'bg-[#1e2026] border border-[#2a2d36] text-[#EDEDED]'
-                          : 'bg-blue-600 text-white'
+                          ? 'bg-gradient-to-r from-blue-600/90 to-indigo-600/90 text-white shadow-lg shadow-blue-500/15 border border-white/15 backdrop-blur-md'
+                          : 'bg-blue-600 text-white shadow-md'
                         : isDark
-                        ? 'bg-[#16181d] border border-[#262930] text-[#EDEDED]'
-                        : 'bg-white border border-slate-200 text-slate-800 shadow-sm'
+                        ? 'bg-[#121622]/80 border border-white/[0.08] text-[#EDEDED] shadow-xl backdrop-blur-md'
+                        : 'bg-white/80 border border-slate-200 text-slate-800 shadow-sm backdrop-blur-md'
                     }`}
                   >
                     <div className="prose prose-invert max-w-none text-xs sm:text-sm">
@@ -477,12 +397,12 @@ export const LocalChatbot: React.FC<LocalChatbotProps> = ({ theme, lang }) => {
             </div>
           )}
 
-          {/* Capsule Prompt Box */}
+          {/* Capsule Prompt Box with Frosted Blur */}
           <div
-            className={`p-2.5 rounded-3xl border transition-all shadow-xl ${
+            className={`p-2.5 rounded-3xl border transition-all shadow-2xl backdrop-blur-2xl ${
               isDark
-                ? 'bg-[#16181d] border-[#2a2d36] focus-within:border-emerald-500/50 shadow-black/40'
-                : 'bg-white border-slate-300 focus-within:border-emerald-600 shadow-slate-200'
+                ? 'bg-[#121622]/80 border-white/[0.12] focus-within:border-emerald-500/50 shadow-black/40'
+                : 'bg-white/80 border-slate-300 focus-within:border-emerald-600 shadow-slate-200'
             }`}
           >
             <div className="flex items-end gap-2 px-2">
@@ -524,8 +444,8 @@ export const LocalChatbot: React.FC<LocalChatbotProps> = ({ theme, lang }) => {
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
             <span>
               {isAr
-                ? 'MOMO1 يعالج البيانات محلياً 100% عبر عتاد حاسوبك • لا يتم إرسال أي بايت عبر الإنترنت'
-                : 'MOMO1 running 100% On-Device • Zero internet data transfer'}
+                ? `MOMO1 يعمل محلياً 100% (${status?.active_model || selectedModel}) • ${isCheckingStatus ? 'جاري التحقق...' : 'معزول تماماً أوفلاين'}`
+                : `MOMO1 On-Device 100% (${status?.active_model || selectedModel}) • ${isCheckingStatus ? 'Probing...' : 'Zero internet transfer'}`}
             </span>
           </div>
         </div>

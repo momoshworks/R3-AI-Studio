@@ -15,7 +15,7 @@ import {
   Cpu,
   X,
 } from 'lucide-react';
-import { DriveStatus, Session, SidebarTab, SystemMetrics } from '../types';
+import { DriveStatus, Session, SidebarTab } from '../types';
 import { USEFUL_WEBSITES } from '../data/usefulWebsites';
 import { Translations, Theme, Language } from '../utils/translations';
 
@@ -31,7 +31,6 @@ interface SidebarProps {
   onOpenSettings: () => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
-  metrics?: SystemMetrics;
   t: Translations;
   theme: Theme;
   lang: Language;
@@ -49,7 +48,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenSettings,
   isCollapsed,
   onToggleCollapse,
-  metrics,
   t,
   theme,
   lang,
@@ -115,12 +113,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside
-      className={`h-screen border-r flex flex-col transition-all duration-300 select-none z-50 overflow-x-hidden safe-pt safe-pb ${
+      className={`h-screen border-r flex flex-col transition-all duration-300 select-none z-50 overflow-x-hidden safe-pt safe-pb backdrop-blur-2xl ${
         isCollapsed ? 'hidden md:flex md:w-16' : 'fixed inset-y-0 start-0 z-50 w-72 max-w-[85vw] shadow-2xl md:static md:w-[260px] md:shadow-none'
       } ${
         isDark
-          ? 'bg-[#16181d] border-[#262930] text-[#EDEDED]'
-          : 'bg-white border-slate-200 text-slate-800'
+          ? 'bg-[#0B0F19]/80 border-white/[0.08] text-[#EDEDED]'
+          : 'bg-white/80 border-slate-200/80 text-slate-800'
       }`}
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
     >
@@ -480,30 +478,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
       </div>
-
-      {/* Compact System Metrics Status Indicator */}
-      {!isCollapsed && metrics && (
-        <div className={`px-3 py-1.5 flex items-center justify-between text-[11px] font-mono border-t select-none ${
-          isDark
-            ? 'border-[#262930] bg-[#141519] text-[#8F95A0]'
-            : 'border-slate-200 bg-slate-100 text-slate-600'
-        }`}>
-          <div className="flex items-center gap-1.5">
-            <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                metrics.cpu_usage > 80
-                  ? 'bg-rose-500 animate-ping'
-                  : metrics.cpu_usage > 50
-                  ? 'bg-amber-400'
-                  : 'bg-emerald-400'
-              }`}
-            />
-            <span>CPU {metrics.cpu_usage.toFixed(0)}%</span>
-          </div>
-          <span>RAM {metrics.memory_percentage.toFixed(0)}%</span>
-          <span>{metrics.disk_free_gb.toFixed(0)}GB Free</span>
-        </div>
-      )}
 
       {/* Footer Settings Button */}
       <div

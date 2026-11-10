@@ -1,17 +1,13 @@
 import React from 'react';
 import {
   GitBranch,
-  Cpu,
   Palette,
-  Activity,
 } from 'lucide-react';
-import { SystemMetrics } from '../types';
 import { Language, Theme } from '../utils/translations';
 
 interface AntigravityStatusBarProps {
   theme: Theme;
   lang: Language;
-  metrics?: SystemMetrics;
   activeThemeName?: string;
   onOpenThemeModal?: () => void;
   onToggleLang?: () => void;
@@ -21,8 +17,7 @@ interface AntigravityStatusBarProps {
 export const AntigravityStatusBar: React.FC<AntigravityStatusBarProps> = ({
   theme,
   lang,
-  metrics,
-  activeThemeName = 'Antigravity Dark',
+  activeThemeName = 'Liquid Glass Aurora',
   onOpenThemeModal,
   onToggleLang,
   onSelectLocalBot,
@@ -30,15 +25,12 @@ export const AntigravityStatusBar: React.FC<AntigravityStatusBarProps> = ({
   const isDark = theme === 'dark';
   const isAr = lang === 'ar';
 
-  const cpuPercent = metrics ? Math.round(metrics.cpu_usage) : 18;
-  const memPercent = metrics ? Math.round(metrics.memory_percentage) : 46;
-
   return (
     <footer
-      className={`h-7 px-3 border-t shrink-0 flex items-center justify-between text-[11px] font-mono select-none transition-colors z-30 ${
+      className={`h-7 px-3 border-t shrink-0 flex items-center justify-between text-[11px] font-mono select-none transition-colors z-30 backdrop-blur-md ${
         isDark
-          ? 'bg-[#0a0a0d] border-[#262930] text-[#8F95A0]'
-          : 'bg-[#EDEDED] border-slate-300 text-slate-600'
+          ? 'bg-[#0a0a0d]/80 border-white/[0.08] text-[#8F95A0]'
+          : 'bg-white/80 border-slate-200 text-slate-600'
       }`}
       dir={isAr ? 'rtl' : 'ltr'}
     >
@@ -68,22 +60,8 @@ export const AntigravityStatusBar: React.FC<AntigravityStatusBarProps> = ({
         </button>
       </div>
 
-      {/* Right Items: Telemetry & Theme Switcher */}
+      {/* Right Items: Theme Switcher & Lang */}
       <div className="flex items-center gap-3">
-        {/* CPU & RAM Telemetry */}
-        <div className="hidden md:flex items-center gap-3 font-mono">
-          <div className="flex items-center gap-1">
-            <Cpu className="w-3.5 h-3.5 text-[#8ab4f8]" />
-            <span>CPU {cpuPercent}%</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Activity className="w-3.5 h-3.5 text-purple-400" />
-            <span>RAM {memPercent}%</span>
-          </div>
-        </div>
-
-        <span className="opacity-30 hidden md:inline">•</span>
-
         {/* Antigravity Theme Switcher Button */}
         <button
           onClick={onOpenThemeModal}
