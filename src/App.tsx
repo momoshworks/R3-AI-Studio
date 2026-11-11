@@ -15,6 +15,7 @@ import {
   RefreshCw,
   Download,
   Trash2,
+  Database,
 } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
 import { ChatCanvas } from './components/ChatCanvas';
@@ -622,6 +623,20 @@ export const App: React.FC = () => {
                   MOMO1 (3B Local • 100% أوفلاين)
                 </span>
               </div>
+
+              {/* Knowledge Vault Shortcut */}
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent('momo1:open_vault'))}
+                className={`px-3 py-1.5 rounded-full border transition-all active:scale-95 flex items-center gap-1.5 ${
+                  isDark
+                    ? 'border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300'
+                    : 'border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-700'
+                }`}
+                title={lang === 'ar' ? 'مكتبة تدريب ومعرفة MOMO1' : 'MOMO1 Knowledge Vault'}
+              >
+                <Database className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-xs font-mono font-medium">{lang === 'ar' ? 'مكتبة التدريب' : 'Vault'}</span>
+              </button>
 
               {/* Local Actions in Main Top Bar */}
               <button

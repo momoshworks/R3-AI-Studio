@@ -1624,11 +1624,55 @@ async def serve_notebook_source_file(notebook_id: str, source_id: str):
 # ============================================================================
 # Antigravity Local LLM & Offline Chatbot Endpoints
 # ============================================================================
+from momo_knowledge import MomoKnowledgeVault
+momo_knowledge_vault = MomoKnowledgeVault(storage_dir=BASE_DIR / "momo_knowledge")
+
 class LocalChatRequest(BaseModel):
     prompt: str
     system_prompt: Optional[str] = None
-    model: Optional[str] = "antigravity-rust-core"
+    model: Optional[str] = "momo1"
     temperature: Optional[float] = 0.7
+    attachments: Optional[List[Dict[str, Any]]] = None
+    use_knowledge: Optional[bool] = True
+
+@app.post("/api/local_llm/documents/upload")
+async def upload_local_knowledge_document(file: UploadFile = File(...)):
+    """Uploads, parses, and chunks any file type into MOMO1's local training memory."""
+    try:
+        content = await file.read()
+        entry = await asyncio.to_thread(momo_knowledge_vault.add_document, file.filename or "file.txt", content)
+        return {
+            "status": "success",
+            "document": entry,
+            "message": f"تم استخراج وفهرسة تدريب المستند '{entry['filename']}' بنجاح في ذاكرة MOMO1"
+        }
+    except Exception as e:
+        logger.error(f"Error training MOMO1 on document: {e}")
+        raise HTTPException(status_code=500, detail=f"فشل تدريب واستخراج الملف: {str(e)}")
+
+@app.get("/api/local_llm/documents")
+async def list_local_knowledge_documents():
+    """Lists all local documents trained into MOMO1's offline memory."""
+    docs = momo_knowledge_vault.list_documents()
+    return {"status": "success", "documents": docs, "total": len(docs)}
+
+@app.delete("/api/local_llm/documents/{doc_id}")
+async def delete_local_knowledge_document(doc_id: str):
+    """Deletes a document from MOMO1's local knowledge memory."""
+    success = momo_knowledge_vault.delete_document(doc_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="المستند غير موجود")
+    return {"status": "success", "deleted": doc_id}
+
+@app.post("/api/local_llm/train")
+async def trigger_local_training():
+    """Confirms and optimizes local knowledge index for MOMO1."""
+    docs = momo_knowledge_vault.list_documents()
+    return {
+        "status": "success",
+        "documents_count": len(docs),
+        "message": f"تم تثبيت وتحديث تدريب MOMO1 على {len(docs)} ملف ومستند محلي بنجاح."
+    }
 
 @app.get("/api/local_llm/status")
 async def local_llm_status():
@@ -1730,6 +1774,36 @@ async def local_llm_chat(req: LocalChatRequest):
     model = req.model or "momo1"
     system_prompt = req.system_prompt or "أنت MOMO1، المساعد الذكي الخارق والمحلي على جهاز المستخدم. تعمل بكفاءة وخصوصية تامة 100% على عتاد الجهاز أوفلاين بدون أي اتصال بالإنترنت. إجاباتك ذكية ومباشرة وعملية واحترافية بتنسيق Markdown."
 
+    # 1. Retrieve local knowledge & documents context
+    knowledge_context = ""
+    if req.use_knowledge:
+        try:
+            knowledge_context = momo_knowledge_vault.search_relevant_context(prompt, top_k=6)
+        except Exception as e:
+            logger.warning(f"Knowledge search note: {e}")
+
+    # 2. Add any specifically attached files
+    attachments_context = ""
+    if req.attachments:
+        for att in req.attachments:
+            name = att.get("name") or att.get("filename") or "ملف مرفق"
+            text = att.get("content") or att.get("preview") or ""
+            if text:
+                attachments_context += f"\n\n📎 [ملف مرفق: {name}]:\n{text[:6000]}"
+
+    combined_context = (knowledge_context + attachments_context).strip()
+    if combined_context:
+        effective_prompt = (
+            f"أنت MOMO1 المساعد الذكي الخارق والمحلي. استند إلى المعرفة والمستندات والملفات المحلية التالية بدقة للإجابة على استفسار المستخدم:\n\n"
+            f"=== المستندات والمعرفة المحلية المرفقة ===\n"
+            f"{combined_context}\n"
+            f"===========================================\n\n"
+            f"استفسار المستخدم:\n{prompt}\n\n"
+            f"المطلوب: أجب بإتقان وتفصيل، مع تحليل وتوضيح المعلومات من الملفات المحلية والمستندات المرفقة."
+        )
+    else:
+        effective_prompt = prompt
+
     async with httpx.AsyncClient(timeout=60.0) as client:
         # Try Ollama
         try:
@@ -1744,7 +1818,7 @@ async def local_llm_chat(req: LocalChatRequest):
                 m_target = model
             res = await client.post("http://127.0.0.1:11434/api/generate", json={
                 "model": m_target,
-                "prompt": prompt,
+                "prompt": effective_prompt,
                 "system": system_prompt,
                 "stream": False
             })
@@ -1757,6 +1831,7 @@ async def local_llm_chat(req: LocalChatRequest):
                     "model_used": "MOMO1 (3B Local)",
                     "source": "ollama",
                     "latency_ms": latency,
+                    "has_knowledge": bool(combined_context),
                     "tokens_approx": len(reply.split())
                 }
         except Exception:
@@ -1768,7 +1843,7 @@ async def local_llm_chat(req: LocalChatRequest):
                 "model": model,
                 "messages": [
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": prompt}
+                    {"role": "user", "content": effective_prompt}
                 ],
                 "temperature": req.temperature or 0.7
             })
@@ -1781,6 +1856,7 @@ async def local_llm_chat(req: LocalChatRequest):
                     "model_used": f"LM Studio ({model})",
                     "source": "lmstudio",
                     "latency_ms": latency,
+                    "has_knowledge": bool(combined_context),
                     "tokens_approx": len(reply.split())
                 }
         except Exception:

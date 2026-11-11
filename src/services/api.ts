@@ -1320,6 +1320,8 @@ export const api = {
     system_prompt?: string;
     model?: string;
     temperature?: number;
+    attachments?: Array<{ name: string; content?: string; preview?: string }>;
+    use_knowledge?: boolean;
   }): Promise<any> {
     // 1. Try Tauri Rust Native Command
     const nativeRes = await tauriInvoke<any>('query_local_llm', {
@@ -1342,5 +1344,70 @@ export const api = {
     }
 
     throw new Error('Failed to query local LLM engine');
+  },
+
+  async uploadLocalLLMDocument(file: File): Promise<{
+    status: string;
+    document: {
+      id: string;
+      filename: string;
+      file_size: number;
+      file_type: string;
+      upload_time: number;
+      char_count: number;
+      chunks_count: number;
+      preview: string;
+    };
+    message: string;
+  }> {
+    const base = getApiBase();
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await fetch(`${base}/api/local_llm/documents/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'فشل رفع المستند للتدريب المحلي');
+    }
+    return await res.json();
+  },
+
+  async getLocalLLMDocuments(): Promise<{
+    status: string;
+    documents: Array<{
+      id: string;
+      filename: string;
+      file_size: number;
+      file_type: string;
+      upload_time: number;
+      char_count: number;
+      chunks_count: number;
+      preview: string;
+    }>;
+    total: number;
+  }> {
+    const base = getApiBase();
+    const res = await fetch(`${base}/api/local_llm/documents`);
+    if (!res.ok) throw new Error('فشل جلب مستندات التدريب المحلية');
+    return await res.json();
+  },
+
+  async deleteLocalLLMDocument(docId: string): Promise<{ status: string; deleted: string }> {
+    const base = getApiBase();
+    const res = await fetch(`${base}/api/local_llm/documents/${docId}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) throw new Error('فشل حذف المستند المحلي');
+    return await res.json();
+  },
+
+  async triggerLocalLLMTraining(): Promise<{ status: string; documents_count: number; message: string }> {
+    const base = getApiBase();
+    const res = await fetch(`${base}/api/local_llm/train`, { method: 'POST' });
+    if (!res.ok) throw new Error('فشل تحديث فهرس التدريب المحلي');
+    return await res.json();
   },
 };
