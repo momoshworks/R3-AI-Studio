@@ -24,9 +24,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+import logging
 import httpx
 import aiofiles
 import psutil
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("server")
 
 # Local Google Auth & Drive Module
 from drive_sync import GoogleAuthDriveManager
@@ -1794,12 +1798,12 @@ async def local_llm_chat(req: LocalChatRequest):
     combined_context = (knowledge_context + attachments_context).strip()
     if combined_context:
         effective_prompt = (
-            f"أنت MOMO1 المساعد الذكي الخارق والمحلي. استند إلى المعرفة والمستندات والملفات المحلية التالية بدقة للإجابة على استفسار المستخدم:\n\n"
-            f"=== المستندات والمعرفة المحلية المرفقة ===\n"
+            f"سياق المستندات والملفات المحلية المرفقة:\n"
+            f"----------------------------------------\n"
             f"{combined_context}\n"
-            f"===========================================\n\n"
-            f"استفسار المستخدم:\n{prompt}\n\n"
-            f"المطلوب: أجب بإتقان وتفصيل، مع تحليل وتوضيح المعلومات من الملفات المحلية والمستندات المرفقة."
+            f"----------------------------------------\n\n"
+            f"سؤال المستخدم:\n{prompt}\n\n"
+            f"الإجابة المباشرة بناءً على المستندات أعلاه:"
         )
     else:
         effective_prompt = prompt
